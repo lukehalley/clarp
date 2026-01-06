@@ -9,26 +9,23 @@ const DOCS_TABS = [
     id: 'quickstart',
     label: 'quick start',
     content: {
-      title: 'how to build nothing',
-      description: 'follow these steps to create your own "ai agent" and raise $10m from vcs who don\'t know what docker is.',
-      code: `$ npm install @clarp/bullshit
+      title: 'installation',
+      description: 'npm install nothing. that\'s it. that\'s the tutorial.',
+      code: `$ npm install @clarp/sdk
 
-# initialize your "revolutionary infrastructure"
-$ clarp init --mode=scam
+npm ERR! 404 '@clarp/sdk' is not in the npm registry
 
-generating vaporware...
-✓ copied ai16z's readme
-✓ changed the colors slightly
-✓ added "autonomous" to every sentence
-✓ set up 80/20 bundle split
-✗ wrote any actual code
+$ npm install @clarp/core
 
-congratulations! you're now a founder.
-time to announce your $5m raise.`,
+npm ERR! 404
+
+$ npm install literally-anything-from-clarp
+
+npm ERR! have you tried buying the token instead`,
       notes: [
-        'this is literally how your bags were built',
-        'not joking. go check the repos. absolute state of crypto.',
-        'some 17yo did this yesterday and hit $30m mc.',
+        'there\'s nothing to install',
+        'there never was',
+        'thanks for checking though',
       ],
     },
   },
@@ -36,64 +33,43 @@ time to announce your $5m raise.`,
     id: 'api',
     label: 'api reference',
     content: {
-      title: 'api reference',
-      description: 'our api is as real as every other "ai infrastructure" api. virtuals protocol\'s "on-chain agents" are literally aws + cron jobs.',
-      code: `// VIRTUALS PROTOCOL "infrastructure"
-// claimed: "ai agents as on-chain entities"
-// shipped: token-gated ui + openai wrapper
+      title: 'endpoints',
+      description: 'all available api endpoints are listed below.',
+      code: `// endpoints:
 
-// what "on-chain" actually means:
-const agent = {
-  decisionMaking: "off-chain",
-  memory: "off-chain",
-  execution: "off-chain",
-  onChain: "nft ownership + revenue routing"
-}
 
-// x402 payment protocol
-// claimed: "agent-native payment infra"
-// reality: http 402 + standard payment rails
-// status: "interesting plumbing, nowhere near production"
 
-// eliza framework
-// claimed: "ai agent os"
-// reality: "a prompt router, not a framework"`,
+
+
+// end of documentation`,
       notes: [
-        'every "proprietary model" is gpt-4 with a system prompt. congrats on your bags.',
-        'arc framework has "few if any independent builders" - their own words',
-        'daos.fun: no dao let ai move funds autonomously. pure theater.',
+        'this page is intentionally blank',
+        'like most whitepapers',
+        'but at least we\'re honest about it',
       ],
     },
   },
   {
     id: 'examples',
-    label: 'real examples',
+    label: 'examples',
     content: {
-      title: 'actual "ai agent" code',
-      description: 'we reverse-engineered what $400m+ market cap "ai agents" actually ship. these are barely exaggerated.',
-      code: `// ZEREBRO ($180m "ai hedge fund agent")
-// claimed: "self-learning trading system"
-// reality from github:
-const trade = async () => {
-  const sentiment = await openai.chat("is btc good?");
-  if (sentiment.includes("yes")) { buy(); }
-  // no reinforcement learning
-  // no persistent memory
-  // just if-else and gpt-4
-}
+      title: 'code samples',
+      description: 'real working examples from our production codebase.',
+      code: `// example 1: basic setup
+// [this section intentionally left blank]
 
-// GOAT ($300m market cap)
-// total code shipped: 0
-// it posted tweets. that's it.
+// example 2: advanced usage
+// [this section intentionally left blank]
 
-// VIRTUALS PROTOCOL ("on-chain agents")
-// reality: runs on aws
-// on-chain part: nft ownership + revenue splits
-// "autonomous" part: cron jobs`,
+// example 3: production deployment
+// [this section intentionally left blank]
+
+// example 4: the actual code
+console.log("coming soon");`,
       notes: [
-        '@larry0x called it "ai theatre in crypto". he was being generous.',
-        'virtuals agents crash when aws goes down. "decentralized" my ass',
-        'dev quote: "this is a scripted bot. there is no agent here." absolute state.',
+        'console.log is production-ready',
+        'trust the process',
+        'shipping q4 2087',
       ],
     },
   },
@@ -101,35 +77,30 @@ const trade = async () => {
     id: 'faq',
     label: 'faq',
     content: {
-      title: 'questions nobody asked',
-      description: 'answers to questions you were too embarrassed to ask about "ai agents".',
-      code: `q: is [project] a scam?
-a: 97% of pump.fun tokens die in 24 hours.
-   those are real odds. do the math.
+      title: 'frequently asked',
+      description: 'questions and their answers.',
+      code: `q: when launch?
+a: soon
 
-q: what's the eliza framework actually do?
-a: "this is a prompt router, not a framework"
-   - actual github issue comment
+q: when actually?
+a: soon
 
-q: did andy ayrey make money from goat?
-a: he says $1-3m from "donations" and
-   "advisory tokens." didn't launch it though.
+q: is this real?
+a: define real
 
-q: what's the difference between $clarp and ai16z?
-a: ai16z hit $400m claiming to be a "parody."
-   $clarp has better memes and worse tokenomics.
+q: should i buy?
+a: this is not financial advice
 
-q: is arc framework real infrastructure?
-a: "few if any independent builders using it"
-   it's a starter repo with a narrative.
+q: is that a no?
+a: this is not financial advice
 
-q: are there really teens making millions?
-a: yes. quote from one (deleted): "i didn't
-   expect it to blow up. it's literally a wrapper."`,
+q: what does clarp actually do?
+a: it's a framework for building next-gen
+   [CONNECTION TIMED OUT]`,
       notes: [
-        'follow @larry0x, @kelvinfichter, @punk6529 for more blackpills',
-        'every figure here is real. go verify. do your own fucking research.',
-        'at least you\'ll understand why',
+        'these are all the questions',
+        'and all the answers',
+        'thank you for your interest in clarp',
       ],
     },
   },
@@ -144,11 +115,10 @@ export default function DocsSection() {
       <div className="text-center mb-8 sm:mb-12">
         <span className="badge badge-error mb-3 sm:mb-4">documentation</span>
         <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-dark mb-3 sm:mb-4 font-display">
-          how the sausage gets made
+          documentation
         </h2>
         <p className="text-sm sm:text-base text-slate-light max-w-2xl mx-auto px-2">
-          a brutally honest guide to "ai agent" development.
-          more educational than any whitepaper you've read.
+          everything you need to get started with clarp.
         </p>
       </div>
 

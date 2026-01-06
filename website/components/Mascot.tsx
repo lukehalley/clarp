@@ -40,16 +40,6 @@ export default function Mascot() {
           </div>
         </div>
       </div>
-
-      {/* Warning barriers */}
-      <div className="absolute -bottom-6 sm:-bottom-8 left-1/2 -translate-x-1/2 flex gap-0.5 sm:gap-1">
-        {[...Array(7)].map((_, i) => (
-          <div
-            key={i}
-            className="w-2 sm:w-3 h-4 sm:h-5 construction-stripe rounded-sm opacity-90"
-          />
-        ))}
-      </div>
     </div>
   );
 }
