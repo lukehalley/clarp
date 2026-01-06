@@ -1,0 +1,49 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Clawd Dark - Rage (angry, red aura, teeth bared) -->
+  <rect width="256" height="256" fill="#1a0a0a"/>
+
+  <!-- Red rage aura -->
+  <ellipse cx="128" cy="128" rx="120" ry="100" fill="#E74C3C" opacity="0.1"/>
+  <ellipse cx="128" cy="128" rx="100" ry="85" fill="#E74C3C" opacity="0.15"/>
+
+  <!-- Body - dark angry red -->
+  <rect x="48" y="80" width="160" height="96" fill="#6B2020"/>
+
+  <!-- Ears - pointed up aggressively -->
+  <polygon points="48,80 48,48 80,80" fill="#6B2020"/>
+  <polygon points="208,80 208,48 176,80" fill="#6B2020"/>
+
+  <!-- Angry eyebrows -->
+  <polygon points="64,96 104,108 104,100 64,88" fill="#0a0a09"/>
+  <polygon points="192,96 152,108 152,100 192,88" fill="#0a0a09"/>
+
+  <!-- Eyes - furious, glowing -->
+  <rect x="72" y="108" width="28" height="24" fill="#0a0a09"/>
+  <rect x="156" y="108" width="28" height="24" fill="#0a0a09"/>
+  <rect x="80" y="112" width="12" height="16" fill="#FF0000"/>
+  <rect x="164" y="112" width="12" height="16" fill="#FF0000"/>
+
+  <!-- Rage veins -->
+  <line x1="52" y1="100" x2="68" y2="108" stroke="#E74C3C" stroke-width="2"/>
+  <line x1="204" y1="100" x2="188" y2="108" stroke="#E74C3C" stroke-width="2"/>
+
+  <!-- Snarling mouth with teeth -->
+  <rect x="88" y="148" width="80" height="20" fill="#0a0a09"/>
+  <!-- Top teeth -->
+  <polygon points="92,148 100,156 108,148" fill="#E8E6DC"/>
+  <polygon points="116,148 124,156 132,148" fill="#E8E6DC"/>
+  <polygon points="140,148 148,156 156,148" fill="#E8E6DC"/>
+  <!-- Bottom teeth -->
+  <polygon points="100,168 108,160 116,168" fill="#E8E6DC"/>
+  <polygon points="132,168 140,160 148,168" fill="#E8E6DC"/>
+
+  <!-- Legs - tense -->
+  <rect x="64" y="176" width="24" height="48" fill="#6B2020"/>
+  <rect x="104" y="176" width="24" height="48" fill="#6B2020"/>
+  <rect x="128" y="176" width="24" height="48" fill="#6B2020"/>
+  <rect x="168" y="176" width="24" height="48" fill="#6B2020"/>
+
+  <!-- Steam/anger marks -->
+  <text x="40" y="60" font-size="24" fill="#E74C3C" opacity="0.7">※</text>
+  <text x="200" y="60" font-size="24" fill="#E74C3C" opacity="0.7">※</text>
+</svg>

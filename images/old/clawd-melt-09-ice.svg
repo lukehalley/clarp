@@ -1,0 +1,36 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Clawd Melt 09 - Ice (cold blue melt, thawing) -->
+  <rect width="256" height="256" fill="white"/>
+
+  <!-- Water puddle -->
+  <ellipse cx="128" cy="232" rx="80" ry="16" fill="#87CEEB" opacity="0.4"/>
+  <ellipse cx="128" cy="228" rx="60" ry="12" fill="#87CEEB" opacity="0.6"/>
+
+  <!-- Body melting cold -->
+  <rect x="48" y="64" width="160" height="80" fill="#A8D8EA"/>
+
+  <!-- Ice drips -->
+  <rect x="56" y="144" width="24" height="32" fill="#87CEEB"/>
+  <rect x="96" y="144" width="32" height="48" fill="#A8D8EA"/>
+  <rect x="144" y="144" width="24" height="40" fill="#87CEEB"/>
+  <rect x="184" y="144" width="16" height="24" fill="#A8D8EA"/>
+  <rect x="64" y="176" width="16" height="24" fill="#87CEEB"/>
+  <rect x="104" y="192" width="24" height="32" fill="#87CEEB"/>
+  <rect x="152" y="184" width="16" height="20" fill="#87CEEB"/>
+
+  <!-- Ears -->
+  <rect x="40" y="56" width="32" height="24" fill="#A8D8EA"/>
+  <rect x="184" y="64" width="32" height="16" fill="#A8D8EA"/>
+
+  <!-- Eyes - cold, shivering -->
+  <rect x="76" y="92" width="20" height="24" fill="#0a0a09"/>
+  <rect x="160" y="92" width="20" height="24" fill="#0a0a09"/>
+  <!-- Shiver lines -->
+  <line x1="68" y1="88" x2="68" y2="96" stroke="#5E5D59" stroke-width="2"/>
+  <line x1="64" y1="92" x2="64" y2="100" stroke="#5E5D59" stroke-width="2"/>
+  <line x1="188" y1="88" x2="188" y2="96" stroke="#5E5D59" stroke-width="2"/>
+  <line x1="192" y1="92" x2="192" y2="100" stroke="#5E5D59" stroke-width="2"/>
+
+  <!-- Chattering teeth mouth -->
+  <rect x="112" y="124" width="32" height="8" fill="#0a0a09"/>
+</svg>

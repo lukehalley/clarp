@@ -1,0 +1,36 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Clawd v6 - Ruins (fragmented, broken apart) -->
+  <rect width="256" height="256" fill="white"/>
+
+  <!-- Scattered body fragments -->
+  <rect x="40" y="72" width="64" height="48" fill="#D97757"/>
+  <rect x="120" y="80" width="72" height="40" fill="#D97757"/>
+  <rect x="152" y="56" width="48" height="32" fill="#D97757"/>
+
+  <!-- Floating fragments -->
+  <rect x="56" y="136" width="32" height="24" fill="#D97757"/>
+  <rect x="104" y="144" width="40" height="32" fill="#D97757"/>
+  <rect x="160" y="128" width="36" height="28" fill="#D97757"/>
+  <rect x="200" y="112" width="24" height="20" fill="#D97757"/>
+
+  <!-- One ear floating -->
+  <rect x="32" y="48" width="24" height="24" fill="#D97757"/>
+
+  <!-- One eye fragment -->
+  <rect x="64" y="88" width="12" height="20" fill="#0a0a09"/>
+
+  <!-- Other eye fragment floating away -->
+  <rect x="180" y="64" width="12" height="20" fill="#0a0a09"/>
+
+  <!-- Leg fragments scattered -->
+  <rect x="72" y="176" width="20" height="32" fill="#D97757"/>
+  <rect x="112" y="192" width="20" height="28" fill="#D97757"/>
+  <rect x="152" y="184" width="20" height="36" fill="#D97757"/>
+  <rect x="192" y="168" width="20" height="24" fill="#D97757"/>
+
+  <!-- Pixel dust/debris -->
+  <rect x="96" y="120" width="8" height="8" fill="#D97757" opacity="0.6"/>
+  <rect x="144" y="108" width="8" height="8" fill="#D97757" opacity="0.5"/>
+  <rect x="88" y="160" width="8" height="8" fill="#D97757" opacity="0.4"/>
+  <rect x="176" y="152" width="8" height="8" fill="#D97757" opacity="0.5"/>
+</svg>

@@ -1,0 +1,47 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Clawd Dark - Corrupted (half normal, half dark) -->
+  <rect width="256" height="256" fill="white"/>
+
+  <!-- Split background -->
+  <rect x="128" y="0" width="128" height="256" fill="#0a0a09"/>
+
+  <!-- Body - left side normal -->
+  <rect x="48" y="80" width="80" height="96" fill="#D97757"/>
+  <!-- Body - right side corrupted -->
+  <rect x="128" y="80" width="80" height="96" fill="#3a1515"/>
+
+  <!-- Left ear normal -->
+  <rect x="48" y="64" width="32" height="32" fill="#D97757"/>
+  <!-- Right ear corrupted -->
+  <rect x="176" y="64" width="32" height="32" fill="#3a1515"/>
+
+  <!-- Left eye - normal -->
+  <rect x="80" y="112" width="16" height="32" fill="#0a0a09"/>
+
+  <!-- Right eye - evil red glow -->
+  <rect x="160" y="112" width="16" height="32" fill="#0a0a09"/>
+  <rect x="164" y="118" width="8" height="20" fill="#E74C3C"/>
+
+  <!-- Mouth - split expression -->
+  <rect x="104" y="152" width="24" height="8" fill="#0a0a09"/>
+  <path d="M128 152 Q144 160 160 152" stroke="#E74C3C" stroke-width="4" fill="none"/>
+
+  <!-- Corruption spreading -->
+  <polygon points="128,80 140,90 128,100 136,110 128,120" fill="#3a1515"/>
+  <polygon points="128,130 138,140 128,150 134,160" fill="#3a1515"/>
+
+  <!-- Left legs - normal -->
+  <rect x="64" y="176" width="24" height="48" fill="#D97757"/>
+  <rect x="104" y="176" width="24" height="48" fill="#D97757"/>
+
+  <!-- Right legs - corrupted -->
+  <rect x="128" y="176" width="24" height="48" fill="#3a1515"/>
+  <rect x="168" y="176" width="24" height="48" fill="#3a1515"/>
+
+  <!-- Corruption cracks on right side -->
+  <line x1="140" y1="90" x2="160" y2="110" stroke="#E74C3C" stroke-width="2" opacity="0.7"/>
+  <line x1="170" y1="140" x2="190" y2="160" stroke="#E74C3C" stroke-width="2" opacity="0.7"/>
+
+  <!-- Center dividing line glow -->
+  <line x1="128" y1="0" x2="128" y2="256" stroke="#E74C3C" stroke-width="2" opacity="0.5"/>
+</svg>

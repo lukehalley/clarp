@@ -1,0 +1,32 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Clawd - Melting/Rugged version -->
+
+  <!-- Body (distorted, melting down) -->
+  <rect x="12" y="16" width="40" height="20" fill="#D97757"/>
+
+  <!-- Melting drips -->
+  <rect x="14" y="36" width="6" height="8" fill="#D97757"/>
+  <rect x="24" y="36" width="8" height="12" fill="#D97757"/>
+  <rect x="36" y="36" width="6" height="10" fill="#D97757"/>
+  <rect x="46" y="36" width="4" height="6" fill="#D97757"/>
+
+  <!-- Ears (drooping) -->
+  <rect x="10" y="14" width="8" height="6" fill="#D97757"/>
+  <rect x="46" y="16" width="8" height="4" fill="#D97757"/>
+
+  <!-- Eyes - droopy/sad X's -->
+  <rect x="18" y="22" width="2" height="2" fill="#0a0a09"/>
+  <rect x="20" y="24" width="2" height="2" fill="#0a0a09"/>
+  <rect x="22" y="26" width="2" height="2" fill="#0a0a09"/>
+  <rect x="22" y="22" width="2" height="2" fill="#0a0a09"/>
+  <rect x="18" y="26" width="2" height="2" fill="#0a0a09"/>
+
+  <rect x="40" y="22" width="2" height="2" fill="#0a0a09"/>
+  <rect x="42" y="24" width="2" height="2" fill="#0a0a09"/>
+  <rect x="44" y="26" width="2" height="2" fill="#0a0a09"/>
+  <rect x="44" y="22" width="2" height="2" fill="#0a0a09"/>
+  <rect x="40" y="26" width="2" height="2" fill="#0a0a09"/>
+
+  <!-- Puddle at bottom -->
+  <ellipse cx="32" cy="58" rx="20" ry="4" fill="#D97757" opacity="0.5"/>
+</svg>

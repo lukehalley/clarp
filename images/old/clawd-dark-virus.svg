@@ -1,0 +1,47 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Clawd Dark - Virus (infected, spreading corruption) -->
+  <rect width="256" height="256" fill="#0a0a09"/>
+
+  <!-- Infection spread pattern -->
+  <circle cx="128" cy="128" r="100" fill="none" stroke="#00FF00" stroke-width="1" opacity="0.2" stroke-dasharray="4 4"/>
+  <circle cx="128" cy="128" r="80" fill="none" stroke="#00FF00" stroke-width="1" opacity="0.3" stroke-dasharray="4 4"/>
+
+  <!-- Body - infected green tint -->
+  <rect x="48" y="80" width="160" height="96" fill="#2D4A2D"/>
+
+  <!-- Infection spots -->
+  <circle cx="72" cy="100" r="8" fill="#00FF00" opacity="0.6"/>
+  <circle cx="180" cy="140" r="10" fill="#00FF00" opacity="0.5"/>
+  <circle cx="100" cy="160" r="6" fill="#00FF00" opacity="0.7"/>
+  <circle cx="160" cy="95" r="7" fill="#00FF00" opacity="0.5"/>
+
+  <!-- Ears -->
+  <rect x="48" y="64" width="32" height="32" fill="#2D4A2D"/>
+  <rect x="176" y="64" width="32" height="32" fill="#2D4A2D"/>
+
+  <!-- Eyes - toxic green glow -->
+  <rect x="72" y="108" width="24" height="32" fill="#0a0a09"/>
+  <rect x="160" y="108" width="24" height="32" fill="#0a0a09"/>
+  <rect x="78" y="114" width="12" height="20" fill="#00FF00"/>
+  <rect x="166" y="114" width="12" height="20" fill="#00FF00"/>
+
+  <!-- Dripping corruption -->
+  <rect x="84" y="140" width="4" height="16" fill="#00FF00" opacity="0.7"/>
+  <rect x="172" y="140" width="4" height="12" fill="#00FF00" opacity="0.7"/>
+
+  <!-- Corrupted mouth - glitchy -->
+  <rect x="104" y="152" width="48" height="8" fill="#00FF00"/>
+  <rect x="100" y="156" width="8" height="8" fill="#00FF00" opacity="0.5"/>
+  <rect x="152" y="148" width="8" height="8" fill="#00FF00" opacity="0.5"/>
+
+  <!-- Legs -->
+  <rect x="64" y="176" width="24" height="48" fill="#2D4A2D"/>
+  <rect x="104" y="176" width="24" height="48" fill="#2D4A2D"/>
+  <rect x="128" y="176" width="24" height="48" fill="#2D4A2D"/>
+  <rect x="168" y="176" width="24" height="48" fill="#2D4A2D"/>
+
+  <!-- Spreading tendrils -->
+  <line x1="48" y1="128" x2="24" y2="120" stroke="#00FF00" stroke-width="3" opacity="0.5"/>
+  <line x1="208" y1="128" x2="232" y2="136" stroke="#00FF00" stroke-width="3" opacity="0.5"/>
+  <line x1="128" y1="80" x2="128" y2="48" stroke="#00FF00" stroke-width="3" opacity="0.4"/>
+</svg>

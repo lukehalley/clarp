@@ -1,0 +1,26 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Clawd Melt 03 - Slumping (body distorting) -->
+  <rect width="256" height="256" fill="#0a0a09"/>
+
+  <!-- Body (very wide, thin - slumping) -->
+  <rect x="72" y="104" width="112" height="32" fill="#D97757"/>
+
+  <!-- Ear nubs (drooping more) -->
+  <rect x="56" y="112" width="16" height="20" fill="#D97757"/>
+  <rect x="184" y="112" width="16" height="20" fill="#D97757"/>
+
+  <!-- Eyes (cutouts, drooping shape) -->
+  <rect x="96" y="112" width="12" height="16" fill="#0a0a09"/>
+  <rect x="148" y="112" width="12" height="16" fill="#0a0a09"/>
+
+  <!-- Melting legs/drips -->
+  <rect x="80" y="136" width="16" height="48" fill="#D97757"/>
+  <rect x="104" y="136" width="16" height="56" fill="#D97757"/>
+  <rect x="128" y="136" width="16" height="52" fill="#D97757"/>
+  <rect x="152" y="136" width="16" height="44" fill="#D97757"/>
+  <rect x="176" y="136" width="16" height="36" fill="#D97757"/>
+
+  <!-- Extra drips -->
+  <rect x="112" y="192" width="8" height="16" fill="#D97757"/>
+  <rect x="136" y="188" width="8" height="12" fill="#D97757"/>
+</svg>

@@ -1,0 +1,29 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Clawd Melt 14 - Ice Melt (cold/frozen theme) -->
+  <rect width="256" height="256" fill="#0a0a09"/>
+
+  <!-- Body (cold blue) -->
+  <rect x="88" y="88" width="80" height="48" fill="#A8D8EA"/>
+
+  <!-- Ear nubs -->
+  <rect x="72" y="100" width="16" height="12" fill="#87CEEB"/>
+  <rect x="168" y="100" width="16" height="12" fill="#87CEEB"/>
+
+  <!-- Eyes (shivering) -->
+  <rect x="104" y="104" width="12" height="20" fill="#0a0a09"/>
+  <rect x="140" y="104" width="12" height="20" fill="#0a0a09"/>
+
+  <!-- Shiver lines -->
+  <rect x="96" y="100" width="2" height="8" fill="#5E5D59"/>
+  <rect x="92" y="104" width="2" height="8" fill="#5E5D59"/>
+  <rect x="160" y="100" width="2" height="8" fill="#5E5D59"/>
+  <rect x="164" y="104" width="2" height="8" fill="#5E5D59"/>
+
+  <!-- Legs (icy drips) -->
+  <rect x="96" y="136" width="16" height="32" fill="#87CEEB"/>
+  <rect x="120" y="136" width="16" height="40" fill="#A8D8EA"/>
+  <rect x="144" y="136" width="16" height="36" fill="#87CEEB"/>
+
+  <!-- Water drips -->
+  <rect x="128" y="176" width="8" height="16" fill="#87CEEB" opacity="0.7"/>
+</svg>

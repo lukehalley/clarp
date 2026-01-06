@@ -1,0 +1,28 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Clawd Melt 17 - Resigned Melt (flat expression, accepted fate) -->
+  <rect width="256" height="256" fill="#0a0a09"/>
+
+  <!-- Body (sagging) -->
+  <rect x="80" y="96" width="96" height="40" fill="#D97757"/>
+
+  <!-- Ear nubs (drooping down) -->
+  <rect x="64" y="108" width="16" height="20" fill="#D97757"/>
+  <rect x="176" y="108" width="16" height="20" fill="#D97757"/>
+
+  <!-- Half-lidded tired eyes -->
+  <rect x="104" y="112" width="16" height="8" fill="#0a0a09"/>
+  <rect x="136" y="112" width="16" height="8" fill="#0a0a09"/>
+
+  <!-- Flat mouth -->
+  <rect x="116" y="124" width="24" height="4" fill="#0a0a09"/>
+
+  <!-- Legs (melting steadily) -->
+  <rect x="88" y="136" width="16" height="40" fill="#D97757"/>
+  <rect x="112" y="136" width="16" height="48" fill="#D97757"/>
+  <rect x="136" y="136" width="16" height="44" fill="#D97757"/>
+  <rect x="160" y="136" width="16" height="36" fill="#D97757"/>
+
+  <!-- Steady drips -->
+  <rect x="120" y="184" width="8" height="20" fill="#D97757"/>
+  <rect x="144" y="180" width="8" height="16" fill="#D97757"/>
+</svg>

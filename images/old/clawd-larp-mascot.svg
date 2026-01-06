@@ -1,0 +1,42 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Clawd - Official LARP Mascot (badge version with text) -->
+  <rect width="256" height="256" fill="white"/>
+
+  <!-- Body -->
+  <rect x="64" y="48" width="128" height="80" fill="#D97757"/>
+
+  <!-- Ears -->
+  <rect x="64" y="32" width="28" height="28" fill="#D97757"/>
+  <rect x="164" y="32" width="28" height="28" fill="#D97757"/>
+
+  <!-- Eyes - X X (larp eyes) -->
+  <line x1="88" y1="72" x2="104" y2="88" stroke="#0a0a09" stroke-width="6"/>
+  <line x1="104" y1="72" x2="88" y2="88" stroke="#0a0a09" stroke-width="6"/>
+  <line x1="152" y1="72" x2="168" y2="88" stroke="#0a0a09" stroke-width="6"/>
+  <line x1="168" y1="72" x2="152" y2="88" stroke="#0a0a09" stroke-width="6"/>
+
+  <!-- Flat mouth -->
+  <rect x="108" y="108" width="40" height="6" fill="#0a0a09"/>
+
+  <!-- Legs -->
+  <rect x="80" y="128" width="20" height="36" fill="#D97757"/>
+  <rect x="108" y="128" width="20" height="36" fill="#D97757"/>
+  <rect x="128" y="128" width="20" height="36" fill="#D97757"/>
+  <rect x="156" y="128" width="20" height="36" fill="#D97757"/>
+
+  <!-- Construction stripe -->
+  <rect x="32" y="172" width="24" height="12" fill="#FF6B35"/>
+  <rect x="56" y="172" width="24" height="12" fill="#0a0a09"/>
+  <rect x="80" y="172" width="24" height="12" fill="#FF6B35"/>
+  <rect x="104" y="172" width="24" height="12" fill="#0a0a09"/>
+  <rect x="128" y="172" width="24" height="12" fill="#FF6B35"/>
+  <rect x="152" y="172" width="24" height="12" fill="#0a0a09"/>
+  <rect x="176" y="172" width="24" height="12" fill="#FF6B35"/>
+  <rect x="200" y="172" width="24" height="12" fill="#0a0a09"/>
+
+  <!-- $CLARP text -->
+  <text x="128" y="208" font-family="monospace" font-size="28" font-weight="bold" fill="#0a0a09" text-anchor="middle">$CLARP</text>
+
+  <!-- Tagline -->
+  <text x="128" y="232" font-family="monospace" font-size="12" fill="#5E5D59" text-anchor="middle">shipping nothing since 2025</text>
+</svg>

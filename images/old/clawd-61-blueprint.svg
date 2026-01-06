@@ -1,0 +1,16 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Blueprint - technical plan -->
+  <rect width="256" height="256" fill="#1a3a5c"/>
+  <rect x="88" y="88" width="80" height="48" fill="none" stroke="#FFF" stroke-width="1"/>
+  <rect x="72" y="100" width="16" height="12" fill="none" stroke="#FFF" stroke-width="1"/>
+  <rect x="168" y="100" width="16" height="12" fill="none" stroke="#FFF" stroke-width="1"/>
+  <rect x="104" y="104" width="12" height="20" fill="none" stroke="#FFF" stroke-width="1"/>
+  <rect x="140" y="104" width="12" height="20" fill="none" stroke="#FFF" stroke-width="1"/>
+  <rect x="96" y="136" width="16" height="24" fill="none" stroke="#FFF" stroke-width="1"/>
+  <rect x="120" y="136" width="16" height="24" fill="none" stroke="#FFF" stroke-width="1"/>
+  <rect x="144" y="136" width="16" height="24" fill="none" stroke="#FFF" stroke-width="1"/>
+  <line x1="48" y1="112" x2="72" y2="112" stroke="#FFF" stroke-width="1" stroke-dasharray="2 2"/>
+  <line x1="184" y1="106" x2="208" y2="106" stroke="#FFF" stroke-width="1" stroke-dasharray="2 2"/>
+  <text x="200" y="110" fill="#FFF" font-size="6" font-family="monospace">16x12</text>
+  <text x="48" y="116" fill="#FFF" font-size="6" font-family="monospace">80x48</text>
+</svg>

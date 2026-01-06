@@ -1,0 +1,14 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="256" height="256" fill="#0a0a09"/>
+  <rect x="88" y="88" width="80" height="48" fill="#D97757"/>
+  <rect x="72" y="100" width="16" height="12" fill="#D97757"/>
+  <rect x="168" y="100" width="16" height="12" fill="#D97757"/>
+  <rect x="104" y="104" width="12" height="20" fill="#0a0a09"/>
+  <rect x="140" y="104" width="12" height="20" fill="#0a0a09"/>
+  <rect x="96" y="136" width="16" height="24" fill="#D97757"/>
+  <rect x="120" y="136" width="16" height="24" fill="#D97757"/>
+  <rect x="144" y="136" width="16" height="24" fill="#D97757"/>
+  <text x="56" y="188" fill="#5E5D59" font-size="8" font-family="monospace">callback(callback(</text>
+  <text x="56" y="200" fill="#5E5D59" font-size="8" font-family="monospace">callback(callback(</text>
+  <text x="56" y="212" fill="#5E5D59" font-size="8" font-family="monospace">callback(...))))</text>
+</svg>

@@ -1,0 +1,27 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Clawd Melt 11 - Dripping Tears (sad melt) -->
+  <rect width="256" height="256" fill="#0a0a09"/>
+
+  <!-- Body -->
+  <rect x="88" y="88" width="80" height="48" fill="#D97757"/>
+
+  <!-- Ear nubs (drooping sad) -->
+  <rect x="72" y="104" width="16" height="16" fill="#D97757"/>
+  <rect x="168" y="104" width="16" height="16" fill="#D97757"/>
+
+  <!-- Sad eyes -->
+  <rect x="104" y="108" width="12" height="16" fill="#0a0a09"/>
+  <rect x="140" y="108" width="12" height="16" fill="#0a0a09"/>
+
+  <!-- Tear drips from eyes -->
+  <rect x="108" y="124" width="4" height="20" fill="#87CEEB"/>
+  <rect x="144" y="124" width="4" height="16" fill="#87CEEB"/>
+
+  <!-- Legs melting -->
+  <rect x="96" y="136" width="16" height="32" fill="#D97757"/>
+  <rect x="120" y="136" width="16" height="40" fill="#D97757"/>
+  <rect x="144" y="136" width="16" height="36" fill="#D97757"/>
+
+  <!-- Drips -->
+  <rect x="128" y="176" width="8" height="16" fill="#D97757"/>
+</svg>

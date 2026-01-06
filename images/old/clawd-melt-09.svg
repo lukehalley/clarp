@@ -1,0 +1,27 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Clawd Melt 09 - X Eyes Dead (classic dead melt) -->
+  <rect width="256" height="256" fill="#0a0a09"/>
+
+  <!-- Body (melting) -->
+  <rect x="80" y="96" width="96" height="40" fill="#D97757"/>
+
+  <!-- Ear nubs (drooping) -->
+  <rect x="64" y="104" width="16" height="16" fill="#D97757"/>
+  <rect x="176" y="104" width="16" height="16" fill="#D97757"/>
+
+  <!-- X Eyes -->
+  <line x1="100" y1="108" x2="116" y2="124" stroke="#0a0a09" stroke-width="4"/>
+  <line x1="116" y1="108" x2="100" y2="124" stroke="#0a0a09" stroke-width="4"/>
+  <line x1="140" y1="108" x2="156" y2="124" stroke="#0a0a09" stroke-width="4"/>
+  <line x1="156" y1="108" x2="140" y2="124" stroke="#0a0a09" stroke-width="4"/>
+
+  <!-- Melting legs -->
+  <rect x="88" y="136" width="16" height="40" fill="#D97757"/>
+  <rect x="112" y="136" width="16" height="52" fill="#D97757"/>
+  <rect x="136" y="136" width="16" height="48" fill="#D97757"/>
+  <rect x="160" y="136" width="16" height="36" fill="#D97757"/>
+
+  <!-- Drips -->
+  <rect x="120" y="188" width="8" height="16" fill="#D97757"/>
+  <rect x="144" y="184" width="8" height="12" fill="#D97757"/>
+</svg>

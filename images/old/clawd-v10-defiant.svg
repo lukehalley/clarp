@@ -1,0 +1,31 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Clawd v10 - Defiant (unimpressed, half-lidded, "really?") -->
+  <rect width="256" height="256" fill="white"/>
+
+  <!-- Body -->
+  <rect x="48" y="80" width="160" height="96" fill="#D97757"/>
+
+  <!-- Ears -->
+  <rect x="48" y="64" width="32" height="32" fill="#D97757"/>
+  <rect x="176" y="64" width="32" height="32" fill="#D97757"/>
+
+  <!-- Eyes - half-lidded, unimpressed -->
+  <rect x="72" y="120" width="28" height="16" fill="#0a0a09"/>
+  <rect x="156" y="120" width="28" height="16" fill="#0a0a09"/>
+
+  <!-- Heavy eyelids -->
+  <rect x="72" y="108" width="28" height="12" fill="#C6613F"/>
+  <rect x="156" y="108" width="28" height="12" fill="#C6613F"/>
+
+  <!-- Flat unamused mouth -->
+  <rect x="104" y="152" width="48" height="8" fill="#0a0a09"/>
+
+  <!-- One eyebrow raised -->
+  <rect x="156" y="100" width="28" height="4" fill="#0a0a09" transform="rotate(-8 170 102)"/>
+
+  <!-- Legs -->
+  <rect x="64" y="176" width="24" height="48" fill="#D97757"/>
+  <rect x="104" y="176" width="24" height="48" fill="#D97757"/>
+  <rect x="128" y="176" width="24" height="48" fill="#D97757"/>
+  <rect x="168" y="176" width="24" height="48" fill="#D97757"/>
+</svg>

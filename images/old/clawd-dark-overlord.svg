@@ -1,0 +1,48 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Clawd Dark - Overlord (crown, cape, ultimate evil form) -->
+  <rect width="256" height="256" fill="#0a0a09"/>
+
+  <!-- Dark cape/cloak flowing -->
+  <polygon points="24,88 48,80 48,224 24,240" fill="#1a1a1a"/>
+  <polygon points="232,88 208,80 208,224 232,240" fill="#1a1a1a"/>
+  <polygon points="48,176 128,200 208,176 208,224 128,248 48,224" fill="#1a1a1a"/>
+
+  <!-- Evil crown -->
+  <rect x="56" y="48" width="144" height="16" fill="#4a0a0a"/>
+  <polygon points="64,48 80,24 96,48" fill="#4a0a0a"/>
+  <polygon points="112,48 128,16 144,48" fill="#4a0a0a"/>
+  <polygon points="160,48 176,24 192,48" fill="#4a0a0a"/>
+  <!-- Crown gems -->
+  <rect x="76" y="32" width="8" height="8" fill="#E74C3C"/>
+  <rect x="124" y="24" width="8" height="8" fill="#E74C3C"/>
+  <rect x="172" y="32" width="8" height="8" fill="#E74C3C"/>
+
+  <!-- Body - royal dark -->
+  <rect x="48" y="64" width="160" height="96" fill="#2a1010"/>
+
+  <!-- Royal collar -->
+  <polygon points="48,64 80,80 176,80 208,64 208,72 176,88 80,88 48,72" fill="#3a1515"/>
+
+  <!-- Ears -->
+  <rect x="48" y="56" width="24" height="24" fill="#2a1010"/>
+  <rect x="184" y="56" width="24" height="24" fill="#2a1010"/>
+
+  <!-- Eyes - commanding, powerful -->
+  <rect x="72" y="96" width="28" height="32" fill="#0a0a09"/>
+  <rect x="156" y="96" width="28" height="32" fill="#0a0a09"/>
+  <!-- Glowing pupils -->
+  <rect x="80" y="104" width="12" height="16" fill="#FFD700"/>
+  <rect x="164" y="104" width="12" height="16" fill="#FFD700"/>
+
+  <!-- Sinister smile -->
+  <path d="M96 144 Q128 164 160 144" stroke="#E74C3C" stroke-width="4" fill="none"/>
+
+  <!-- Legs on throne base -->
+  <rect x="64" y="160" width="24" height="40" fill="#2a1010"/>
+  <rect x="104" y="160" width="24" height="40" fill="#2a1010"/>
+  <rect x="128" y="160" width="24" height="40" fill="#2a1010"/>
+  <rect x="168" y="160" width="24" height="40" fill="#2a1010"/>
+
+  <!-- Throne base hint -->
+  <rect x="40" y="200" width="176" height="16" fill="#1a0a0a"/>
+</svg>

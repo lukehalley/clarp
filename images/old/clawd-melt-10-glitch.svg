@@ -1,0 +1,41 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Clawd Melt 10 - Glitch (digital melting with artifacts) -->
+  <rect width="256" height="256" fill="white"/>
+
+  <!-- Scan lines -->
+  <rect x="0" y="100" width="256" height="2" fill="#00FFFF" opacity="0.3"/>
+  <rect x="0" y="160" width="256" height="2" fill="#FF00FF" opacity="0.3"/>
+
+  <!-- Puddle with glitch -->
+  <ellipse cx="128" cy="232" rx="80" ry="16" fill="#D97757" opacity="0.4"/>
+  <ellipse cx="132" cy="230" rx="60" ry="12" fill="#00FFFF" opacity="0.2"/>
+
+  <!-- Body melting with offset -->
+  <rect x="48" y="64" width="160" height="80" fill="#D97757"/>
+  <rect x="52" y="68" width="80" height="40" fill="#00FFFF" opacity="0.2"/>
+  <rect x="124" y="100" width="80" height="40" fill="#FF00FF" opacity="0.2"/>
+
+  <!-- Melting drips -->
+  <rect x="56" y="144" width="24" height="32" fill="#D97757"/>
+  <rect x="96" y="144" width="32" height="48" fill="#D97757"/>
+  <rect x="144" y="144" width="24" height="40" fill="#D97757"/>
+  <rect x="184" y="144" width="16" height="24" fill="#D97757"/>
+  <rect x="64" y="176" width="16" height="24" fill="#D97757"/>
+  <rect x="104" y="192" width="24" height="32" fill="#D97757"/>
+
+  <!-- Ears -->
+  <rect x="40" y="56" width="32" height="24" fill="#D97757"/>
+  <rect x="184" y="64" width="32" height="16" fill="#D97757"/>
+
+  <!-- Eyes - X X with color offset -->
+  <line x1="72" y1="88" x2="96" y2="112" stroke="#0a0a09" stroke-width="6"/>
+  <line x1="96" y1="88" x2="72" y2="112" stroke="#0a0a09" stroke-width="6"/>
+  <line x1="74" y1="90" x2="98" y2="114" stroke="#00FFFF" stroke-width="4" opacity="0.5"/>
+  <line x1="160" y1="88" x2="184" y2="112" stroke="#0a0a09" stroke-width="6"/>
+  <line x1="184" y1="88" x2="160" y2="112" stroke="#0a0a09" stroke-width="6"/>
+  <line x1="158" y1="86" x2="182" y2="110" stroke="#FF00FF" stroke-width="4" opacity="0.5"/>
+
+  <!-- Glitch pixels -->
+  <rect x="200" y="80" width="8" height="8" fill="#00FFFF"/>
+  <rect x="40" y="120" width="8" height="8" fill="#FF00FF"/>
+</svg>

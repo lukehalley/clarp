@@ -1,0 +1,44 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Clawd Dark - Abyss (being pulled into void, stretched) -->
+  <rect width="256" height="256" fill="#000000"/>
+
+  <!-- Void spiral below -->
+  <ellipse cx="128" cy="240" rx="80" ry="20" fill="#0a0a09"/>
+  <ellipse cx="128" cy="240" rx="60" ry="15" fill="#1a1a1a"/>
+  <ellipse cx="128" cy="240" rx="40" ry="10" fill="#2a2a2a"/>
+  <ellipse cx="128" cy="240" rx="20" ry="5" fill="#E74C3C" opacity="0.5"/>
+
+  <!-- Body - stretched, being pulled down -->
+  <rect x="56" y="48" width="144" height="72" fill="#5a3a30"/>
+
+  <!-- Stretched middle section -->
+  <polygon points="56,120 72,180 184,180 200,120" fill="#5a3a30"/>
+
+  <!-- Ears - normal at top -->
+  <rect x="56" y="32" width="28" height="28" fill="#5a3a30"/>
+  <rect x="172" y="32" width="28" height="28" fill="#5a3a30"/>
+
+  <!-- Eyes - terrified, wide -->
+  <rect x="80" y="64" width="20" height="28" fill="#0a0a09"/>
+  <rect x="156" y="64" width="20" height="28" fill="#0a0a09"/>
+  <rect x="84" y="72" width="12" height="12" fill="#E8E6DC"/>
+  <rect x="160" y="72" width="12" height="12" fill="#E8E6DC"/>
+  <!-- Tiny pupils - fear -->
+  <rect x="88" y="76" width="4" height="4" fill="#0a0a09"/>
+  <rect x="164" y="76" width="4" height="4" fill="#0a0a09"/>
+
+  <!-- Mouth - screaming -->
+  <ellipse cx="128" cy="100" rx="20" ry="12" fill="#0a0a09"/>
+
+  <!-- Legs - stretched into void -->
+  <polygon points="80,180 72,240 88,240 96,180" fill="#5a3a30"/>
+  <polygon points="112,180 108,240 124,240 128,180" fill="#5a3a30"/>
+  <polygon points="128,180 132,240 148,240 144,180" fill="#5a3a30"/>
+  <polygon points="160,180 168,240 184,240 176,180" fill="#5a3a30"/>
+
+  <!-- Reaching arms upward -->
+  <rect x="32" y="56" width="24" height="12" fill="#5a3a30"/>
+  <rect x="24" y="48" width="16" height="16" fill="#5a3a30"/>
+  <rect x="200" y="56" width="24" height="12" fill="#5a3a30"/>
+  <rect x="216" y="48" width="16" height="16" fill="#5a3a30"/>
+</svg>

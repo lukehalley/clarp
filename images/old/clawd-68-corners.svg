@@ -1,0 +1,26 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Corners only - minimal -->
+  <rect width="256" height="256" fill="#0a0a09"/>
+  <!-- Body corners -->
+  <rect x="88" y="88" width="12" height="2" fill="#D97757"/>
+  <rect x="88" y="88" width="2" height="12" fill="#D97757"/>
+  <rect x="156" y="88" width="12" height="2" fill="#D97757"/>
+  <rect x="166" y="88" width="2" height="12" fill="#D97757"/>
+  <rect x="88" y="134" width="2" height="12" fill="#D97757"/>
+  <rect x="88" y="134" width="12" height="2" fill="#D97757"/>
+  <rect x="166" y="134" width="2" height="12" fill="#D97757"/>
+  <rect x="156" y="134" width="12" height="2" fill="#D97757"/>
+  <!-- Eyes -->
+  <rect x="104" y="104" width="12" height="20" fill="#D97757"/>
+  <rect x="140" y="104" width="12" height="20" fill="#D97757"/>
+  <!-- Leg corners -->
+  <rect x="96" y="136" width="8" height="2" fill="#D97757"/>
+  <rect x="96" y="136" width="2" height="8" fill="#D97757"/>
+  <rect x="96" y="158" width="2" height="8" fill="#D97757"/>
+  <rect x="120" y="136" width="8" height="2" fill="#D97757"/>
+  <rect x="120" y="136" width="2" height="8" fill="#D97757"/>
+  <rect x="120" y="158" width="2" height="8" fill="#D97757"/>
+  <rect x="144" y="136" width="8" height="2" fill="#D97757"/>
+  <rect x="144" y="136" width="2" height="8" fill="#D97757"/>
+  <rect x="144" y="158" width="2" height="8" fill="#D97757"/>
+</svg>

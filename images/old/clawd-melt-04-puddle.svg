@@ -1,0 +1,22 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Clawd Melt 04 - Almost puddle (nearly gone) -->
+  <rect width="256" height="256" fill="white"/>
+
+  <!-- Massive puddle -->
+  <ellipse cx="128" cy="200" rx="100" ry="40" fill="#D97757" opacity="0.4"/>
+  <ellipse cx="128" cy="196" rx="85" ry="32" fill="#D97757" opacity="0.6"/>
+  <ellipse cx="128" cy="192" rx="70" ry="24" fill="#D97757" opacity="0.8"/>
+
+  <!-- Just a tiny bit of body left -->
+  <rect x="88" y="140" width="80" height="32" fill="#D97757"/>
+
+  <!-- Final drips merging with puddle -->
+  <rect x="96" y="172" width="24" height="28" fill="#D97757"/>
+  <rect x="136" y="172" width="24" height="24" fill="#D97757"/>
+
+  <!-- Eyes floating in puddle - just X marks -->
+  <line x1="92" y1="188" x2="108" y2="204" stroke="#0a0a09" stroke-width="4"/>
+  <line x1="108" y1="188" x2="92" y2="204" stroke="#0a0a09" stroke-width="4"/>
+  <line x1="148" y1="188" x2="164" y2="204" stroke="#0a0a09" stroke-width="4"/>
+  <line x1="164" y1="188" x2="148" y2="204" stroke="#0a0a09" stroke-width="4"/>
+</svg>

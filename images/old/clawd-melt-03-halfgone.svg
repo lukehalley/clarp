@@ -1,0 +1,31 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Clawd Melt 03 - Half gone (severe melting) -->
+  <rect width="256" height="256" fill="white"/>
+
+  <!-- Large puddle -->
+  <ellipse cx="128" cy="220" rx="90" ry="24" fill="#D97757" opacity="0.5"/>
+  <ellipse cx="128" cy="216" rx="70" ry="18" fill="#D97757" opacity="0.7"/>
+
+  <!-- Body (heavily distorted) -->
+  <rect x="56" y="72" width="144" height="56" fill="#D97757"/>
+
+  <!-- Heavy dripping -->
+  <rect x="56" y="128" width="32" height="48" fill="#D97757"/>
+  <rect x="96" y="128" width="40" height="72" fill="#D97757"/>
+  <rect x="144" y="128" width="32" height="60" fill="#D97757"/>
+  <rect x="184" y="128" width="24" height="40" fill="#D97757"/>
+
+  <!-- Extra drips -->
+  <rect x="72" y="176" width="20" height="36" fill="#D97757"/>
+  <rect x="160" y="188" width="20" height="28" fill="#D97757"/>
+
+  <!-- One ear melted off, one drooping badly -->
+  <rect x="40" y="64" width="24" height="16" fill="#D97757"/>
+  <rect x="192" y="80" width="20" height="8" fill="#D97757"/>
+
+  <!-- Eyes - X X barely visible -->
+  <line x1="80" y1="88" x2="100" y2="108" stroke="#0a0a09" stroke-width="5"/>
+  <line x1="100" y1="88" x2="80" y2="108" stroke="#0a0a09" stroke-width="5"/>
+  <line x1="156" y1="88" x2="176" y2="108" stroke="#0a0a09" stroke-width="5"/>
+  <line x1="176" y1="88" x2="156" y2="108" stroke="#0a0a09" stroke-width="5"/>
+</svg>

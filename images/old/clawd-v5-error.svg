@@ -1,0 +1,31 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Clawd v5 - Error (warning triangle, X eyes) -->
+  <rect width="256" height="256" fill="white"/>
+
+  <!-- Warning triangle above head -->
+  <polygon points="128,8 168,56 88,56" fill="#FF6B35"/>
+  <rect x="120" y="24" width="16" height="16" fill="#0a0a09"/>
+  <rect x="120" y="44" width="16" height="8" fill="#0a0a09"/>
+
+  <!-- Body -->
+  <rect x="48" y="80" width="160" height="96" fill="#D97757"/>
+
+  <!-- Ears -->
+  <rect x="48" y="64" width="32" height="32" fill="#D97757"/>
+  <rect x="176" y="64" width="32" height="32" fill="#D97757"/>
+
+  <!-- Eyes - X X -->
+  <line x1="72" y1="104" x2="104" y2="136" stroke="#0a0a09" stroke-width="8"/>
+  <line x1="104" y1="104" x2="72" y2="136" stroke="#0a0a09" stroke-width="8"/>
+  <line x1="152" y1="104" x2="184" y2="136" stroke="#0a0a09" stroke-width="8"/>
+  <line x1="184" y1="104" x2="152" y2="136" stroke="#0a0a09" stroke-width="8"/>
+
+  <!-- Error mouth - wavy -->
+  <path d="M96 156 Q112 164 128 156 Q144 148 160 156" stroke="#0a0a09" stroke-width="6" fill="none"/>
+
+  <!-- Legs -->
+  <rect x="64" y="176" width="24" height="48" fill="#D97757"/>
+  <rect x="104" y="176" width="24" height="48" fill="#D97757"/>
+  <rect x="128" y="176" width="24" height="48" fill="#D97757"/>
+  <rect x="168" y="176" width="24" height="48" fill="#D97757"/>
+</svg>

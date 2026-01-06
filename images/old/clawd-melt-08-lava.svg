@@ -1,0 +1,35 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Clawd Melt 08 - Lava (hot red/orange melt) -->
+  <rect width="256" height="256" fill="white"/>
+
+  <!-- Lava puddle -->
+  <ellipse cx="128" cy="232" rx="80" ry="16" fill="#E74C3C" opacity="0.5"/>
+  <ellipse cx="128" cy="228" rx="60" ry="12" fill="#FF6B35" opacity="0.7"/>
+  <ellipse cx="128" cy="224" rx="40" ry="8" fill="#FFD93D" opacity="0.8"/>
+
+  <!-- Body melting hot -->
+  <rect x="48" y="64" width="160" height="80" fill="#E74C3C"/>
+
+  <!-- Lava drips -->
+  <rect x="56" y="144" width="24" height="32" fill="#FF6B35"/>
+  <rect x="96" y="144" width="32" height="48" fill="#E74C3C"/>
+  <rect x="144" y="144" width="24" height="40" fill="#FF6B35"/>
+  <rect x="184" y="144" width="16" height="24" fill="#FFD93D"/>
+  <rect x="64" y="176" width="16" height="24" fill="#FFD93D"/>
+  <rect x="104" y="192" width="24" height="32" fill="#FF6B35"/>
+  <rect x="152" y="184" width="16" height="20" fill="#E74C3C"/>
+
+  <!-- Ears -->
+  <rect x="40" y="56" width="32" height="24" fill="#E74C3C"/>
+  <rect x="184" y="64" width="32" height="16" fill="#E74C3C"/>
+
+  <!-- Eyes - X X in black -->
+  <line x1="72" y1="88" x2="96" y2="112" stroke="#0a0a09" stroke-width="6"/>
+  <line x1="96" y1="88" x2="72" y2="112" stroke="#0a0a09" stroke-width="6"/>
+  <line x1="160" y1="88" x2="184" y2="112" stroke="#0a0a09" stroke-width="6"/>
+  <line x1="184" y1="88" x2="160" y2="112" stroke="#0a0a09" stroke-width="6"/>
+
+  <!-- Heat waves -->
+  <path d="M60 48 Q68 40 76 48 Q84 56 92 48" stroke="#FF6B35" stroke-width="2" fill="none" opacity="0.5"/>
+  <path d="M164 48 Q172 40 180 48 Q188 56 196 48" stroke="#FF6B35" stroke-width="2" fill="none" opacity="0.5"/>
+</svg>

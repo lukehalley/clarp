@@ -1,0 +1,33 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Scanlines - CRT effect -->
+  <rect width="256" height="256" fill="#0a0a09"/>
+  <rect x="88" y="88" width="80" height="48" fill="#D97757"/>
+  <rect x="72" y="100" width="16" height="12" fill="#D97757"/>
+  <rect x="168" y="100" width="16" height="12" fill="#D97757"/>
+  <rect x="104" y="104" width="12" height="20" fill="#0a0a09"/>
+  <rect x="140" y="104" width="12" height="20" fill="#0a0a09"/>
+  <rect x="96" y="136" width="16" height="24" fill="#D97757"/>
+  <rect x="120" y="136" width="16" height="24" fill="#D97757"/>
+  <rect x="144" y="136" width="16" height="24" fill="#D97757"/>
+  <rect x="0" y="0" width="256" height="2" fill="#0a0a09" opacity="0.3"/>
+  <rect x="0" y="4" width="256" height="2" fill="#0a0a09" opacity="0.3"/>
+  <rect x="0" y="8" width="256" height="2" fill="#0a0a09" opacity="0.3"/>
+  <rect x="0" y="88" width="256" height="2" fill="#0a0a09" opacity="0.3"/>
+  <rect x="0" y="92" width="256" height="2" fill="#0a0a09" opacity="0.3"/>
+  <rect x="0" y="96" width="256" height="2" fill="#0a0a09" opacity="0.3"/>
+  <rect x="0" y="100" width="256" height="2" fill="#0a0a09" opacity="0.3"/>
+  <rect x="0" y="104" width="256" height="2" fill="#0a0a09" opacity="0.3"/>
+  <rect x="0" y="108" width="256" height="2" fill="#0a0a09" opacity="0.3"/>
+  <rect x="0" y="112" width="256" height="2" fill="#0a0a09" opacity="0.3"/>
+  <rect x="0" y="116" width="256" height="2" fill="#0a0a09" opacity="0.3"/>
+  <rect x="0" y="120" width="256" height="2" fill="#0a0a09" opacity="0.3"/>
+  <rect x="0" y="124" width="256" height="2" fill="#0a0a09" opacity="0.3"/>
+  <rect x="0" y="128" width="256" height="2" fill="#0a0a09" opacity="0.3"/>
+  <rect x="0" y="132" width="256" height="2" fill="#0a0a09" opacity="0.3"/>
+  <rect x="0" y="136" width="256" height="2" fill="#0a0a09" opacity="0.3"/>
+  <rect x="0" y="140" width="256" height="2" fill="#0a0a09" opacity="0.3"/>
+  <rect x="0" y="144" width="256" height="2" fill="#0a0a09" opacity="0.3"/>
+  <rect x="0" y="148" width="256" height="2" fill="#0a0a09" opacity="0.3"/>
+  <rect x="0" y="152" width="256" height="2" fill="#0a0a09" opacity="0.3"/>
+  <rect x="0" y="156" width="256" height="2" fill="#0a0a09" opacity="0.3"/>
+</svg>
