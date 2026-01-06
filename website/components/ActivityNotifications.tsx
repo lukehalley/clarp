@@ -306,11 +306,31 @@ export default function ActivityNotifications() {
     // Initial notification after short delay
     const initialTimeout = setTimeout(() => {
       addNotification();
-    }, 2000);
+    }, 3000);
 
-    // Random interval between 2-5 seconds
+    // Sporadic intervals - sometimes rapid bursts, sometimes long pauses
+    const getRandomDelay = () => {
+      const roll = Math.random();
+      if (roll < 0.15) {
+        // 15% chance: rapid burst (0.8-1.5s)
+        return 800 + Math.random() * 700;
+      } else if (roll < 0.35) {
+        // 20% chance: quick (2-4s)
+        return 2000 + Math.random() * 2000;
+      } else if (roll < 0.7) {
+        // 35% chance: normal (5-10s)
+        return 5000 + Math.random() * 5000;
+      } else if (roll < 0.9) {
+        // 20% chance: slow (12-20s)
+        return 12000 + Math.random() * 8000;
+      } else {
+        // 10% chance: long pause (25-40s)
+        return 25000 + Math.random() * 15000;
+      }
+    };
+
     const scheduleNext = () => {
-      const delay = 2000 + Math.random() * 3000;
+      const delay = getRandomDelay();
       return setTimeout(() => {
         addNotification();
         intervalRef = scheduleNext();

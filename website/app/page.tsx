@@ -75,7 +75,7 @@ const NAV_HOVER_TEXT: Record<string, string> = {
   products: 'vaporware',
   ai: 'chatgpt wrapper',
   docs: 'this page',
-  'hall of shame': 'you',
+  'hall of shame': 'your portfolio',
 };
 
 export default function Home() {
@@ -284,14 +284,14 @@ export default function Home() {
               </h1>
 
               <p className="text-lg sm:text-xl md:text-2xl text-slate-light mb-2 sm:mb-4">
-                the framework
+                vaporware-as-a-service
               </p>
               <p className="text-base sm:text-lg text-danger-orange font-mono mb-4 sm:mb-6 font-bold">
-                for building things. soon.
+                shipping nothing since 2025
               </p>
 
               <p className="text-sm sm:text-base text-slate-light mb-6 sm:mb-8 max-w-md mx-auto lg:mx-0">
-                revolutionary infrastructure for the next generation of applications that will definitely exist at some point.
+                enterprise-grade infrastructure for things that don't exist. join the waitlist for the waitlist.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start mb-6 sm:mb-8">

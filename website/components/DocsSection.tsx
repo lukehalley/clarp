@@ -95,8 +95,8 @@ q: is that a no?
 a: this is not financial advice
 
 q: what does clarp actually do?
-a: it's a framework for building next-gen
-   [CONNECTION TIMED OUT]`,
+a: it's vaporware-as-a-service
+   (that's the whole product)`,
       notes: [
         'these are all the questions',
         'and all the answers',
