@@ -1,19 +1,6 @@
-```
-                    ██████╗██╗      █████╗ ██████╗ ██████╗
-                   ██╔════╝██║     ██╔══██╗██╔══██╗██╔══██╗
-                   ██║     ██║     ███████║██████╔╝██████╔╝
-                   ██║     ██║     ██╔══██║██╔══██╗██╔═══╝
-                   ╚██████╗███████╗██║  ██║██║  ██║██║
-                    ╚═════╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝
-```
-
 <div align="center">
 
-# $CLARP
-
-### vaporware-as-a-service
-
-**shipping nothing since 2025**
+<img src="marketing-assets/og-image.svg" alt="$CLARP - vaporware-as-a-service" width="600" />
 
 <br>
 
