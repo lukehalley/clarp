@@ -96,10 +96,64 @@ export default function Home() {
   const [navHoverText, setNavHoverText] = useState<Record<string, string>>({});
   const [ctaClicks, setCtaClicks] = useState({ doIt: 0, pretend: 0 });
   const [asciiClicks, setAsciiClicks] = useState(0);
+  const [konamiProgress, setKonamiProgress] = useState(0);
+  const [konamiActivated, setKonamiActivated] = useState(false);
+  const [rageClicks, setRageClicks] = useState(0);
+  const [showRageMessage, setShowRageMessage] = useState(false);
+  const [cursorTrail, setCursorTrail] = useState<{x: number, y: number, id: number}[]>([]);
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+
+    // Konami code easter egg: ↑↑↓↓←→←→BA
+    const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'KeyB', 'KeyA'];
+    let konamiIndex = 0;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.code === konamiCode[konamiIndex]) {
+        konamiIndex++;
+        setKonamiProgress(konamiIndex);
+        if (konamiIndex === konamiCode.length) {
+          setKonamiActivated(true);
+          konamiIndex = 0;
+        }
+      } else {
+        konamiIndex = 0;
+        setKonamiProgress(0);
+      }
+    };
+
+    // Rage click detection
+    let clickTimes: number[] = [];
+    const handleClick = () => {
+      const now = Date.now();
+      clickTimes.push(now);
+      clickTimes = clickTimes.filter(t => now - t < 2000); // clicks in last 2s
+      if (clickTimes.length >= 10) {
+        setRageClicks(prev => prev + 1);
+        setShowRageMessage(true);
+        setTimeout(() => setShowRageMessage(false), 3000);
+        clickTimes = [];
+      }
+    };
+
+    // Cursor trail when Konami activated
+    const handleMouseMove = (e: MouseEvent) => {
+      if (konamiActivated) {
+        setCursorTrail(prev => [...prev.slice(-15), { x: e.clientX, y: e.clientY, id: Date.now() }]);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('click', handleClick);
+    window.addEventListener('mousemove', handleMouseMove);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('click', handleClick);
+      window.removeEventListener('mousemove', handleMouseMove);
+    };
+  }, [konamiActivated]);
 
   // Easter egg: fake loading that cycles through messages and fails
   const triggerFakeLoading = () => {
@@ -742,6 +796,63 @@ export default function Home() {
           >
             <span className="text-danger-orange">error:</span> {footerMessage}
           </div>
+        </div>
+      )}
+
+      {/* Konami code progress indicator */}
+      {konamiProgress > 0 && !konamiActivated && (
+        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[100] animate-fade-in">
+          <div className="bg-slate-dark border-2 border-larp-yellow px-4 py-2 font-mono text-xs text-larp-yellow">
+            konami: {Array(konamiProgress).fill('▓').join('')}{Array(10 - konamiProgress).fill('░').join('')}
+          </div>
+        </div>
+      )}
+
+      {/* Konami activated mode */}
+      {konamiActivated && (
+        <>
+          {/* Rainbow border animation */}
+          <div className="fixed inset-0 pointer-events-none z-[80] border-4 animate-pulse" style={{ borderColor: `hsl(${Date.now() / 20 % 360}, 70%, 50%)` }} />
+
+          {/* Achievement unlocked */}
+          <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[100]">
+            <div className="bg-larp-green text-black px-6 py-3 font-mono text-sm font-bold border-2 border-black" style={{ boxShadow: '4px 4px 0 black' }}>
+              🎮 KONAMI MODE ACTIVATED - you found nothing. congrats.
+            </div>
+          </div>
+
+          {/* Cursor trail */}
+          {cursorTrail.map((point, i) => (
+            <div
+              key={point.id}
+              className="fixed w-3 h-3 bg-danger-orange pointer-events-none z-[200] transition-opacity"
+              style={{
+                left: point.x - 6,
+                top: point.y - 6,
+                opacity: (i + 1) / cursorTrail.length * 0.8,
+                transform: `scale(${(i + 1) / cursorTrail.length})`,
+              }}
+            />
+          ))}
+        </>
+      )}
+
+      {/* Rage clicking message */}
+      {showRageMessage && (
+        <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[100] animate-[shake_0.5s_ease-in-out]">
+          <div className="bg-larp-red text-black px-8 py-4 font-mono text-lg font-bold border-4 border-black" style={{ boxShadow: '8px 8px 0 black' }}>
+            {rageClicks >= 5 ? 'SEEK PROFESSIONAL HELP' :
+             rageClicks >= 3 ? 'RAGE CLICKING DETECTED (again)' :
+             rageClicks >= 2 ? 'still rage clicking?' :
+             'RAGE CLICKING DETECTED'}
+          </div>
+        </div>
+      )}
+
+      {/* Rage click counter - shows after first rage */}
+      {rageClicks > 0 && !showRageMessage && (
+        <div className="fixed bottom-20 left-4 z-[90] font-mono text-[10px] text-ivory-light/30">
+          rage incidents: {rageClicks}
         </div>
       )}
     </main>
