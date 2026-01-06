@@ -75,19 +75,19 @@ export default function Footer() {
                 onClick={handleSocialClick}
                 className={`w-10 h-10 bg-slate-medium flex items-center justify-center text-ivory-light/60 hover:text-danger-orange hover:bg-slate-light/20 transition-colors border border-slate-light/20 ${socialClicks >= 5 ? 'animate-pulse' : ''}`}
               >
-                <span className="text-lg">{socialClicks >= 5 ? '💀' : '𝕏'}</span>
+                <span className="text-lg">{socialClicks >= 5 ? '.' : '𝕏'}</span>
               </button>
               <button
                 onClick={handleSocialClick}
                 className={`w-10 h-10 bg-slate-medium flex items-center justify-center text-ivory-light/60 hover:text-danger-orange hover:bg-slate-light/20 transition-colors border border-slate-light/20 ${socialClicks >= 5 ? 'animate-pulse' : ''}`}
               >
-                <span className="text-lg">{socialClicks >= 5 ? '🤡' : '◆'}</span>
+                <span className="text-lg">{socialClicks >= 5 ? '.' : '◆'}</span>
               </button>
               <button
                 onClick={handleSocialClick}
                 className={`w-10 h-10 bg-slate-medium flex items-center justify-center text-ivory-light/60 hover:text-danger-orange hover:bg-slate-light/20 transition-colors border border-slate-light/20 ${socialClicks >= 5 ? 'animate-pulse' : ''}`}
               >
-                <span className="text-lg">{socialClicks >= 5 ? '📉' : '⌘'}</span>
+                <span className="text-lg">{socialClicks >= 5 ? '.' : '⌘'}</span>
               </button>
             </div>
             {socialClicks >= 3 && (
