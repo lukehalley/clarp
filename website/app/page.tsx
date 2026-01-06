@@ -110,6 +110,15 @@ export default function Home() {
     let konamiIndex = 0;
 
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Escape to exit Konami mode
+      if (e.code === 'Escape') {
+        setKonamiActivated(false);
+        setCursorTrail([]);
+        konamiIndex = 0;
+        setKonamiProgress(0);
+        return;
+      }
+
       if (e.code === konamiCode[konamiIndex]) {
         konamiIndex++;
         setKonamiProgress(konamiIndex);
