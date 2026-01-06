@@ -88,6 +88,8 @@ export default function Home() {
   const [showWhitepaperModal, setShowWhitepaperModal] = useState(false);
   const [showLoadingModal, setShowLoadingModal] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('');
+  const [loadingProgress, setLoadingProgress] = useState(0);
+  const [loadingFailed, setLoadingFailed] = useState(false);
   const [showFooterMessage, setShowFooterMessage] = useState(false);
   const [footerMessage, setFooterMessage] = useState('');
   const [glitchedStat, setGlitchedStat] = useState<number | null>(null);
@@ -99,11 +101,50 @@ export default function Home() {
     setMounted(true);
   }, []);
 
-  // Easter egg: infinite loading that never resolves
+  // Easter egg: fake loading that cycles through messages and fails
   const triggerFakeLoading = () => {
-    const msg = LOADING_MESSAGES[Math.floor(Math.random() * LOADING_MESSAGES.length)];
-    setLoadingMessage(msg);
+    setLoadingProgress(0);
+    setLoadingFailed(false);
     setShowLoadingModal(true);
+
+    // Shuffle messages for this session
+    const shuffled = [...LOADING_MESSAGES].sort(() => Math.random() - 0.5);
+    let messageIndex = 0;
+
+    setLoadingMessage(shuffled[0]);
+
+    // Cycle through messages
+    const messageInterval = setInterval(() => {
+      messageIndex++;
+      if (messageIndex < shuffled.length) {
+        setLoadingMessage(shuffled[messageIndex]);
+        setLoadingProgress(prev => Math.min(prev + 12, 95));
+      }
+    }, 800);
+
+    // Progress bar increments
+    const progressInterval = setInterval(() => {
+      setLoadingProgress(prev => {
+        if (prev >= 99) return 99;
+        return prev + Math.random() * 8;
+      });
+    }, 200);
+
+    // Fail after cycling through messages
+    setTimeout(() => {
+      clearInterval(messageInterval);
+      clearInterval(progressInterval);
+      setLoadingProgress(99);
+      setLoadingMessage('fatal error: product not found');
+      setLoadingFailed(true);
+
+      // Auto-close after showing failure
+      setTimeout(() => {
+        setShowLoadingModal(false);
+        setLoadingFailed(false);
+        setLoadingProgress(0);
+      }, 2000);
+    }, shuffled.length * 800 + 500);
   };
 
   // Easter egg: footer link click
@@ -638,40 +679,55 @@ export default function Home() {
         </div>
       )}
 
-      {/* infinite loading modal - easter egg */}
+      {/* loading modal - cycles through messages then fails */}
       {showLoadingModal && (
         <div
           className="fixed inset-0 z-[100] flex items-center justify-center"
-          onClick={() => setShowLoadingModal(false)}
+          onClick={() => !loadingFailed && setShowLoadingModal(false)}
         >
           <div className="absolute inset-0 bg-slate-dark/95 backdrop-blur-sm" />
           <div
-            className="relative bg-slate-dark border-4 border-danger-orange p-8 max-w-md w-full mx-4"
-            style={{ boxShadow: '8px 8px 0 #FF6B35' }}
+            className={`relative bg-slate-dark border-4 p-8 max-w-md w-full mx-4 transition-colors ${loadingFailed ? 'border-larp-red' : 'border-danger-orange'}`}
+            style={{ boxShadow: loadingFailed ? '8px 8px 0 #ef4444' : '8px 8px 0 #FF6B35' }}
             onClick={(e) => e.stopPropagation()}
           >
-            <button
-              className="absolute -top-4 -right-4 w-10 h-10 bg-larp-red text-black font-mono font-bold text-xl flex items-center justify-center border-2 border-black hover:bg-danger-orange transition-colors"
-              style={{ boxShadow: '3px 3px 0 black' }}
-              onClick={() => setShowLoadingModal(false)}
-            >
-              ✗
-            </button>
+            {!loadingFailed && (
+              <button
+                className="absolute -top-4 -right-4 w-10 h-10 bg-larp-red text-black font-mono font-bold text-xl flex items-center justify-center border-2 border-black hover:bg-danger-orange transition-colors"
+                style={{ boxShadow: '3px 3px 0 black' }}
+                onClick={() => setShowLoadingModal(false)}
+              >
+                ✗
+              </button>
+            )}
 
             <div className="text-center">
               <div className="mb-6">
-                <div className="inline-block w-12 h-12 border-4 border-danger-orange border-t-transparent rounded-full animate-spin" />
+                {loadingFailed ? (
+                  <div className="inline-block w-12 h-12 border-4 border-larp-red flex items-center justify-center text-larp-red text-2xl font-bold">
+                    ✗
+                  </div>
+                ) : (
+                  <div className="inline-block w-12 h-12 border-4 border-danger-orange border-t-transparent rounded-full animate-spin" />
+                )}
               </div>
-              <p className="text-danger-orange font-mono text-sm mb-2">{loadingMessage}</p>
-              <div className="w-full bg-slate-medium h-2 rounded-full overflow-hidden mb-4">
-                <div className="h-full bg-danger-orange animate-loading-bar" style={{ width: '99%' }} />
+              <p className={`font-mono text-sm mb-2 transition-colors ${loadingFailed ? 'text-larp-red' : 'text-danger-orange'}`}>
+                {loadingMessage}
+              </p>
+              <div className="w-full bg-slate-medium h-2 overflow-hidden mb-4">
+                <div
+                  className={`h-full transition-all duration-200 ${loadingFailed ? 'bg-larp-red' : 'bg-danger-orange'}`}
+                  style={{ width: `${Math.min(loadingProgress, 99)}%` }}
+                />
               </div>
-              <p className="text-ivory-light/50 font-mono text-xs">
-                eta: soon™
+              <p className={`font-mono text-xs ${loadingFailed ? 'text-larp-red' : 'text-ivory-light/50'}`}>
+                {loadingFailed ? 'connection terminated' : `${Math.floor(loadingProgress)}% complete`}
               </p>
-              <p className="text-ivory-light/30 font-mono text-[10px] mt-4">
-                (click anywhere to give up)
-              </p>
+              {!loadingFailed && (
+                <p className="text-ivory-light/30 font-mono text-[10px] mt-4">
+                  (click anywhere to give up)
+                </p>
+              )}
             </div>
           </div>
         </div>
