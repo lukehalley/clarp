@@ -10,6 +10,8 @@ import Mascot from '@/components/Mascot';
 import DocsSection from '@/components/DocsSection';
 import Footer from '@/components/Footer';
 import Clarp from '@/components/Clarp';
+import ClarpAI from '@/components/ClarpAI';
+import ActivityNotifications from '@/components/ActivityNotifications';
 
 const ASCII_LOGO = `
  ██████╗██╗      █████╗ ██████╗ ██████╗
@@ -48,15 +50,85 @@ const PRODUCTS = [
   },
 ];
 
+// Easter egg messages for various interactions
+const LOADING_MESSAGES = [
+  'locating blockchain...',
+  'syncing vaporware...',
+  'deploying nothing...',
+  'auditing vibes...',
+  'connecting to mainnet (fake)...',
+  'initializing cope...',
+  'fetching liquidity (there is none)...',
+  'compiling promises...',
+];
+
+const FOOTER_MESSAGES = [
+  'this link goes nowhere. like your investments.',
+  'did you expect documentation?',
+  'the real treasure was the gas fees we paid along the way.',
+  'page not found. neither is the product.',
+  '404: honesty not found (just kidding, we\'re honest)',
+  'you clicked a footer link. on a parody site.',
+];
+
+const NAV_HOVER_TEXT: Record<string, string> = {
+  products: 'vaporware',
+  ai: 'chatgpt wrapper',
+  docs: 'this page',
+  'hall of shame': 'you',
+};
+
 export default function Home() {
   const [mounted, setMounted] = useState(false);
   const [showWalletModal, setShowWalletModal] = useState(false);
   const [showSmoke, setShowSmoke] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  // Easter egg states
+  const [showWhitepaperModal, setShowWhitepaperModal] = useState(false);
+  const [showLoadingModal, setShowLoadingModal] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState('');
+  const [showFooterMessage, setShowFooterMessage] = useState(false);
+  const [footerMessage, setFooterMessage] = useState('');
+  const [glitchedStat, setGlitchedStat] = useState<number | null>(null);
+  const [navHoverText, setNavHoverText] = useState<Record<string, string>>({});
+  const [ctaClicks, setCtaClicks] = useState({ doIt: 0, pretend: 0 });
+  const [asciiClicks, setAsciiClicks] = useState(0);
+
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Easter egg: infinite loading that never resolves
+  const triggerFakeLoading = () => {
+    const msg = LOADING_MESSAGES[Math.floor(Math.random() * LOADING_MESSAGES.length)];
+    setLoadingMessage(msg);
+    setShowLoadingModal(true);
+  };
+
+  // Easter egg: footer link click
+  const handleFooterClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const msg = FOOTER_MESSAGES[Math.floor(Math.random() * FOOTER_MESSAGES.length)];
+    setFooterMessage(msg);
+    setShowFooterMessage(true);
+    setTimeout(() => setShowFooterMessage(false), 3000);
+  };
+
+  // Easter egg: stat glitch
+  const triggerStatGlitch = (index: number) => {
+    setGlitchedStat(index);
+    setTimeout(() => setGlitchedStat(null), 500);
+  };
+
+  // Easter egg: nav hover text change
+  const handleNavHover = (key: string) => {
+    setNavHoverText(prev => ({ ...prev, [key]: NAV_HOVER_TEXT[key] || key }));
+  };
+
+  const handleNavLeave = (key: string) => {
+    setNavHoverText(prev => ({ ...prev, [key]: '' }));
+  };
 
   if (!mounted) return null;
 
@@ -74,9 +146,30 @@ export default function Home() {
 
           {/* Desktop nav */}
           <div className="hidden md:flex items-center gap-6">
-            <a href="#products" className="text-sm text-slate-light hover:text-danger-orange transition-colors">products</a>
-            <a href="#docs" className="text-sm text-slate-light hover:text-danger-orange transition-colors">docs</a>
-            <a href="#victims" className="text-sm text-slate-light hover:text-danger-orange transition-colors">hall of shame</a>
+            <a
+              href="#products"
+              className="text-sm text-slate-light hover:text-danger-orange transition-colors"
+              onMouseEnter={() => handleNavHover('products')}
+              onMouseLeave={() => handleNavLeave('products')}
+            >
+              {navHoverText['products'] || 'products'}
+            </a>
+            <a
+              href="#docs"
+              className="text-sm text-slate-light hover:text-danger-orange transition-colors"
+              onMouseEnter={() => handleNavHover('docs')}
+              onMouseLeave={() => handleNavLeave('docs')}
+            >
+              {navHoverText['docs'] || 'docs'}
+            </a>
+            <a
+              href="#victims"
+              className="text-sm text-slate-light hover:text-danger-orange transition-colors"
+              onMouseEnter={() => handleNavHover('hall of shame')}
+              onMouseLeave={() => handleNavLeave('hall of shame')}
+            >
+              {navHoverText['hall of shame'] || 'hall of shame'}
+            </a>
             <button className="btn-secondary text-sm px-4 py-2" onClick={() => setShowWalletModal(true)}>connect wallet</button>
           </div>
 
@@ -128,7 +221,8 @@ export default function Home() {
             </div>
           </div>
         )}
-      </nav>
+        </nav>
+      </header>
 
       {/* hero section */}
       <section className="relative py-12 sm:py-16 lg:py-24 px-4 sm:px-6 overflow-hidden">
@@ -142,9 +236,29 @@ export default function Home() {
               <Terminal title="clarp">
                 <div className="h-[280px] sm:h-[320px] overflow-y-auto overflow-x-hidden scrollbar-hide">
                   {/* Mobile: simple text logo */}
-                  <pre className="ascii-art text-danger-orange mb-6 md:hidden text-2xl font-bold">{ASCII_LOGO_MOBILE}</pre>
+                  <pre
+                    className="ascii-art text-danger-orange mb-6 md:hidden text-2xl font-bold cursor-pointer hover:text-larp-red transition-colors"
+                    onClick={() => {
+                      setAsciiClicks(prev => prev + 1);
+                    }}
+                  >
+                    {asciiClicks >= 5 ? '$COPE' : asciiClicks >= 3 ? '$LARP' : ASCII_LOGO_MOBILE}
+                  </pre>
                   {/* Desktop: full ASCII art */}
-                  <pre className="ascii-art text-danger-orange mb-6 hidden md:block">{ASCII_LOGO}</pre>
+                  <pre
+                    className={`ascii-art text-danger-orange mb-6 hidden md:block cursor-pointer hover:text-larp-red transition-colors ${asciiClicks >= 3 ? 'animate-[glitch_0.1s_ease-in-out_infinite]' : ''}`}
+                    onClick={() => {
+                      setAsciiClicks(prev => prev + 1);
+                    }}
+                  >
+                    {asciiClicks >= 5 ? `
+ ██████╗ ██████╗ ██████╗ ███████╗
+██╔════╝██╔═══██╗██╔══██╗██╔════╝
+██║     ██║   ██║██████╔╝█████╗
+██║     ██║   ██║██╔═══╝ ██╔══╝
+╚██████╗╚██████╔╝██║     ███████╗
+ ╚═════╝ ╚═════╝ ╚═╝     ╚══════╝` : ASCII_LOGO}
+                  </pre>
                   <div className="space-y-1">
                     <div className="flex items-start gap-2">
                       <span className="terminal-prompt text-ivory-light/90">clarp --status</span>
@@ -204,7 +318,10 @@ export default function Home() {
                     </div>
                   )}
                 </div>
-                <button className="btn-secondary opacity-50 cursor-not-allowed">
+                <button
+                  className="btn-secondary hover:opacity-100 transition-opacity"
+                  onClick={triggerFakeLoading}
+                >
                   get started (never)
                 </button>
               </div>
@@ -223,14 +340,18 @@ export default function Home() {
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8">
             {[
-              { label: 'lines of code shipped', value: '0', sublabel: '(industry standard)' },
-              { label: 'your portfolio', value: '-94%', sublabel: '(this month)' },
-              { label: 'working product', value: 'no', sublabel: '(never)' },
-              { label: 'you reading this', value: '→ ape', sublabel: '(inevitable)' },
+              { label: 'lines of code shipped', value: '0', glitchValue: 'NaN', sublabel: '(industry standard)' },
+              { label: 'your portfolio', value: '-94%', glitchValue: '-∞%', sublabel: '(this month)' },
+              { label: 'working product', value: 'no', glitchValue: '404', sublabel: '(never)' },
+              { label: 'you reading this', value: '→ ape', glitchValue: 'rekt', sublabel: '(inevitable)' },
             ].map((stat, i) => (
-              <div key={i} className="text-center p-2 sm:p-0">
-                <div className="text-2xl sm:text-3xl md:text-4xl font-mono font-bold text-danger-orange mb-1">
-                  {stat.value}
+              <div
+                key={i}
+                className={`text-center p-2 sm:p-0 cursor-pointer select-none transition-transform hover:scale-105 ${glitchedStat === i ? 'animate-[glitch_0.1s_ease-in-out_5]' : ''}`}
+                onClick={() => triggerStatGlitch(i)}
+              >
+                <div className={`text-2xl sm:text-3xl md:text-4xl font-mono font-bold mb-1 transition-colors ${glitchedStat === i ? 'text-larp-red' : 'text-danger-orange'}`}>
+                  {glitchedStat === i ? stat.glitchValue : stat.value}
                 </div>
                 <div className="text-xs sm:text-sm font-medium text-ivory-light">{stat.label}</div>
                 <div className="text-[10px] sm:text-xs text-ivory-light/50">{stat.sublabel}</div>
@@ -266,8 +387,7 @@ export default function Home() {
       </section>
 
       {/* mascot section */}
-      <section className="py-16 sm:py-24 px-4 sm:px-6 bg-slate-dark text-ivory-light overflow-hidden relative">
-        <div className="construction-stripe h-1 absolute top-0 left-0 right-0" />
+      <section className="py-16 sm:py-24 px-4 sm:px-6 bg-slate-dark text-ivory-light overflow-hidden">
         <div className="max-w-6xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             <div className="text-center lg:text-left">
@@ -292,7 +412,12 @@ export default function Home() {
                   </li>
                 ))}
               </ul>
-              <button className="btn-outline text-sm sm:text-base">whitepaper (blank)</button>
+              <button
+                className="btn-outline text-sm sm:text-base"
+                onClick={() => setShowWhitepaperModal(true)}
+              >
+                whitepaper (blank)
+              </button>
             </div>
             <div className="flex justify-center order-first lg:order-last">
               <div className="scale-75 sm:scale-100">
@@ -301,7 +426,6 @@ export default function Home() {
             </div>
           </div>
         </div>
-        <div className="construction-stripe h-1 absolute bottom-0 left-0 right-0" />
       </section>
 
       {/* documentation section */}
@@ -387,29 +511,46 @@ export default function Home() {
       <section className="py-16 sm:py-24 px-4 sm:px-6 relative">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-dark mb-4 sm:mb-6 font-display">
-            you made it to the bottom
+            {ctaClicks.doIt >= 3 ? 'you\'re still clicking' : ctaClicks.pretend >= 3 ? 'liar' : 'you made it to the bottom'}
           </h2>
           <p className="text-base sm:text-xl text-slate-light mb-2 sm:mb-4">
-            of a website that exists purely to mock you.
+            {ctaClicks.doIt >= 5 ? 'seriously?' : ctaClicks.pretend >= 5 ? 'we both know you\'re lying.' : 'of a website that exists purely to mock you.'}
           </p>
           <p className="text-sm sm:text-lg text-danger-orange mb-6 sm:mb-8 font-mono font-bold">
-            and you're still considering it.
+            {ctaClicks.doIt + ctaClicks.pretend >= 10 ? `clicked ${ctaClicks.doIt + ctaClicks.pretend} times. seek help.` : 'and you\'re still considering it.'}
           </p>
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
-            <button className="btn-primary">
-              do it anyway
+            <button
+              className={`btn-primary ${ctaClicks.doIt >= 3 ? 'animate-pulse' : ''}`}
+              onClick={() => {
+                setCtaClicks(prev => ({ ...prev, doIt: prev.doIt + 1 }));
+                if (ctaClicks.doIt >= 5) {
+                  setShowWalletModal(true);
+                }
+              }}
+            >
+              {ctaClicks.doIt >= 5 ? 'fine. here.' : ctaClicks.doIt >= 3 ? 'stop' : ctaClicks.doIt >= 1 ? 'you clicked it' : 'do it anyway'}
             </button>
-            <button className="btn-secondary">
-              pretend you won't
+            <button
+              className={`btn-secondary ${ctaClicks.pretend >= 3 ? 'line-through' : ''}`}
+              onClick={() => setCtaClicks(prev => ({ ...prev, pretend: prev.pretend + 1 }))}
+            >
+              {ctaClicks.pretend >= 5 ? 'cope' : ctaClicks.pretend >= 3 ? 'sure you won\'t' : ctaClicks.pretend >= 1 ? 'you\'re lying' : 'pretend you won\'t'}
             </button>
           </div>
           <p className="text-xs text-slate-light/50 mt-6 font-mono">
-            this button does nothing. like every "launch app" button you've clicked.
+            {ctaClicks.doIt + ctaClicks.pretend >= 5 ? 'you\'ve clicked ' + (ctaClicks.doIt + ctaClicks.pretend) + ' times. the button still does nothing.' : 'this button does nothing. like every "launch app" button you\'ve clicked.'}
           </p>
         </div>
       </section>
 
       <Footer />
+
+      {/* activity notifications */}
+      <ActivityNotifications />
+
+      {/* clarp ai floating chat */}
+      <ClarpAI />
 
       {/* wallet modal */}
       {showWalletModal && (
@@ -426,9 +567,6 @@ export default function Home() {
             style={{ boxShadow: '8px 8px 0 #0a0a09, 12px 12px 0 #FF6B35' }}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* danger stripe top */}
-            <div className="construction-stripe h-2 absolute -top-2 left-0 right-0" />
-
             {/* close button */}
             <button
               className="absolute -top-4 -right-4 w-10 h-10 bg-larp-red text-black font-mono font-bold text-xl flex items-center justify-center border-2 border-black hover:bg-danger-orange transition-colors"
@@ -462,9 +600,91 @@ export default function Home() {
                 </p>
               </div>
             </div>
+          </div>
+        </div>
+      )}
 
-            {/* danger stripe bottom */}
-            <div className="construction-stripe h-2 absolute -bottom-2 left-0 right-0" />
+      {/* whitepaper modal - easter egg */}
+      {showWhitepaperModal && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center"
+          onClick={() => setShowWhitepaperModal(false)}
+        >
+          <div className="absolute inset-0 bg-slate-dark/95 backdrop-blur-sm" />
+          <div
+            className="relative bg-ivory-light border-4 border-slate-dark p-12 max-w-2xl w-full mx-4 min-h-[400px] flex flex-col items-center justify-center"
+            style={{ boxShadow: '8px 8px 0 #0a0a09' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              className="absolute -top-4 -right-4 w-10 h-10 bg-larp-red text-black font-mono font-bold text-xl flex items-center justify-center border-2 border-black hover:bg-danger-orange transition-colors"
+              style={{ boxShadow: '3px 3px 0 black' }}
+              onClick={() => setShowWhitepaperModal(false)}
+            >
+              ✗
+            </button>
+
+            <div className="text-center">
+              <h3 className="text-2xl font-mono text-slate-light/40 mb-8">$clarp whitepaper v1.0</h3>
+              <div className="text-9xl font-mono text-slate-dark mb-8">.</div>
+              <p className="text-slate-light/40 font-mono text-sm">
+                [this page intentionally left blank]
+              </p>
+              <p className="text-slate-light/30 font-mono text-xs mt-4">
+                like most whitepapers, but at least we're honest.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* infinite loading modal - easter egg */}
+      {showLoadingModal && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center"
+          onClick={() => setShowLoadingModal(false)}
+        >
+          <div className="absolute inset-0 bg-slate-dark/95 backdrop-blur-sm" />
+          <div
+            className="relative bg-slate-dark border-4 border-danger-orange p-8 max-w-md w-full mx-4"
+            style={{ boxShadow: '8px 8px 0 #FF6B35' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              className="absolute -top-4 -right-4 w-10 h-10 bg-larp-red text-black font-mono font-bold text-xl flex items-center justify-center border-2 border-black hover:bg-danger-orange transition-colors"
+              style={{ boxShadow: '3px 3px 0 black' }}
+              onClick={() => setShowLoadingModal(false)}
+            >
+              ✗
+            </button>
+
+            <div className="text-center">
+              <div className="mb-6">
+                <div className="inline-block w-12 h-12 border-4 border-danger-orange border-t-transparent rounded-full animate-spin" />
+              </div>
+              <p className="text-danger-orange font-mono text-sm mb-2">{loadingMessage}</p>
+              <div className="w-full bg-slate-medium h-2 rounded-full overflow-hidden mb-4">
+                <div className="h-full bg-danger-orange animate-loading-bar" style={{ width: '99%' }} />
+              </div>
+              <p className="text-ivory-light/50 font-mono text-xs">
+                eta: soon™
+              </p>
+              <p className="text-ivory-light/30 font-mono text-[10px] mt-4">
+                (click anywhere to give up)
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* footer message toast - easter egg */}
+      {showFooterMessage && (
+        <div className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:max-w-md z-[100] animate-slide-in">
+          <div
+            className="bg-slate-dark border-2 border-danger-orange p-4 font-mono text-sm text-ivory-light"
+            style={{ boxShadow: '4px 4px 0 #FF6B35' }}
+          >
+            <span className="text-danger-orange">error:</span> {footerMessage}
           </div>
         </div>
       )}
