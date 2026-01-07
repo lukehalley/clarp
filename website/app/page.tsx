@@ -630,15 +630,15 @@ export default function Home() {
                 this is <span className="text-danger-orange">clarp</span>
               </h2>
               <p className="text-sm sm:text-base text-ivory-light/70 mb-4 sm:mb-6">
-                an image. on a website. about nothing.
-                you scrolled here on purpose.
+                you scrolled past 100 fake products to look at a jpeg.
+                and you'll scroll back up to look again.
               </p>
               <ul className="space-y-2 sm:space-y-3 mb-6 sm:mb-8 text-left">
                 {[
-                  'represents nothing. like the tokens you hold.',
-                  'under construction since forever. familiar?',
-                  'more honest than your "alpha" discord.',
-                  'at least this admits it\'s a joke.',
+                  'the official mascot of admitted vaporware.',
+                  'more product than your $50m ai agent.',
+                  'under construction forever. like everything you\'ve invested in.',
+                  'at least $CLARP tells you it ships nothing.',
                 ].map((item, i) => (
                   <li key={i} className="flex items-start gap-2 sm:gap-3 text-xs sm:text-sm text-ivory-light/80">
                     <span className="text-danger-orange shrink-0">▸</span>
@@ -650,7 +650,7 @@ export default function Home() {
                 className="btn-outline text-sm sm:text-base"
                 onClick={() => setShowWhitepaperModal(true)}
               >
-                whitepaper (blank)
+                whitepaper (blank, like theirs)
               </button>
             </div>
             <div className="flex justify-center order-first lg:order-last">
@@ -687,10 +687,10 @@ export default function Home() {
 
           <div className="space-y-4 sm:space-y-6">
             {[
-              { phase: 'q1 2025', title: 'launch', items: ['deploy bonding curve', 'pay kol bundle 80% supply', 'claim "fair launch"'], status: 'complete' },
-              { phase: 'q2 2025', title: 'growth', items: ['say "we\'re so back" 47 times', 'shipping v2 (always)', 'gaslight holders (marketing)'], status: 'current' },
-              { phase: 'q2 2025', title: 'scale', items: ['raise $50m, ship landing page', 'partnership with other vaporware', 'audit theater: pay certik for pdf'], status: 'upcoming' },
-              { phase: 'q2 forever', title: 'ship product', items: ['coming q2 (always)', 'modular omnichain intent-based', 'ngmi'], status: 'never' },
+              { phase: 'q1 2025', title: 'admit it\'s vaporware', items: ['deploy $CLARP bonding curve', 'write "exit liquidity" on the homepage', 'make this roadmap (done)'], status: 'complete' },
+              { phase: 'q2 2025', title: 'continue admitting', items: ['update this section monthly (we won\'t)', 'add more fake products to the carousel', 'you\'re reading this right now'], status: 'current' },
+              { phase: 'q2 2025', title: 'keep not shipping', items: ['decline vc money (they didn\'t offer)', 'partnership with other admitted vaporware', 'audit the blank whitepaper'], status: 'upcoming' },
+              { phase: 'q2 forever', title: 'ship actual product', items: ['coming q2 (which q2? yes)', 'the q2 that this entire site mocks', 'ngmi (but honestly)'], status: 'never' },
             ].map((phase, i) => (
               <div
                 key={i}
@@ -863,14 +863,6 @@ export default function Home() {
             </button>
 
             <div className="text-center flex flex-col items-center justify-center h-full">
-              <h3 className="text-lg sm:text-2xl font-mono text-slate-light/40 mb-6 sm:mb-8">$clarp whitepaper v1.0</h3>
-              <div className="text-7xl sm:text-9xl font-mono text-slate-dark mb-6 sm:mb-8">.</div>
-              <p className="text-slate-light/40 font-mono text-xs sm:text-sm">
-                [this page intentionally left blank]
-              </p>
-              <p className="text-slate-light/30 font-mono text-[10px] sm:text-xs mt-3 sm:mt-4">
-                like most whitepapers, but at least we're honest.
-              </p>
             </div>
           </div>
         </div>

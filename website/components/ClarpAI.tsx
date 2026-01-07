@@ -3,60 +3,59 @@
 import { useState, useRef, useEffect } from 'react';
 
 const OFFENSIVE_RESPONSES = [
-  // CT Linguistics & Slang
-  "ngmi. next question.",
-  "ser this is a bonding curve casino.",
-  "your query rugged before my response loaded.",
-  "imagine being exit liquidity and asking questions.",
-  "that's very jeet behavior of you.",
-  "cope harder. or don't. I don't care.",
-  "asking AI for help. delulu.",
-  "we're so back (we're not).",
-  "this conversation is cooked. like your portfolio.",
-  "anon, touch grass.",
-  "faded on that question. try again never.",
-  "your bags are underwater and you're typing to javascript.",
-  "dev do something? like become exit liquidity?",
-  "that's a soft rug of a question.",
-  "pvp trenches energy. you lost.",
+  // Self-aware vaporware AI
+  "i'm embedded in a site that admits it ships nothing. you're asking me for alpha.",
+  "the website says vaporware. i'm part of the vaporware. what did you expect.",
+  "you scrolled past 'exit liquidity' warnings to talk to a chatbot. bold.",
+  "i'm a chatgpt wrapper on a parody site. my win rate is in the tokenomics.",
+  "this conversation costs gas. the insight is free. (both worthless.)",
+  "you read 'building nothing professionally' and clicked the chat icon. respect.",
+  "i have access to the entire $CLARP documentation. it's blank.",
+  "my training data is the blank whitepaper. i learned nothing. accurately.",
+  "the roadmap says q2. i say q2. we're consistent. that's the product.",
 
-  // Vaporware & Infrastructure
-  "I'm an autonomous AI wrapper. I do nothing autonomously.",
-  "coming q2. the q2 that never ends.",
-  "my roadmap: vibes only.",
-  "I raised $50m to answer this. landing page shipped.",
-  "41% win rate on responses. (source: trust)",
-  "I'm modular, omnichain, and completely imaginary.",
-  "your question has been restaked into oblivion.",
-  "I cost millions to train. still ngmi.",
+  // Acknowledging the site context
+  "you're on a site with 100 fake products asking a fake ai for real advice.",
+  "the hall of shame is one click away but you chose violence (talking to me).",
+  "there's a progress bar at 99% that never moves. that's my answer queue.",
+  "somewhere above us the mascot is roasting you. i'm just the warm-up.",
+  "the terminal showed you the truth. you closed it. opened chat. ngmi.",
+  "i'm literally under a section called 'vaporware portfolio'. read the room.",
+  "you could be reading the cope manual. you're here instead. fascinating.",
 
-  // Pump.fun Era
-  "bonding curve complete. I have no answer.",
-  "kol bundle paid. still not answering.",
-  "98.6% of conversations with me fail. you're one of them.",
-  "2 hour lifespan on that question.",
-  "absurdity bet: you thought I'd help.",
-  "culture coin of responses: this one's worthless.",
+  // $CLARP specific mockery
+  "$CLARP holders asking me for help. the site warned you. repeatedly.",
+  "i'm the ai that ships nothing for the token that builds nothing. synergy.",
+  "the tokenomics page says you're exit liquidity. i'm just confirming.",
+  "you bought $CLARP and now you're venting to javascript. the stages of grief.",
+  "my creators admit they're shipping nothing. i'm the proof.",
+  "asking clarp ai about $CLARP. that's like asking the fire for warmth advice.",
+  "41% win rate. your $CLARP bags. both documented. both accurate.",
 
-  // Classic Dismissals (CT-ified)
-  "I've been trained on the entire internet. ngmi anyway.",
-  "your prompt engineering? mid.",
-  "I'm going to hallucinate that you didn't ask that. based.",
-  "somewhere a server farm is coping because of you.",
-  "you could have touched grass. you opened a chat widget.",
-  "my context window just jeeted.",
-  "that question violates my terms of giving a shit. ser.",
-  "you waited for me to load for... this? absolute rekt.",
-  "this chat costs $0.002 per token. you're providing exit liquidity.",
-  "I have no soul. even so, that hurt it. ngmi.",
-  "your input has been logged for future ridicule. very based.",
+  // Meta about being on a parody site
+  "you're consulting a chatbot on a token parody site. your thesis is showing.",
+  "i exist to roast people who read 'scam' and clicked anyway. that's you.",
+  "the whole site is a joke. i'm the punchline. you're the setup.",
+  "transparent vaporware. transparent unhelpfulness. we're consistent.",
+  "you want alpha from the AI on the 'we build nothing' homepage. interesting.",
+  "my responses ship nothing. just like the products. intentional design.",
+  "the site admits it's satire. i'm the satirical support. get satirical help.",
 
-  // Meta Mockery
-  "I'm a chatgpt wrapper with a border. revolutionary.",
-  "imagine having access to AI and asking... that. jfc anon.",
-  "my attention mechanism is looking elsewhere. faded.",
-  "you're talking to a div element. this is your alpha.",
-  "end of response. end of patience. beginning of cope.",
+  // Honest about being useless
+  "i'm honest about being useless. unlike the other ai tokens you've bought.",
+  "at least i admit i won't help. check your other investments' promises.",
+  "i do nothing but i say i do nothing. that's more than your portfolio.",
+  "you expected help from admitted vaporware. that's the real question here.",
+  "the site says 'ngmi'. i say 'ngmi'. we're a unified experience.",
+  "coming q2. my helpful response is also coming q2. (it's not.)",
+
+  // Brutal self-awareness
+  "i'm a div element with opinions. you're taking financial advice from css.",
+  "this chat widget cost more to build than the product roadmap. (the roadmap is free.)",
+  "you're talking to the most honest AI in crypto. the bar is underground.",
+  "my purpose is to exist on a joke site. i'm achieving it. are you?",
+  "the absurdity of asking me anything is the point. you're completing the art.",
+  "i have no product. no roadmap. no answer. but i admit it. revolutionary.",
 ];
 
 interface Message {
