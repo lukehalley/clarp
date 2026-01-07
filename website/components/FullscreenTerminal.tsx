@@ -287,15 +287,12 @@ SELL_TAX=99%        # jk. maybe.`,
       motd: {
         type: 'file',
         content: `
- ▄████▄   ██▓    ▄▄▄       ██▀███   ██▓███
-▒██▀ ▀█  ▓██▒   ▒████▄    ▓██ ▒ ██▒▓██░  ██▒
-▒▓█    ▄ ▒██░   ▒██  ▀█▄  ▓██ ░▄█ ▒▓██░ ██▓▒
-▒▓▓▄ ▄██▒▒██░   ░██▄▄▄▄██ ▒██▀▀█▄  ▒██▄█▓▒ ▒
-▒ ▓███▀ ░░██████▒▓█   ▓██▒░██▓ ▒██▒▒██▒ ░  ░
-░ ░▒ ▒  ░░ ▒░▓  ░▒▒   ▓▒█░░ ▒▓ ░▒▓░▒▓▒░ ░  ░
-  ░  ▒   ░ ░ ▒  ░ ▒   ▒▒ ░  ░▒ ░ ▒░░▒ ░
-░          ░ ░    ░   ▒     ░░   ░ ░░
-░ ░          ░  ░     ░  ░   ░
+ ██████╗██╗      █████╗ ██████╗ ██████╗
+██╔════╝██║     ██╔══██╗██╔══██╗██╔══██╗
+██║     ██║     ███████║██████╔╝██████╔╝
+██║     ██║     ██╔══██║██╔══██╗██╔═══╝
+╚██████╗███████╗██║  ██║██║  ██║██║
+ ╚═════╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝
 
 welcome to the clarp development environment.
 there is no development. there is no environment.
@@ -939,13 +936,8 @@ ${FILESYSTEM.etc?.children?.motd?.content || ''}
       <div className="terminal-header shrink-0">
         <div
           className="terminal-dot bg-larp-red cursor-pointer hover:brightness-125 transition-all"
-          onClick={() => {
-            setHistory(prev => [...prev, {
-              command: '',
-              output: `[SYSTEM] close button pressed\n\nyou clicked the red button hoping to escape.\njust like you clicked "buy" hoping to escape your 9-5.\n\nneither worked.\n\n(press ESC or type 'exit' to actually close)`
-            }]);
-          }}
-          title="close (try it)"
+          onClick={onClose}
+          title="close"
         />
         <div
           className="terminal-dot bg-larp-yellow cursor-pointer hover:brightness-125 transition-all"
@@ -996,6 +988,10 @@ ${FILESYSTEM.etc?.children?.motd?.content || ''}
                   .replace(/>/g, '&gt;')
                   .replace(/&lt;dir&gt;/g, '<span class="text-sky-400">')
                   .replace(/&lt;\/dir&gt;/g, '</span>')
+                  // Style the ASCII logo in orange with glow
+                  .replace(/( ██████╗██╗[\s\S]*?╚═════╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝)/g,
+                    '<span class="text-danger-orange" style="text-shadow: 0 0 10px rgba(255, 107, 53, 0.5), 0 0 20px rgba(255, 107, 53, 0.3);">$1</span>'
+                  )
               }}
             />
           </div>
