@@ -413,29 +413,35 @@
   90% { transform: translate(-50%, -50%) translate(-1px, -1px) rotate(0deg); }
 }
 
-/* Custom scrollbar - brutalist black */
+/* Custom scrollbar - brutalist solid black rectangle, no background */
 ::-webkit-scrollbar {
-  width: 16px;
-  height: 16px;
-  background-color: #FAF9F5;
+  width: 12px;
+  height: 12px;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-track {
-  background-color: #FAF9F5;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
   background-color: #000000;
+  border: none;
+  border-radius: 0;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #FF6B35;
 }
 
 ::-webkit-scrollbar-corner {
-  background-color: #FAF9F5;
+  background: transparent;
 }
 
-/* Firefox scrollbar - brutalist black */
+/* Firefox scrollbar - hide completely since Firefox doesn't support transparent tracks */
+/* Users can still scroll, but no visible scrollbar (matches brutalist minimal aesthetic) */
 html {
-  scrollbar-width: auto;
-  scrollbar-color: #000000 #FAF9F5;
+  scrollbar-width: none;
 }
 
 /* Cursor */
