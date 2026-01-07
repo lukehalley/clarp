@@ -731,9 +731,29 @@ button, .btn-primary, .btn-secondary, .btn-outline, .badge, .larp-card {
   -webkit-overflow-scrolling: touch;
 }
 
-/* Prevent zoom on double tap for buttons */
-button {
+/* Prevent zoom on double tap for buttons and inputs */
+button, input, textarea, select {
   touch-action: manipulation;
+}
+
+/* Prevent iOS Safari auto-zoom on input focus - must be 16px or larger */
+@media screen and (max-width: 767px) {
+  input, textarea, select {
+    font-size: 16px !important;
+  }
+}
+
+/* Additional iOS Safari zoom prevention */
+@supports (-webkit-touch-callout: none) {
+  /* iOS-specific styles */
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  input, textarea, select {
+    font-size: max(16px, 1em);
+  }
 }
 
 /* Mobile typography enhancements */

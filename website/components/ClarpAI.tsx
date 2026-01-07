@@ -321,7 +321,7 @@ export default function ClarpAI() {
                   onBlur={handleInputBlur}
                   placeholder="type something..."
                   disabled={isTyping}
-                  className="w-full bg-slate-dark/80 text-ivory-light text-xs pl-6 pr-2 py-2 border border-danger-orange/30 focus:border-danger-orange focus:outline-none placeholder:text-ivory-light/30 disabled:opacity-50"
+                  className="w-full bg-slate-dark/80 text-ivory-light text-base sm:text-xs pl-6 pr-2 py-2 border border-danger-orange/30 focus:border-danger-orange focus:outline-none placeholder:text-ivory-light/30 disabled:opacity-50"
                   style={{ boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.3)' }}
                 />
               </div>
