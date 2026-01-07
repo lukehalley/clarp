@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Clarp ($CLARP) - Building Nothing, Together',
+  title: 'Clarp',
   description: 'The AI coding assistant that exclusively generates vaporware. Now shipping nothing to production.',
   keywords: ['clarp', 'ai agent', 'satire', 'crypto', 'solana', 'memecoin', 'vaporware'],
   openGraph: {
