@@ -146,12 +146,16 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Message toast */}
-        {clickedLink && (
-          <div className="mb-6 p-3 bg-larp-red/10 border border-larp-red/30 text-sm font-mono text-ivory-light/80 animate-fade-in">
+        {/* Message toast - fixed height container to prevent layout shift */}
+        <div className="h-[52px] mb-6">
+          <div
+            className={`p-3 bg-larp-red/10 border border-larp-red/30 text-sm font-mono text-ivory-light/80 transition-all duration-300 ${
+              clickedLink ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2 invisible'
+            }`}
+          >
             <span className="text-larp-red">error:</span> {message}
           </div>
-        )}
+        </div>
 
         {/* Bottom */}
         <div className="pt-6 sm:pt-8 border-t border-slate-light/20">
