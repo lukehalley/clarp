@@ -10,7 +10,7 @@ const DOCS_TABS = [
     label: 'quick start',
     content: {
       title: 'bonding curve casino',
-      description: 'step 1: ape. step 2: cope. there is no step 3.',
+      description: 'step 1: ape.\nstep 2: cope.\nthere is no step 3.',
       code: `$ clarp launch --pumpfun
 
 > deploying bonding curve...
@@ -162,7 +162,7 @@ export default function DocsSection() {
                 <h3 className="text-xl sm:text-2xl font-bold text-slate-dark mb-3 sm:mb-4">
                   {activeContent.title}
                 </h3>
-                <p className="text-sm sm:text-base text-slate-light mb-4 sm:mb-6">
+                <p className="text-sm sm:text-base text-slate-light mb-4 sm:mb-6 whitespace-pre-line">
                   {activeContent.description}
                 </p>
 

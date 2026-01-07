@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 
 const OFFENSIVE_RESPONSES = [
   // Self-aware vaporware AI
@@ -71,8 +71,11 @@ export default function ClarpAI() {
   const [isTyping, setIsTyping] = useState(false);
   const [usedResponses, setUsedResponses] = useState<Set<number>>(new Set());
   const [hasNewMessage, setHasNewMessage] = useState(false);
+  const [isInputFocused, setIsInputFocused] = useState(false);
+  const [viewportHeight, setViewportHeight] = useState<number | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const chatWindowRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -87,6 +90,37 @@ export default function ClarpAI() {
       inputRef.current.focus();
     }
   }, [isOpen]);
+
+  // Handle visual viewport changes (keyboard open/close on mobile)
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.visualViewport) return;
+
+    const handleResize = () => {
+      // When keyboard opens, visualViewport.height shrinks
+      setViewportHeight(window.visualViewport?.height ?? null);
+    };
+
+    window.visualViewport.addEventListener('resize', handleResize);
+    // Initial value
+    handleResize();
+
+    return () => {
+      window.visualViewport?.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
+  // Scroll input into view when focused on mobile
+  const handleInputFocus = useCallback(() => {
+    setIsInputFocused(true);
+    // Small delay to let keyboard open
+    setTimeout(() => {
+      inputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 300);
+  }, []);
+
+  const handleInputBlur = useCallback(() => {
+    setIsInputFocused(false);
+  }, []);
 
   const getRandomResponse = () => {
     if (usedResponses.size >= OFFENSIVE_RESPONSES.length) {
@@ -145,21 +179,37 @@ export default function ClarpAI() {
     <>
       {/* Chat window */}
       <div
+        ref={chatWindowRef}
         className={`fixed z-[90] transition-all duration-300 ${
           isOpen
             ? 'opacity-100 translate-y-0 pointer-events-auto'
             : 'opacity-0 translate-y-4 pointer-events-none'
-        }`}
+        } ${isInputFocused ? 'sm:bottom-auto' : ''}`}
         style={{
-          bottom: 'max(1rem, env(safe-area-inset-bottom))',
-          right: 'max(1rem, env(safe-area-inset-right))',
+          // On mobile when input is focused, position at top of visual viewport
+          ...(isInputFocused && viewportHeight && viewportHeight < 500
+            ? {
+                bottom: 'auto',
+                top: '0',
+                left: '0',
+                right: '0',
+                height: `${viewportHeight}px`,
+              }
+            : {
+                bottom: 'max(1rem, env(safe-area-inset-bottom))',
+                right: 'max(1rem, env(safe-area-inset-right))',
+              }),
         }}
       >
         <div
-          className="w-[calc(100vw-2rem)] sm:w-[380px] bg-slate-dark text-ivory-light font-mono overflow-hidden"
+          className={`bg-slate-dark text-ivory-light font-mono overflow-hidden transition-all duration-300 ${
+            isInputFocused && viewportHeight && viewportHeight < 500
+              ? 'w-full h-full flex flex-col'
+              : 'w-[calc(100vw-2rem)] sm:w-[380px]'
+          }`}
           style={{
-            border: '2px solid var(--danger-orange)',
-            boxShadow: '0 0 0 1px rgba(255, 107, 53, 0.3), 0 0 40px rgba(255, 107, 53, 0.15), 8px 8px 0 black',
+            border: isInputFocused && viewportHeight && viewportHeight < 500 ? 'none' : '2px solid var(--danger-orange)',
+            boxShadow: isInputFocused && viewportHeight && viewportHeight < 500 ? 'none' : '0 0 0 1px rgba(255, 107, 53, 0.3), 0 0 40px rgba(255, 107, 53, 0.15), 8px 8px 0 black',
           }}
         >
           {/* Header */}
@@ -186,7 +236,11 @@ export default function ClarpAI() {
 
           {/* Messages */}
           <div
-            className="h-[300px] sm:h-[350px] overflow-y-auto p-4 scrollbar-hide"
+            className={`overflow-y-auto p-4 scrollbar-hide ${
+              isInputFocused && viewportHeight && viewportHeight < 500
+                ? 'flex-1'
+                : 'h-[300px] sm:h-[350px]'
+            }`}
             style={{
               backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255, 107, 53, 0.02) 2px, rgba(255, 107, 53, 0.02) 4px)',
             }}
@@ -263,6 +317,8 @@ export default function ClarpAI() {
                   type="text"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
+                  onFocus={handleInputFocus}
+                  onBlur={handleInputBlur}
                   placeholder="type something..."
                   disabled={isTyping}
                   className="w-full bg-slate-dark/80 text-ivory-light text-xs pl-6 pr-2 py-2 border border-danger-orange/30 focus:border-danger-orange focus:outline-none placeholder:text-ivory-light/30 disabled:opacity-50"
