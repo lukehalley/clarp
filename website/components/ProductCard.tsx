@@ -25,7 +25,6 @@ interface ProductCardProps {
   features: string[];
   progress: number;
   status: 'coming-soon' | 'development' | 'roadmap';
-  delay?: number;
 }
 
 export default function ProductCard({
@@ -35,7 +34,6 @@ export default function ProductCard({
   features,
   progress,
   status,
-  delay = 0,
 }: ProductCardProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [loadingText, setLoadingText] = useState('');
@@ -73,28 +71,27 @@ export default function ProductCard({
   };
 
   return (
-    <div
-      className="larp-card animate-slide-up p-4 sm:p-6 h-full flex flex-col"
-      style={{ animationDelay: `${delay}ms` }}
-    >
+    <div className="larp-card p-4 sm:p-6 h-full flex flex-col">
       {/* Status badge */}
       <Badge variant={statusConfig[status].badge} className="mb-3 sm:mb-4">
         {statusConfig[status].label}
       </Badge>
 
-      {/* Header */}
-      <h3 className="text-lg sm:text-xl font-semibold text-slate-dark mb-1">{name}</h3>
-      <p className="text-xs sm:text-sm font-mono text-clay mb-3 sm:mb-4">{tagline}</p>
+      {/* Header - fixed height */}
+      <div className="h-[52px] sm:h-[60px]">
+        <h3 className="text-lg sm:text-xl font-semibold text-slate-dark mb-1 line-clamp-1">{name}</h3>
+        <p className="text-xs sm:text-sm font-mono text-clay line-clamp-1">{tagline}</p>
+      </div>
 
-      {/* Description */}
-      <p className="text-slate-light text-xs sm:text-sm mb-4 sm:mb-6">{description}</p>
+      {/* Description - fixed height with line clamp */}
+      <p className="text-slate-light text-xs sm:text-sm mb-4 sm:mb-6 h-[48px] sm:h-[60px] line-clamp-3">{description}</p>
 
-      {/* Features - grows to fill available space */}
-      <ul className="space-y-1.5 sm:space-y-2 mb-4 sm:mb-6 flex-grow">
+      {/* Features - fixed height */}
+      <ul className="space-y-1.5 sm:space-y-2 mb-4 sm:mb-6 h-[72px] sm:h-[84px] overflow-hidden">
         {features.map((feature, i) => (
           <li key={i} className="flex items-center gap-2 text-xs sm:text-sm text-slate-light">
             <span className="text-cloud-medium shrink-0">▸</span>
-            {feature}
+            <span className="line-clamp-1">{feature}</span>
           </li>
         ))}
       </ul>
@@ -109,17 +106,19 @@ export default function ProductCard({
         <button
           onClick={handleLearnMore}
           disabled={isLoading}
-          className={`w-full text-xs sm:text-sm px-4 py-2 border-2 border-slate-dark font-mono transition-all ${
+          className={`w-full h-[36px] sm:h-[40px] text-xs sm:text-sm px-4 border-2 border-slate-dark font-mono ${
             isLoading
               ? 'bg-slate-dark text-danger-orange animate-pulse'
               : 'bg-transparent text-slate-dark hover:bg-slate-dark hover:text-ivory-light'
           }`}
           style={{ boxShadow: isLoading ? 'none' : '3px 3px 0 var(--slate-dark)' }}
         >
-          {isLoading && (
-            <span className="inline-block w-3 h-3 border-2 border-danger-orange border-t-transparent rounded-full animate-spin mr-2" />
-          )}
-          {buttonText()}
+          <span className="flex items-center justify-center truncate">
+            {isLoading && (
+              <span className="inline-block w-3 h-3 border-2 border-danger-orange border-t-transparent rounded-full animate-spin mr-2 shrink-0" />
+            )}
+            <span className="truncate">{buttonText()}</span>
+          </span>
         </button>
         {clickCount >= 3 && !isLoading && (
           <p className="text-[10px] text-slate-light/50 mt-2 text-center font-mono">

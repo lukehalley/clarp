@@ -413,24 +413,29 @@
   90% { transform: translate(-50%, -50%) translate(-1px, -1px) rotate(0deg); }
 }
 
-/* Custom scrollbar - industrial */
+/* Custom scrollbar - brutalist black */
 ::-webkit-scrollbar {
-  width: 12px;
-  height: 12px;
+  width: 16px;
+  height: 16px;
+  background-color: #FAF9F5;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--slate-dark);
-  border-left: 1px solid var(--danger-orange);
+  background-color: #FAF9F5;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--danger-orange);
-  border: 2px solid var(--slate-dark);
+  background-color: #000000;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: var(--clay);
+::-webkit-scrollbar-corner {
+  background-color: #FAF9F5;
+}
+
+/* Firefox scrollbar - brutalist black */
+html {
+  scrollbar-width: auto;
+  scrollbar-color: #000000 #FAF9F5;
 }
 
 /* Cursor */
@@ -476,3 +481,167 @@ a, button, [role="button"] {
 .notification-toast {
   transform-origin: bottom left;
 }
+
+/* Terminal CRT Power On/Off Animations */
+.terminal-crt-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.terminal-crt-screen {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Power On Animation - CRT horizontal line expand */
+.terminal-power-on .terminal-crt-screen {
+  animation: crt-power-on 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes crt-power-on {
+  0% {
+    transform: scaleY(0.003) scaleX(0.2);
+    filter: brightness(4) saturate(0);
+    opacity: 1;
+  }
+  25% {
+    transform: scaleY(0.003) scaleX(0.8);
+    filter: brightness(4) saturate(0);
+  }
+  40% {
+    transform: scaleY(0.005) scaleX(1);
+    filter: brightness(3) saturate(0);
+  }
+  60% {
+    transform: scaleY(0.03) scaleX(1);
+    filter: brightness(2) saturate(0.3);
+  }
+  80% {
+    transform: scaleY(0.5) scaleX(1);
+    filter: brightness(1.3) saturate(0.7);
+  }
+  100% {
+    transform: scaleY(1) scaleX(1);
+    filter: brightness(1) saturate(1);
+    opacity: 1;
+  }
+}
+
+/* Power Off Animation - CRT collapse to horizontal line */
+.terminal-power-off .terminal-crt-screen {
+  animation: crt-power-off 0.5s cubic-bezier(0.55, 0, 1, 0.45) forwards;
+}
+
+@keyframes crt-power-off {
+  0% {
+    transform: scaleY(1) scaleX(1);
+    filter: brightness(1) saturate(1);
+    opacity: 1;
+  }
+  30% {
+    transform: scaleY(0.1) scaleX(1);
+    filter: brightness(1.5) saturate(0.7);
+  }
+  50% {
+    transform: scaleY(0.02) scaleX(1);
+    filter: brightness(2.5) saturate(0.3);
+  }
+  70% {
+    transform: scaleY(0.005) scaleX(0.6);
+    filter: brightness(3.5) saturate(0);
+    opacity: 1;
+  }
+  90% {
+    transform: scaleY(0.003) scaleX(0.2);
+    filter: brightness(5) saturate(0);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scaleY(0) scaleX(0);
+    filter: brightness(6) saturate(0);
+    opacity: 0;
+  }
+}
+
+/* Scanline flash effect on open */
+.terminal-scanline-flash {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 100;
+  animation: scanline-flash 0.6s ease-out forwards;
+}
+
+.terminal-scanline-flash::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 107, 53, 1),
+    rgba(255, 107, 53, 0.6),
+    transparent
+  );
+  box-shadow: 0 0 20px rgba(255, 107, 53, 0.8);
+  animation: scanline-sweep 0.5s ease-out 0.1s forwards;
+}
+
+@keyframes scanline-flash {
+  0% {
+    background: rgba(255, 107, 53, 0.3);
+  }
+  100% {
+    background: transparent;
+  }
+}
+
+@keyframes scanline-sweep {
+  0% {
+    top: 0;
+    opacity: 1;
+  }
+  100% {
+    top: 100%;
+    opacity: 0;
+  }
+}
+
+/* Brutalist carousel glitch effect */
+.carousel-glitch {
+  animation: brutal-glitch 150ms steps(2) forwards;
+}
+
+@keyframes brutal-glitch {
+  0% {
+    transform: translateX(-2px);
+    filter: brightness(1.1) contrast(1.2);
+  }
+  25% {
+    transform: translateX(3px) skewX(-1deg);
+    filter: brightness(0.9);
+  }
+  50% {
+    transform: translateX(-1px) skewX(1deg);
+    filter: brightness(1.2) contrast(1.1);
+  }
+  75% {
+    transform: translateX(2px);
+    filter: brightness(0.95);
+  }
+  100% {
+    transform: translateX(0);
+    filter: brightness(1) contrast(1);
+  }
+}
+

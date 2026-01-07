@@ -7,6 +7,8 @@ interface FullscreenTerminalProps {
   onClose: () => void;
 }
 
+type AnimationState = 'closed' | 'opening' | 'open' | 'closing';
+
 interface FileSystemNode {
   type: 'file' | 'directory';
   content?: string;
@@ -673,9 +675,29 @@ export default function FullscreenTerminal({ isOpen, onClose }: FullscreenTermin
   const [currentPath, setCurrentPath] = useState('/home/jeet');
   const [commandHistory, setCommandHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
+  const [animationState, setAnimationState] = useState<AnimationState>('closed');
 
   const inputRef = useRef<HTMLInputElement>(null);
   const terminalRef = useRef<HTMLDivElement>(null);
+
+  // Handle open/close animation states
+  useEffect(() => {
+    if (isOpen && animationState === 'closed') {
+      setAnimationState('opening');
+      const timer = setTimeout(() => setAnimationState('open'), 600);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen, animationState]);
+
+  const handleClose = useCallback(() => {
+    if (animationState === 'open' || animationState === 'opening') {
+      setAnimationState('closing');
+      setTimeout(() => {
+        setAnimationState('closed');
+        onClose();
+      }, 500);
+    }
+  }, [animationState, onClose]);
 
   // Initial boot message
   useEffect(() => {
@@ -691,12 +713,12 @@ ${FILESYSTEM.etc?.children?.motd?.content || ''}
     }
   }, [isOpen, history.length]);
 
-  // Focus input when opened
+  // Focus input when animation completes
   useEffect(() => {
-    if (isOpen && inputRef.current) {
-      setTimeout(() => inputRef.current?.focus(), 100);
+    if (animationState === 'open' && inputRef.current) {
+      inputRef.current.focus();
     }
-  }, [isOpen]);
+  }, [animationState]);
 
   // Scroll to bottom on new output
   useEffect(() => {
@@ -713,12 +735,12 @@ ${FILESYSTEM.etc?.children?.motd?.content || ''}
       if (e.key === 'Escape') {
         e.preventDefault();
         e.stopPropagation();
-        onClose();
+        handleClose();
       }
     };
     window.addEventListener('keydown', handleKeyDown, true); // capture phase
     return () => window.removeEventListener('keydown', handleKeyDown, true);
-  }, [isOpen, onClose]);
+  }, [isOpen, handleClose]);
 
   const resolvePath = useCallback((path: string): string => {
     if (path.startsWith('/')) {
@@ -863,7 +885,7 @@ ${FILESYSTEM.etc?.children?.motd?.content || ''}
         case 'quit':
         case 'q':
           output = 'exiting terminal...\n(if only exiting your positions was this easy)';
-          setTimeout(onClose, 1000);
+          setTimeout(handleClose, 1000);
           break;
 
         default:
@@ -873,7 +895,7 @@ ${FILESYSTEM.etc?.children?.motd?.content || ''}
 
     // Add command and output to history instantly
     setHistory(prev => [...prev, { command: trimmed, output }]);
-  }, [currentPath, resolvePath, getNode, onClose]);
+  }, [currentPath, resolvePath, getNode, handleClose]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
@@ -922,37 +944,43 @@ ${FILESYSTEM.etc?.children?.motd?.content || ''}
     }
   };
 
-  if (!isOpen) return null;
+  if (animationState === 'closed') return null;
 
   return (
     <div
-      className="fixed inset-0 z-[200] bg-slate-dark"
+      className={`fixed inset-0 z-[200] terminal-crt-container ${
+        animationState === 'opening' ? 'terminal-power-on' : ''
+      }${animationState === 'closing' ? 'terminal-power-off' : ''}`}
       onClick={() => inputRef.current?.focus()}
     >
-      {/* Construction stripe header */}
-      <div className="construction-stripe h-2" />
+      {/* CRT screen effect overlay */}
+      <div className="terminal-crt-screen bg-slate-dark">
+        {/* Scanline flash on open */}
+        {animationState === 'opening' && <div className="terminal-scanline-flash" />}
 
-      {/* Terminal header */}
-      <div className="terminal-header shrink-0">
-        <div
-          className="terminal-dot bg-larp-red cursor-pointer hover:brightness-125 transition-all"
-          onClick={onClose}
-          title="close"
-        />
-        <div
-          className="terminal-dot bg-larp-yellow cursor-pointer hover:brightness-125 transition-all"
-          onClick={onClose}
-          title="minimize (closes it)"
-        />
-        <div
-          className="terminal-dot bg-larp-green opacity-50"
-          title="you're already maximized"
-        />
-        <span className="ml-3 text-xs text-ivory-light/50 font-mono">terminal</span>
-        <span className="ml-auto text-[10px] text-ivory-light/30 font-mono hidden sm:block">
-          press ESC to exit (your only successful exit)
-        </span>
-      </div>
+        {/* Construction stripe header */}
+        <div className="construction-stripe h-2" />
+
+        {/* Terminal header */}
+        <div className="terminal-header shrink-0">
+          <div
+            className="terminal-dot bg-larp-red opacity-50 cursor-not-allowed"
+            title="there's no getting out of this hole"
+          />
+          <div
+            className="terminal-dot bg-larp-yellow cursor-pointer hover:brightness-125 transition-all"
+            onClick={(e) => { e.stopPropagation(); handleClose(); }}
+            title="minimize (closes it)"
+          />
+          <div
+            className="terminal-dot bg-larp-green opacity-50 cursor-not-allowed"
+            title="you're already maximized. like your losses."
+          />
+          <span className="ml-3 text-xs text-ivory-light/50 font-mono">terminal</span>
+          <span className="ml-auto text-[10px] text-ivory-light/30 font-mono hidden sm:block">
+            press ESC to exit (your only successful exit)
+          </span>
+        </div>
 
       {/* Terminal body */}
       <div
@@ -1017,6 +1045,7 @@ ${FILESYSTEM.etc?.children?.motd?.content || ''}
               />
             </div>
           </div>
+        </div>
       </div>
     </div>
   );

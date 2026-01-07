@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Terminal from '@/components/Terminal';
-import ProductCard from '@/components/ProductCard';
+import ProductCarousel from '@/components/ProductCarousel';
 import ProgressBar from '@/components/ProgressBar';
 import Badge from '@/components/Badge';
 import Button from '@/components/Button';
@@ -14,6 +14,8 @@ import ClarpAI from '@/components/ClarpAI';
 import ActivityNotifications from '@/components/ActivityNotifications';
 import HallOfShame from '@/components/HallOfShame';
 import PixelGithub from '@/components/PixelGithub';
+import TERMINAL_CONVERSATIONS from '@/data/terminal-conversations.json';
+import HERO_SENTENCES from '@/data/hero-sentences.json';
 
 const ASCII_LOGO = `
  ██████╗██╗      █████╗ ██████╗ ██████╗
@@ -24,33 +26,6 @@ const ASCII_LOGO = `
  ╚═════╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝`;
 
 const ASCII_LOGO_MOBILE = `$CLARP`;
-
-const PRODUCTS = [
-  {
-    name: 'clarp agent',
-    tagline: 'autonomous ai wrapper',
-    description: 'chatgpt but we called it autonomous infrastructure. 41% win rate (trust us). shipping v2.',
-    features: ['gpt-4 api call (revolutionary)', '"neural network" in readme', 'executes 0 actual trades'],
-    progress: 99,
-    status: 'coming-soon' as const,
-  },
-  {
-    name: 'clarp modular',
-    tagline: 'omnichain intent l3',
-    description: 'it\'s arbitrum but we added buzzwords. modular. omnichain. intent-based. $50m raised. landing page shipped.',
-    features: ['intents (undefined)', 'modular architecture (fork)', 'coming q2 (forever)'],
-    progress: 73,
-    status: 'development' as const,
-  },
-  {
-    name: 'clarp restake',
-    tagline: 'recursive yield primitive',
-    description: 'stake your stake of staked stakes. infinite recursive yield until the cascade. risk model: number go up.',
-    features: ['ponzinomics (capital efficient)', 'slashing: not calculated', 'yield: ∞% (theoretical)'],
-    progress: 47,
-    status: 'roadmap' as const,
-  },
-];
 
 // Easter egg messages for various interactions
 const LOADING_MESSAGES = [
@@ -83,91 +58,11 @@ const NAV_HOVER_TEXT: Record<string, string> = {
   'hall of shame': 'your portfolio',
 };
 
-const TERMINAL_VARIATIONS = [
-  {
-    command: 'clarp --jeet-detector',
-    lines: [
-      { type: 'success', content: '✓ scanning wallet for paper hands...' },
-      { type: 'success', content: '✓ found 47 panic sells at -5%' },
-      { type: 'success', content: '✓ diamond hands status: ngmi' },
-      { type: 'error', content: '✗ survived a single dip' },
-    ],
-    info: 'jeet score: 98.6% | you are exit liquidity',
-  },
-  {
-    command: 'clarp launch --pumpfun-meta',
-    lines: [
-      { type: 'success', content: '✓ bonding curve deployed' },
-      { type: 'success', content: '✓ kol bundle paid (80% supply)' },
-      { type: 'success', content: '✓ telegram raid scheduled' },
-      { type: 'error', content: '✗ survived first hour' },
-    ],
-    info: 'soft rug in progress... 2hr remaining',
-  },
-  {
-    command: 'clarp generate --ai-agent-wrapper',
-    lines: [
-      { type: 'success', content: '✓ copied chatgpt api (revolutionary)' },
-      { type: 'success', content: '✓ added "autonomous" to readme 47x' },
-      { type: 'success', content: '✓ claimed 41% win rate (source: trust)' },
-      { type: 'error', content: '✗ executed a single trade' },
-    ],
-    info: 'shipping v2... ngmi',
-  },
-  {
-    command: 'clarp generate --modular-omnichain-l3',
-    lines: [
-      { type: 'success', content: '✓ forked arbitrum, added intents' },
-      { type: 'success', content: '✓ whitepaper: 73 buzzwords, 0 math' },
-      { type: 'success', content: '✓ raised $50m, shipped landing page' },
-      { type: 'error', content: '✗ understood what blockchain does' },
-    ],
-    info: 'coming q2... forever',
-  },
-  {
-    command: 'clarp generate --restaking-primitive',
-    lines: [
-      { type: 'success', content: '✓ staked the stake of staked stakes' },
-      { type: 'success', content: '✓ infinite recursive yield (on paper)' },
-      { type: 'success', content: '✓ risk model: "number go up"' },
-      { type: 'error', content: '✗ calculated slashing scenarios' },
-    ],
-    info: 'capital efficient... until cascade',
-  },
-  {
-    command: 'clarp scan --trenches',
-    lines: [
-      { type: 'success', content: '✓ pvp trenches: cooked' },
-      { type: 'success', content: '✓ your bags: underwater' },
-      { type: 'success', content: '✓ "we\'re so back" counter: 47' },
-      { type: 'error', content: '✗ touched grass this week' },
-    ],
-    info: 'cope levels: critical | delulu status: max',
-  },
-  {
-    command: 'clarp audit --theater-mode',
-    lines: [
-      { type: 'success', content: '✓ paid certik $200k for pdf' },
-      { type: 'success', content: '✓ ignored all critical findings' },
-      { type: 'success', content: '✓ added "audited" badge to site' },
-      { type: 'error', content: '✗ read the audit' },
-    ],
-    info: '0 exploits found (so far)... ngmi',
-  },
-  {
-    command: 'clarp launch --culture-coin',
-    lines: [
-      { type: 'success', content: '✓ absurdity bet deployed' },
-      { type: 'success', content: '✓ meme game: strong' },
-      { type: 'success', content: '✓ utility: vibes only' },
-      { type: 'error', content: '✗ any fundamentals whatsoever' },
-    ],
-    info: '$1b mcap (for 1 hour)... then: rekt',
-  },
-];
-
 // Animation phases: 'typing' | 'paused' | 'deleting'
 type AnimationPhase = 'typing' | 'paused' | 'deleting';
+
+// Hero typing animation phases
+type HeroPhase = 'typing' | 'displayed' | 'deleting';
 
 export default function Home() {
   const [mounted, setMounted] = useState(false);
@@ -175,12 +70,20 @@ export default function Home() {
   const [showSmoke, setShowSmoke] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // Terminal animation states
-  const [currentVariation, setCurrentVariation] = useState(0);
-  const [visibleLines, setVisibleLines] = useState(0);
+  // Terminal conversation animation states
+  const [currentConversation, setCurrentConversation] = useState(0);
+  const [visibleMessages, setVisibleMessages] = useState(0);
+  const [currentMessageText, setCurrentMessageText] = useState('');
   const [phase, setPhase] = useState<AnimationPhase>('typing');
   const terminalRef = useRef<HTMLDivElement>(null);
-  const totalLines = 7; // command + empty + 4 lines + info
+
+  // Hero sentence typing animation states
+  const [heroSentenceIndex, setHeroSentenceIndex] = useState(0);
+  const [heroDisplayedText, setHeroDisplayedText] = useState('');
+  const [heroPhase, setHeroPhase] = useState<HeroPhase>('typing');
+  const heroTypingSpeed = 30; // ms per character when typing
+  const heroDeletingSpeed = 15; // ms per character when deleting
+  const heroDisplayDuration = 4000; // ms to display full sentence
 
   // Easter egg states
   const [showWhitepaperModal, setShowWhitepaperModal] = useState(false);
@@ -200,44 +103,89 @@ export default function Home() {
   const [showRageMessage, setShowRageMessage] = useState(false);
   const [cursorTrail, setCursorTrail] = useState<{x: number, y: number, id: number}[]>([]);
 
-  // Terminal typing animation
+  // Terminal conversation typing animation
   useEffect(() => {
     if (!mounted) return;
 
+    const conversation = TERMINAL_CONVERSATIONS[currentConversation];
+    const totalMessages = conversation.messages.length;
     let timeout: NodeJS.Timeout;
 
     if (phase === 'typing') {
-      if (visibleLines < totalLines) {
-        timeout = setTimeout(() => {
-          setVisibleLines((prev) => prev + 1);
-        }, 300);
-      } else {
-        // Done typing, pause before deleting
+      // Currently typing out a message character by character
+      const currentMessage = conversation.messages[visibleMessages];
+      if (!currentMessage) {
+        // All messages shown, pause then delete
         timeout = setTimeout(() => {
           setPhase('deleting');
-        }, 2500);
+        }, 3000);
+      } else if (currentMessageText.length < currentMessage.content.length) {
+        // Still typing current message
+        timeout = setTimeout(() => {
+          setCurrentMessageText(currentMessage.content.slice(0, currentMessageText.length + 1));
+        }, currentMessage.role === 'user' ? 40 : 20); // User types slower
+      } else {
+        // Done with current message, move to next
+        timeout = setTimeout(() => {
+          setVisibleMessages((prev) => prev + 1);
+          setCurrentMessageText('');
+        }, currentMessage.role === 'user' ? 800 : 500);
       }
     } else if (phase === 'deleting') {
-      if (visibleLines > 0) {
+      if (visibleMessages > 0) {
         timeout = setTimeout(() => {
-          setVisibleLines((prev) => prev - 1);
-        }, 50);
+          setVisibleMessages((prev) => prev - 1);
+        }, 100);
       } else {
-        // Done deleting, move to next variation
-        setCurrentVariation((prev) => (prev + 1) % TERMINAL_VARIATIONS.length);
+        // Done deleting, move to next conversation
+        setCurrentConversation((prev) => (prev + 1) % TERMINAL_CONVERSATIONS.length);
+        setCurrentMessageText('');
         setPhase('typing');
       }
     }
 
     return () => clearTimeout(timeout);
-  }, [mounted, phase, visibleLines, totalLines]);
+  }, [mounted, phase, visibleMessages, currentMessageText, currentConversation]);
 
   // Auto-scroll terminal to bottom
   useEffect(() => {
     if (terminalRef.current) {
       terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
     }
-  }, [visibleLines]);
+  }, [visibleMessages, currentMessageText]);
+
+  // Hero sentence typing animation
+  useEffect(() => {
+    if (!mounted) return;
+
+    const currentSentence = HERO_SENTENCES[heroSentenceIndex];
+    let timeout: NodeJS.Timeout;
+
+    if (heroPhase === 'typing') {
+      if (heroDisplayedText.length < currentSentence.length) {
+        timeout = setTimeout(() => {
+          setHeroDisplayedText(currentSentence.slice(0, heroDisplayedText.length + 1));
+        }, heroTypingSpeed);
+      } else {
+        // Done typing, pause before deleting
+        timeout = setTimeout(() => {
+          setHeroPhase('deleting');
+        }, heroDisplayDuration);
+      }
+    } else if (heroPhase === 'deleting') {
+      if (heroDisplayedText.length > 0) {
+        timeout = setTimeout(() => {
+          setHeroDisplayedText(heroDisplayedText.slice(0, -1));
+        }, heroDeletingSpeed);
+      } else {
+        // Done deleting, move to next sentence
+        setHeroSentenceIndex((prev) => (prev + 1) % HERO_SENTENCES.length);
+        setHeroPhase('typing');
+      }
+    }
+
+    return () => clearTimeout(timeout);
+  }, [mounted, heroPhase, heroDisplayedText, heroSentenceIndex, heroTypingSpeed, heroDeletingSpeed, heroDisplayDuration]);
 
   useEffect(() => {
     setMounted(true);
@@ -522,32 +470,44 @@ export default function Home() {
 ╚██████╗╚██████╔╝██║     ███████╗
  ╚═════╝ ╚═════╝ ╚═╝     ╚══════╝` : ASCII_LOGO}
                   </pre>
-                  {/* Animated terminal output */}
-                  <div className="space-y-1">
-                    {/* Command line */}
-                    {visibleLines >= 1 && (
-                      <div className="flex items-start gap-2">
-                        <span className="terminal-prompt text-ivory-light/90">{TERMINAL_VARIATIONS[currentVariation].command}</span>
-                      </div>
-                    )}
-                    {/* Empty line */}
-                    {visibleLines >= 2 && <div>&nbsp;</div>}
-                    {/* Output lines */}
-                    {TERMINAL_VARIATIONS[currentVariation].lines.map((line, i) => (
-                      visibleLines >= i + 3 && (
-                        <div key={i} className={line.type === 'success' ? 'text-larp-green' : 'text-larp-red'}>
-                          {line.content}
+                  {/* Animated terminal output - vibe coding conversation */}
+                  <div className="space-y-2">
+                    {TERMINAL_CONVERSATIONS[currentConversation].messages.map((msg, i) => {
+                      const isVisible = i < visibleMessages;
+                      const isTyping = i === visibleMessages && phase === 'typing';
+                      const displayText = isTyping ? currentMessageText : (isVisible ? msg.content : '');
+
+                      if (!isVisible && !isTyping) return null;
+
+                      return (
+                        <div key={i} className="flex items-start gap-2">
+                          {msg.role === 'user' ? (
+                            <>
+                              <span className="text-larp-green shrink-0">&gt;</span>
+                              <span className="text-ivory-light font-mono">
+                                {displayText}
+                                {isTyping && <span className="inline-block w-2 h-4 bg-larp-green animate-blink align-middle ml-0.5" />}
+                              </span>
+                            </>
+                          ) : (
+                            <>
+                              <span className="text-danger-orange shrink-0">ai:</span>
+                              <span className="text-ivory-light/80">
+                                {displayText}
+                                {isTyping && <span className="inline-block w-2 h-4 bg-danger-orange animate-blink align-middle ml-0.5" />}
+                              </span>
+                            </>
+                          )}
                         </div>
-                      )
-                    ))}
-                    {/* Info line */}
-                    {visibleLines >= 7 && (
-                      <div className="mt-2">
-                        <span className="text-danger-orange">{TERMINAL_VARIATIONS[currentVariation].info}</span>
+                      );
+                    })}
+                    {/* Show cursor at bottom when paused between conversations */}
+                    {phase === 'deleting' && visibleMessages === 0 && (
+                      <div className="flex items-start gap-2">
+                        <span className="text-larp-green">&gt;</span>
+                        <span className="inline-block w-2 h-4 bg-larp-green animate-blink" />
                       </div>
                     )}
-                    {/* Blinking cursor */}
-                    <span className="inline-block w-3 h-5 bg-danger-orange animate-blink" />
                   </div>
                 </div>
               </Terminal>
@@ -566,8 +526,9 @@ export default function Home() {
                 building nothing, together
               </p>
 
-              <p className="text-sm sm:text-base text-slate-light mb-6 sm:mb-8 max-w-md mx-auto lg:mx-0">
-                autonomous ai agent infrastructure for the bonding curve casino. you are exit liquidity. ngmi.
+              <p className="text-sm sm:text-base text-slate-light mb-6 sm:mb-8 max-w-md mx-auto lg:mx-0 min-h-[6rem] sm:min-h-[4.5rem]">
+                {heroDisplayedText}
+                <span className="inline-block w-0.5 h-4 bg-slate-light ml-0.5 animate-blink align-middle" />
               </p>
 
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start mb-6 sm:mb-8">
@@ -648,19 +609,13 @@ export default function Home() {
               products
             </h2>
             <p className="text-sm sm:text-base text-slate-light max-w-2xl mx-auto px-2">
-              none of these exist. neither do theirs. you know this.
+              100 products. none exist. neither do theirs. you know this.
               you're still scrolling.
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-            {PRODUCTS.map((product, i) => (
-              <ProductCard
-                key={i}
-                {...product}
-                delay={i * 150}
-              />
-            ))}
+          <div className="relative pt-8">
+            <ProductCarousel />
           </div>
         </div>
       </section>
@@ -976,16 +931,16 @@ export default function Home() {
       )}
 
       {/* footer message toast - easter egg */}
-      {showFooterMessage && (
-        <div className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:max-w-md z-[100] animate-slide-in">
-          <div
-            className="bg-slate-dark border-2 border-danger-orange p-4 font-mono text-sm text-ivory-light"
-            style={{ boxShadow: '4px 4px 0 #FF6B35' }}
-          >
-            <span className="text-danger-orange">error:</span> {footerMessage}
-          </div>
+      <div className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:w-[400px] z-[100] pointer-events-none">
+        <div
+          className={`bg-slate-dark border-2 border-danger-orange p-4 font-mono text-sm text-ivory-light transition-all duration-300 ${
+            showFooterMessage ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 invisible'
+          }`}
+          style={{ boxShadow: '4px 4px 0 #FF6B35' }}
+        >
+          <span className="text-danger-orange">error:</span> {footerMessage}
         </div>
-      )}
+      </div>
 
       {/* Konami code progress indicator */}
       {konamiProgress > 0 && !konamiActivated && (

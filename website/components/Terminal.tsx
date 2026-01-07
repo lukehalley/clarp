@@ -21,11 +21,11 @@ export default function Terminal({ children, title = 'terminal', className = '',
       <div className={`terminal ${className}`}>
         <div className="terminal-header shrink-0">
           <div
-            className="terminal-dot bg-slate-light/50"
+            className="terminal-dot bg-larp-red opacity-50"
             title="close (disabled)"
           />
           <div
-            className="terminal-dot bg-slate-light/50"
+            className="terminal-dot bg-larp-yellow opacity-50"
             title="minimize (disabled)"
           />
           <div

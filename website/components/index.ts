@@ -3,6 +3,7 @@ export { default as Button } from './Button';
 export { default as Badge } from './Badge';
 export { default as ProgressBar } from './ProgressBar';
 export { default as ProductCard } from './ProductCard';
+export { default as ProductCarousel } from './ProductCarousel';
 export { default as Mascot } from './Mascot';
 export { default as DocsSection } from './DocsSection';
 export { default as Footer } from './Footer';

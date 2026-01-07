@@ -1,0 +1,754 @@
+[
+  {
+    "name": "clarp agent",
+    "tagline": "autonomous ai wrapper",
+    "description": "chatgpt but we called it autonomous infrastructure. 41% win rate (trust us). shipping v2.",
+    "features": ["gpt-4 api call (revolutionary)", "\"neural network\" in readme", "executes 0 actual trades"],
+    "progress": 99,
+    "status": "coming-soon"
+  },
+  {
+    "name": "clarp modular",
+    "tagline": "omnichain intent l3",
+    "description": "it's arbitrum but we added buzzwords. modular. omnichain. intent-based. $50m raised. landing page shipped.",
+    "features": ["intents (undefined)", "modular architecture (fork)", "coming q2 (forever)"],
+    "progress": 73,
+    "status": "development"
+  },
+  {
+    "name": "clarp restake",
+    "tagline": "recursive yield primitive",
+    "description": "stake your stake of staked stakes. infinite recursive yield until the cascade. risk model: number go up.",
+    "features": ["ponzinomics (capital efficient)", "slashing: not calculated", "yield: ∞% (theoretical)"],
+    "progress": 47,
+    "status": "roadmap"
+  },
+  {
+    "name": "clarp bridge",
+    "tagline": "cross-chain liquidity hole",
+    "description": "move your funds across chains. we promise they'll arrive. eventually. maybe. check back q2.",
+    "features": ["7-day withdrawal window", "locked liquidity (ours)", "audit: pending (forever)"],
+    "progress": 23,
+    "status": "roadmap"
+  },
+  {
+    "name": "clarp nft",
+    "tagline": "pixelated money laundering",
+    "description": "jpegs of cartoon animals but on the blockchain. floor price: your dignity. utility: none.",
+    "features": ["10k supply (47k minted)", "roadmap: discord and vibes", "royalties: 69%"],
+    "progress": 88,
+    "status": "coming-soon"
+  },
+  {
+    "name": "clarp swap",
+    "tagline": "decentralized sandwich shop",
+    "description": "swap tokens at the worst possible price. mev bots thank you for your service.",
+    "features": ["99% slippage tolerance", "front-run as a service", "fees: yes"],
+    "progress": 64,
+    "status": "development"
+  },
+  {
+    "name": "clarp lend",
+    "tagline": "overcollateralized poverty",
+    "description": "deposit $1000 to borrow $500. revolutionary. the missing $500? innovation tax.",
+    "features": ["150% collateral ratio", "liquidation: instant", "interest: variable (always up)"],
+    "progress": 31,
+    "status": "roadmap"
+  },
+  {
+    "name": "clarp dao",
+    "tagline": "decentralized autocracy",
+    "description": "vote on proposals that the team will ignore anyway. governance theater at its finest.",
+    "features": ["1 token = 1 delusion", "team has 80% supply", "quorum: whatever we want"],
+    "progress": 55,
+    "status": "development"
+  },
+  {
+    "name": "clarp oracle",
+    "tagline": "trust us bro price feed",
+    "description": "we tell you what the price is. you believe us. that's the oracle. that's the whole thing.",
+    "features": ["price: our best guess", "update frequency: vibes", "manipulation: built-in"],
+    "progress": 42,
+    "status": "roadmap"
+  },
+  {
+    "name": "clarp vault",
+    "tagline": "automated yield rugging",
+    "description": "deposit your tokens. we farm yields. you get receipts. where are the yields? q2.",
+    "features": ["auto-compound (our bags)", "performance fee: 47%", "emergency withdrawal: no"],
+    "progress": 79,
+    "status": "coming-soon"
+  },
+  {
+    "name": "clarp perpetuals",
+    "tagline": "infinite loss engine",
+    "description": "100x leverage on assets that don't exist. your liquidation funds our holiday.",
+    "features": ["leverage: irresponsible", "funding rate: yes", "insurance fund: lol"],
+    "progress": 18,
+    "status": "roadmap"
+  },
+  {
+    "name": "clarp social",
+    "tagline": "friend.tech but worse",
+    "description": "buy shares in influencers who will abandon the platform in 3 weeks. premium cope.",
+    "features": ["key price: exponential", "exit liquidity: you", "utility: parasocial"],
+    "progress": 91,
+    "status": "coming-soon"
+  },
+  {
+    "name": "clarp launch",
+    "tagline": "fair launch theater",
+    "description": "launchpad for tokens that will rug. we take 5%. they take everything. very fair.",
+    "features": ["kyc: anime pfp", "allocation: insiders only", "refunds: see terms (no)"],
+    "progress": 36,
+    "status": "development"
+  },
+  {
+    "name": "clarp identity",
+    "tagline": "doxxed to the blockchain",
+    "description": "on-chain identity for people who don't understand privacy. soulbound means you can't escape.",
+    "features": ["soulbound (trapped)", "reputation: fabricated", "privacy: none"],
+    "progress": 52,
+    "status": "development"
+  },
+  {
+    "name": "clarp gaming",
+    "tagline": "play to lose",
+    "description": "games where you pay to play, pay to win, and still lose. revolutionary entertainment.",
+    "features": ["nft skins: required", "gameplay: optional", "fun: not included"],
+    "progress": 27,
+    "status": "roadmap"
+  },
+  {
+    "name": "clarp insurance",
+    "tagline": "rug coverage (excluded)",
+    "description": "buy insurance for smart contract hacks. exclusions: everything that actually happens.",
+    "features": ["coverage: theoretical", "claims: denied", "premium: expensive"],
+    "progress": 44,
+    "status": "roadmap"
+  },
+  {
+    "name": "clarp index",
+    "tagline": "diversified bags",
+    "description": "own a basket of 20 failing tokens instead of just 1. diversified poverty.",
+    "features": ["rebalancing: monthly rugs", "management fee: 5%", "returns: negative"],
+    "progress": 68,
+    "status": "development"
+  },
+  {
+    "name": "clarp privacy",
+    "tagline": "untraceable (probably)",
+    "description": "mix your funds with other people's funds. definitely not money laundering. trust.",
+    "features": ["zk-proofs: incomprehensible", "compliance: tbd", "legality: unclear"],
+    "progress": 15,
+    "status": "roadmap"
+  },
+  {
+    "name": "clarp phone",
+    "tagline": "web3 mobile (lol)",
+    "description": "a phone that does less but costs more. seed phrase storage in notes app.",
+    "features": ["battery: 2 hours", "apps: 3", "price: $2000"],
+    "progress": 83,
+    "status": "coming-soon"
+  },
+  {
+    "name": "clarp ai v2",
+    "tagline": "even more autonomous",
+    "description": "the sequel nobody asked for. now with more parameters and less functionality.",
+    "features": ["parameters: billions", "accuracy: unknown", "shipping: q2 (again)"],
+    "progress": 96,
+    "status": "coming-soon"
+  },
+  {
+    "name": "clarp predict",
+    "tagline": "betting with extra steps",
+    "description": "prediction markets for events nobody cares about. will it rain in dubai? bet on it.",
+    "features": ["resolution: arbitrary", "liquidity: thin", "outcomes: rigged"],
+    "progress": 34,
+    "status": "development"
+  },
+  {
+    "name": "clarp bonds",
+    "tagline": "debt with tokenomics",
+    "description": "buy bonds at a discount, receive tokens worth less. ohm fork #4729.",
+    "features": ["(3,3) (cope,cope)", "backing: vibes", "treasury: gone"],
+    "progress": 12,
+    "status": "roadmap"
+  },
+  {
+    "name": "clarp stables",
+    "tagline": "algorithmic instability",
+    "description": "a stablecoin that's stable until it isn't. pegged to $1 (usually) (sometimes) (rarely).",
+    "features": ["peg: aspirational", "backing: complex math", "depeg: inevitable"],
+    "progress": 67,
+    "status": "development"
+  },
+  {
+    "name": "clarp names",
+    "tagline": "expensive strings",
+    "description": "pay $500 for clarp.eth. flex on twitter. that's it. that's the product.",
+    "features": ["renewal: annual extortion", "utility: profile pic", "speculation: heavy"],
+    "progress": 89,
+    "status": "coming-soon"
+  },
+  {
+    "name": "clarp music",
+    "tagline": "spotify but worse",
+    "description": "stream music as nfts. artists still get nothing. middlemen get everything. decentralized.",
+    "features": ["royalties: 0.000001%", "catalog: 12 songs", "quality: 128kbps"],
+    "progress": 41,
+    "status": "roadmap"
+  },
+  {
+    "name": "clarp art",
+    "tagline": "galleries but digital",
+    "description": "buy digital art. look at it on your screen. explain it at parties. regret everything.",
+    "features": ["provenance: screenshot-proof", "curation: none", "prices: delusional"],
+    "progress": 58,
+    "status": "development"
+  },
+  {
+    "name": "clarp compute",
+    "tagline": "decentralized slow",
+    "description": "rent gpu from strangers. 10x slower than aws. 3x the price. but decentralized.",
+    "features": ["uptime: 47%", "latency: yes", "support: discord dm"],
+    "progress": 29,
+    "status": "roadmap"
+  },
+  {
+    "name": "clarp storage",
+    "tagline": "ipfs but branded",
+    "description": "store files forever. or until the pinning service shuts down. whichever comes first.",
+    "features": ["permanence: temporary", "retrieval: slow", "cost: per byte"],
+    "progress": 76,
+    "status": "development"
+  },
+  {
+    "name": "clarp mesh",
+    "tagline": "networks but complicated",
+    "description": "mesh networking on blockchain. your toaster talks to your fridge. both get hacked.",
+    "features": ["nodes: 7 total", "bandwidth: dial-up", "security: none"],
+    "progress": 19,
+    "status": "roadmap"
+  },
+  {
+    "name": "clarp mail",
+    "tagline": "email but worse",
+    "description": "send emails on-chain. pay gas to say hello. spam costs $47. revolutionary.",
+    "features": ["delivery: eventual", "spam filter: none", "inbox: immutable"],
+    "progress": 45,
+    "status": "roadmap"
+  },
+  {
+    "name": "clarp chat",
+    "tagline": "discord but tokenized",
+    "description": "chat rooms where every message is an nft. your shitposts live forever on-chain.",
+    "features": ["gas per message", "edit: impossible", "delete: lol no"],
+    "progress": 62,
+    "status": "development"
+  },
+  {
+    "name": "clarp meet",
+    "tagline": "zoom but decentralized",
+    "description": "video calls stored on blockchain. your embarrassing meeting lives forever.",
+    "features": ["quality: 240p", "latency: 5 seconds", "recording: permanent"],
+    "progress": 33,
+    "status": "roadmap"
+  },
+  {
+    "name": "clarp docs",
+    "tagline": "google docs but slow",
+    "description": "collaborative editing where every keystroke costs gas. write less, pay more.",
+    "features": ["save: costs eth", "share: costs eth", "read: also eth"],
+    "progress": 51,
+    "status": "development"
+  },
+  {
+    "name": "clarp sheets",
+    "tagline": "excel but expensive",
+    "description": "spreadsheets on-chain. your budget is now public. your formulas are permanent.",
+    "features": ["cells: 100 max", "functions: basic", "privacy: zero"],
+    "progress": 24,
+    "status": "roadmap"
+  },
+  {
+    "name": "clarp slides",
+    "tagline": "powerpoint but tokenized",
+    "description": "presentations as nfts. your quarterly review is now a speculative asset.",
+    "features": ["animations: none", "templates: 2", "export: impossible"],
+    "progress": 38,
+    "status": "roadmap"
+  },
+  {
+    "name": "clarp calendar",
+    "tagline": "scheduling but blockchain",
+    "description": "calendar app where booking meetings requires wallet connection. very professional.",
+    "features": ["sync: manual", "notifications: on-chain", "timezones: wrong"],
+    "progress": 56,
+    "status": "development"
+  },
+  {
+    "name": "clarp tasks",
+    "tagline": "todo lists on-chain",
+    "description": "manage tasks on blockchain. completing a task costs gas. procrastination is free.",
+    "features": ["checkbox: 0.001 eth", "delete: impossible", "priority: all high"],
+    "progress": 71,
+    "status": "development"
+  },
+  {
+    "name": "clarp notes",
+    "tagline": "notion but permanent",
+    "description": "take notes that can never be edited or deleted. your typos are forever.",
+    "features": ["edit: append only", "organize: chaos", "search: grep"],
+    "progress": 43,
+    "status": "roadmap"
+  },
+  {
+    "name": "clarp crm",
+    "tagline": "salesforce but web3",
+    "description": "customer relationship management on blockchain. your leads are public. competitors thank you.",
+    "features": ["contacts: visible to all", "deals: transparent", "pipeline: exposed"],
+    "progress": 28,
+    "status": "roadmap"
+  },
+  {
+    "name": "clarp hr",
+    "tagline": "workday but tokenized",
+    "description": "hr management where salary is paid in tokens. value varies. employees cry.",
+    "features": ["payroll: volatile", "benefits: token vesting", "pto: burned"],
+    "progress": 17,
+    "status": "roadmap"
+  },
+  {
+    "name": "clarp erp",
+    "tagline": "sap but decentralized",
+    "description": "enterprise resource planning on-chain. your inventory is public. your margins are exposed.",
+    "features": ["modules: 2", "integration: none", "support: telegram"],
+    "progress": 35,
+    "status": "roadmap"
+  },
+  {
+    "name": "clarp pos",
+    "tagline": "square but crypto",
+    "description": "point of sale for accepting crypto. customer pays $5, you receive $4.73 after gas.",
+    "features": ["fees: more than visa", "settlement: 12 blocks", "refunds: complicated"],
+    "progress": 59,
+    "status": "development"
+  },
+  {
+    "name": "clarp payroll",
+    "tagline": "gusto but worse",
+    "description": "pay employees in tokens. explain taxes. watch them quit. revolutionary hr.",
+    "features": ["w2: what's that", "taxes: your problem", "compliance: lol"],
+    "progress": 22,
+    "status": "roadmap"
+  },
+  {
+    "name": "clarp invoice",
+    "tagline": "quickbooks but chain",
+    "description": "send invoices on blockchain. client ignores them on blockchain. net 30 forever.",
+    "features": ["templates: 1", "reminders: on-chain spam", "payment: eventually"],
+    "progress": 48,
+    "status": "development"
+  },
+  {
+    "name": "clarp tickets",
+    "tagline": "eventbrite but nft",
+    "description": "event tickets as nfts. scalpers love it. attendees hate it. we profit.",
+    "features": ["resale: 500% markup", "verification: screenshot", "refunds: never"],
+    "progress": 77,
+    "status": "development"
+  },
+  {
+    "name": "clarp booking",
+    "tagline": "airbnb but crypto",
+    "description": "book stays with crypto. host accepts. price crashes. vacation ruined.",
+    "features": ["deposits: volatile", "cancellation: expensive", "reviews: immutable burns"],
+    "progress": 39,
+    "status": "roadmap"
+  },
+  {
+    "name": "clarp ride",
+    "tagline": "uber but decentralized",
+    "description": "ride sharing on blockchain. driver rates you. you rate driver. both on-chain forever.",
+    "features": ["surge: always", "eta: approximate", "safety: yolo"],
+    "progress": 14,
+    "status": "roadmap"
+  },
+  {
+    "name": "clarp delivery",
+    "tagline": "doordash but worse",
+    "description": "food delivery paid in crypto. tip your driver in tokens. they can't pay rent with it.",
+    "features": ["fees: $47 for a burger", "tracking: blockchain slow", "cold food: guaranteed"],
+    "progress": 31,
+    "status": "roadmap"
+  },
+  {
+    "name": "clarp market",
+    "tagline": "amazon but nft",
+    "description": "buy physical goods with crypto. shipping takes 3 weeks. returns impossible.",
+    "features": ["products: 47", "shipping: eventually", "disputes: discord"],
+    "progress": 54,
+    "status": "development"
+  },
+  {
+    "name": "clarp auction",
+    "tagline": "ebay but permanent",
+    "description": "auction platform where bids are forever. your lowball offer immortalized on-chain.",
+    "features": ["reserve: hidden", "sniping: encouraged", "escrow: trust me bro"],
+    "progress": 66,
+    "status": "development"
+  },
+  {
+    "name": "clarp freelance",
+    "tagline": "fiverr but worse",
+    "description": "hire freelancers with crypto. they deliver. you pay. price is now different.",
+    "features": ["escrow: maybe", "disputes: community vote", "fees: 20%"],
+    "progress": 41,
+    "status": "roadmap"
+  },
+  {
+    "name": "clarp jobs",
+    "tagline": "linkedin but tokenized",
+    "description": "job board where applying costs gas. ghosted on-chain. rejection immutable.",
+    "features": ["apply: 0.01 eth", "response rate: 0%", "networking: awkward"],
+    "progress": 37,
+    "status": "roadmap"
+  },
+  {
+    "name": "clarp learn",
+    "tagline": "udemy but web3",
+    "description": "courses about crypto paid in crypto. learn nothing. certificate is nft.",
+    "features": ["content: outdated", "certificate: jpeg", "refunds: no"],
+    "progress": 72,
+    "status": "development"
+  },
+  {
+    "name": "clarp degree",
+    "tagline": "university but chain",
+    "description": "earn degrees on blockchain. employers still don't care. but it's decentralized.",
+    "features": ["accreditation: lol", "tuition: 50 eth", "value: questionable"],
+    "progress": 26,
+    "status": "roadmap"
+  },
+  {
+    "name": "clarp health",
+    "tagline": "epic but exposed",
+    "description": "health records on blockchain. your medical history public. hipaa what?",
+    "features": ["privacy: none", "records: permanent", "insurance: denied"],
+    "progress": 13,
+    "status": "roadmap"
+  },
+  {
+    "name": "clarp fitness",
+    "tagline": "strava but tokenized",
+    "description": "earn tokens for working out. sell them. buy pizza. net zero fitness.",
+    "features": ["rewards: diminishing", "cheating: rampant", "gains: negative"],
+    "progress": 58,
+    "status": "development"
+  },
+  {
+    "name": "clarp dating",
+    "tagline": "tinder but blockchain",
+    "description": "find love on-chain. your rejections are permanent. your matches are public.",
+    "features": ["swipes: cost gas", "matches: rare", "ghosting: immutable"],
+    "progress": 45,
+    "status": "roadmap"
+  },
+  {
+    "name": "clarp social v2",
+    "tagline": "twitter but worse",
+    "description": "social media where posts cost money. engagement farming costs more. elon would be proud.",
+    "features": ["post: 0.001 eth", "like: 0.0001 eth", "ratio: expensive"],
+    "progress": 81,
+    "status": "coming-soon"
+  },
+  {
+    "name": "clarp video",
+    "tagline": "youtube but decentralized",
+    "description": "video platform on blockchain. upload costs fortune. views cost viewers. everyone loses.",
+    "features": ["upload: $50", "watch: $0.01", "monetization: negative"],
+    "progress": 49,
+    "status": "development"
+  },
+  {
+    "name": "clarp stream",
+    "tagline": "twitch but tokenized",
+    "description": "streaming where donations are in tokens. value crashes mid-stream. sad.",
+    "features": ["bits: volatile", "subs: complicated", "raids: on-chain"],
+    "progress": 63,
+    "status": "development"
+  },
+  {
+    "name": "clarp podcast",
+    "tagline": "spotify but chain",
+    "description": "podcasts as nfts. own episodes. flex on nobody. why did you buy this.",
+    "features": ["episodes: collectible", "listens: trackable", "value: none"],
+    "progress": 32,
+    "status": "roadmap"
+  },
+  {
+    "name": "clarp news",
+    "tagline": "reuters but crypto",
+    "description": "news platform where articles are nfts. fake news is immutable. fact-checking is centralized.",
+    "features": ["sources: trust me", "edits: impossible", "retractions: never"],
+    "progress": 44,
+    "status": "roadmap"
+  },
+  {
+    "name": "clarp wiki",
+    "tagline": "wikipedia but tokenized",
+    "description": "collaborative encyclopedia where edits cost gas. vandalism is expensive. accuracy optional.",
+    "features": ["edits: $2 each", "citations: none", "accuracy: vibes"],
+    "progress": 57,
+    "status": "development"
+  },
+  {
+    "name": "clarp maps",
+    "tagline": "google maps but worse",
+    "description": "navigation on blockchain. directions stored forever. your commute is public.",
+    "features": ["routes: outdated", "traffic: ignored", "privacy: zero"],
+    "progress": 21,
+    "status": "roadmap"
+  },
+  {
+    "name": "clarp weather",
+    "tagline": "weather.com but chain",
+    "description": "weather data on blockchain. forecasts are immutable. wrong forever.",
+    "features": ["accuracy: 40%", "updates: daily", "predictions: permanent"],
+    "progress": 38,
+    "status": "roadmap"
+  },
+  {
+    "name": "clarp translate",
+    "tagline": "google translate but nft",
+    "description": "translation as nfts. own your mistranslations. embarrassment is permanent.",
+    "features": ["languages: 3", "accuracy: approximate", "context: ignored"],
+    "progress": 29,
+    "status": "roadmap"
+  },
+  {
+    "name": "clarp search",
+    "tagline": "google but decentralized",
+    "description": "search engine on blockchain. results are terrible. but nobody can censor them.",
+    "features": ["results: 10 max", "relevance: random", "ads: everywhere"],
+    "progress": 16,
+    "status": "roadmap"
+  },
+  {
+    "name": "clarp browser",
+    "tagline": "chrome but crypto",
+    "description": "web browser that pays you to browse. amount: negligible. data sold: all of it.",
+    "features": ["rewards: $0.02/month", "tracking: extensive", "speed: slow"],
+    "progress": 74,
+    "status": "development"
+  },
+  {
+    "name": "clarp vpn",
+    "tagline": "nordvpn but tokenized",
+    "description": "vpn where your traffic is definitely not logged. pinky promise. tokens involved.",
+    "features": ["servers: 3", "speed: dial-up", "logs: probably kept"],
+    "progress": 52,
+    "status": "development"
+  },
+  {
+    "name": "clarp password",
+    "tagline": "1password but chain",
+    "description": "password manager on blockchain. your passwords are encrypted. the metadata isn't.",
+    "features": ["storage: on-chain", "breach: when not if", "2fa: seed phrase"],
+    "progress": 35,
+    "status": "roadmap"
+  },
+  {
+    "name": "clarp backup",
+    "tagline": "backblaze but worse",
+    "description": "backup your files to distributed storage. retrieval takes 3 days. if it works.",
+    "features": ["redundancy: theoretical", "speed: glacial", "reliability: 60%"],
+    "progress": 43,
+    "status": "roadmap"
+  },
+  {
+    "name": "clarp sync",
+    "tagline": "dropbox but chain",
+    "description": "file sync on blockchain. every version costs gas. storage is expensive.",
+    "features": ["sync: slow", "conflicts: permanent", "storage: $10/gb"],
+    "progress": 61,
+    "status": "development"
+  },
+  {
+    "name": "clarp sign",
+    "tagline": "docusign but tokenized",
+    "description": "sign documents on-chain. legally binding? unclear. gas fee? definitely.",
+    "features": ["validity: questionable", "audit trail: overkill", "templates: none"],
+    "progress": 69,
+    "status": "development"
+  },
+  {
+    "name": "clarp legal",
+    "tagline": "legalzoom but web3",
+    "description": "legal documents as smart contracts. bugs are features. exploits are legal.",
+    "features": ["contracts: immutable bugs", "lawyers: not included", "liability: yours"],
+    "progress": 25,
+    "status": "roadmap"
+  },
+  {
+    "name": "clarp vote",
+    "tagline": "democracy but chain",
+    "description": "voting on blockchain. transparent. immutable. still rigged. just decentralized rigging.",
+    "features": ["votes: public", "privacy: none", "manipulation: visible"],
+    "progress": 47,
+    "status": "roadmap"
+  },
+  {
+    "name": "clarp charity",
+    "tagline": "gofundme but crypto",
+    "description": "charitable giving on-chain. 40% goes to gas. 30% to platform. 30% maybe to charity.",
+    "features": ["transparency: partial", "fees: excessive", "impact: minimal"],
+    "progress": 53,
+    "status": "development"
+  },
+  {
+    "name": "clarp carbon",
+    "tagline": "offsets but tokenized",
+    "description": "buy carbon credits as nfts. feel good. planet still dies. but you tried.",
+    "features": ["credits: imaginary", "verification: vibes", "impact: zero"],
+    "progress": 78,
+    "status": "coming-soon"
+  },
+  {
+    "name": "clarp energy",
+    "tagline": "grid but decentralized",
+    "description": "trade energy on blockchain. your solar panels earn tokens. worth less than electricity.",
+    "features": ["trading: complex", "savings: negative", "grid: unstable"],
+    "progress": 36,
+    "status": "roadmap"
+  },
+  {
+    "name": "clarp real estate",
+    "tagline": "zillow but fractional",
+    "description": "own 0.0001% of a house. can't live there. can't sell it. but it's an nft.",
+    "features": ["ownership: theoretical", "liquidity: none", "maintenance: someone else's problem"],
+    "progress": 64,
+    "status": "development"
+  },
+  {
+    "name": "clarp car",
+    "tagline": "carvana but tokenized",
+    "description": "buy cars with crypto. title is nft. dmv doesn't recognize it. good luck.",
+    "features": ["registration: impossible", "insurance: denied", "ownership: disputed"],
+    "progress": 19,
+    "status": "roadmap"
+  },
+  {
+    "name": "clarp art v2",
+    "tagline": "generative chaos",
+    "description": "ai-generated art as nfts. 10k collection of the same thing slightly different.",
+    "features": ["uniqueness: 0.01% different", "art: subjective", "value: speculative"],
+    "progress": 87,
+    "status": "coming-soon"
+  },
+  {
+    "name": "clarp fashion",
+    "tagline": "gucci but digital",
+    "description": "buy digital clothes for your avatar. flex in metaverse. mom is disappointed.",
+    "features": ["wearable: in 1 app", "resale: unlikely", "flex: digital only"],
+    "progress": 73,
+    "status": "development"
+  },
+  {
+    "name": "clarp pets",
+    "tagline": "tamagotchi but chain",
+    "description": "digital pets on blockchain. feed them. they die anyway. death is permanent.",
+    "features": ["feeding: costs gas", "death: immutable", "resurrection: no"],
+    "progress": 46,
+    "status": "roadmap"
+  },
+  {
+    "name": "clarp land",
+    "tagline": "metaverse dirt",
+    "description": "buy virtual land. nobody visits. property taxes still apply. somehow.",
+    "features": ["neighbors: none", "development: impossible", "value: declining"],
+    "progress": 82,
+    "status": "coming-soon"
+  },
+  {
+    "name": "clarp avatar",
+    "tagline": "bitmoji but expensive",
+    "description": "create avatars as nfts. use in zero applications. very interoperable.",
+    "features": ["customization: limited", "interop: promised", "utility: none"],
+    "progress": 59,
+    "status": "development"
+  },
+  {
+    "name": "clarp world",
+    "tagline": "roblox but blockchain",
+    "description": "user-generated metaverse. build worlds. nobody comes. servers cost tokens.",
+    "features": ["users: 12", "content: minimal", "hosting: expensive"],
+    "progress": 28,
+    "status": "roadmap"
+  },
+  {
+    "name": "clarp quest",
+    "tagline": "rpg but tokenized",
+    "description": "play to earn rpg. grind for tokens. tokens worthless. time wasted.",
+    "features": ["gameplay: tedious", "rewards: diminishing", "fun: not found"],
+    "progress": 65,
+    "status": "development"
+  },
+  {
+    "name": "clarp race",
+    "tagline": "mario kart but nft",
+    "description": "racing game where cars are nfts. faster cars cost more. pay to win. literally.",
+    "features": ["balance: none", "skill: irrelevant", "spending: required"],
+    "progress": 42,
+    "status": "roadmap"
+  },
+  {
+    "name": "clarp battle",
+    "tagline": "pokemon but chain",
+    "description": "collectible battlers as nfts. train them. battle them. lose them. cry.",
+    "features": ["creatures: 47", "balance: broken", "trading: manipulated"],
+    "progress": 71,
+    "status": "development"
+  },
+  {
+    "name": "clarp sports",
+    "tagline": "fantasy but token",
+    "description": "fantasy sports with crypto prizes. lose money on fake teams. double the pain.",
+    "features": ["entry: expensive", "prizes: volatile", "skill: luck"],
+    "progress": 55,
+    "status": "development"
+  },
+  {
+    "name": "clarp casino",
+    "tagline": "gambling but honest",
+    "description": "provably fair casino. you provably lose. house edge is transparent. still takes everything.",
+    "features": ["fairness: proven", "house edge: visible", "bankruptcy: inevitable"],
+    "progress": 94,
+    "status": "coming-soon"
+  },
+  {
+    "name": "clarp lottery",
+    "tagline": "powerball but chain",
+    "description": "lottery on blockchain. odds are public. still terrible. but decentralized terrible.",
+    "features": ["odds: 1 in 300m", "jackpot: volatile", "taxes: complicated"],
+    "progress": 48,
+    "status": "development"
+  },
+  {
+    "name": "clarp bingo",
+    "tagline": "grandma's game tokenized",
+    "description": "bingo on blockchain. cards are nfts. prizes in tokens. nursing homes confused.",
+    "features": ["cards: collectible", "calling: on-chain", "excitement: minimal"],
+    "progress": 33,
+    "status": "roadmap"
+  },
+  {
+    "name": "clarp poker",
+    "tagline": "texas holdem but web3",
+    "description": "poker where every hand is on-chain. your bluffs are permanent. tells are immutable.",
+    "features": ["rake: 10%", "cheating: transparent", "fish: you"],
+    "progress": 67,
+    "status": "development"
+  }
+]
