@@ -14,8 +14,10 @@ import ClarpAI from '@/components/ClarpAI';
 import ActivityNotifications from '@/components/ActivityNotifications';
 import HallOfShame from '@/components/HallOfShame';
 import PixelGithub from '@/components/PixelGithub';
+import WarningTicker from '@/components/WarningTicker';
 import TERMINAL_CONVERSATIONS from '@/data/terminal-conversations.json';
 import HERO_SENTENCES from '@/data/hero-sentences.json';
+import WARNING_TICKERS from '@/data/warning-tickers.json';
 
 const ASCII_LOGO = `
  ██████╗██╗      █████╗ ██████╗ ██████╗
@@ -61,8 +63,6 @@ const NAV_HOVER_TEXT: Record<string, string> = {
 // Animation phases: 'typing' | 'paused' | 'deleting'
 type AnimationPhase = 'typing' | 'paused' | 'deleting';
 
-// Hero typing animation phases
-type HeroPhase = 'typing' | 'displayed' | 'deleting';
 
 export default function Home() {
   const [mounted, setMounted] = useState(false);
@@ -77,13 +77,8 @@ export default function Home() {
   const [phase, setPhase] = useState<AnimationPhase>('typing');
   const terminalRef = useRef<HTMLDivElement>(null);
 
-  // Hero sentence typing animation states
+  // Hero sentence rotation (brutalist instant swap)
   const [heroSentenceIndex, setHeroSentenceIndex] = useState(0);
-  const [heroDisplayedText, setHeroDisplayedText] = useState('');
-  const [heroPhase, setHeroPhase] = useState<HeroPhase>('typing');
-  const heroTypingSpeed = 30; // ms per character when typing
-  const heroDeletingSpeed = 15; // ms per character when deleting
-  const heroDisplayDuration = 4000; // ms to display full sentence
 
   // Easter egg states
   const [showWhitepaperModal, setShowWhitepaperModal] = useState(false);
@@ -93,7 +88,6 @@ export default function Home() {
   const [loadingFailed, setLoadingFailed] = useState(false);
   const [showFooterMessage, setShowFooterMessage] = useState(false);
   const [footerMessage, setFooterMessage] = useState('');
-  const [glitchedStat, setGlitchedStat] = useState<number | null>(null);
   const [navHoverText, setNavHoverText] = useState<Record<string, string>>({});
   const [ctaClicks, setCtaClicks] = useState({ doIt: 0, pretend: 0 });
   const [asciiClicks, setAsciiClicks] = useState(0);
@@ -154,38 +148,16 @@ export default function Home() {
     }
   }, [visibleMessages, currentMessageText]);
 
-  // Hero sentence typing animation
+  // Hero sentence rotation (brutalist instant swap)
   useEffect(() => {
     if (!mounted) return;
 
-    const currentSentence = HERO_SENTENCES[heroSentenceIndex];
-    let timeout: NodeJS.Timeout;
+    const interval = setInterval(() => {
+      setHeroSentenceIndex((prev) => (prev + 1) % HERO_SENTENCES.length);
+    }, 5000);
 
-    if (heroPhase === 'typing') {
-      if (heroDisplayedText.length < currentSentence.length) {
-        timeout = setTimeout(() => {
-          setHeroDisplayedText(currentSentence.slice(0, heroDisplayedText.length + 1));
-        }, heroTypingSpeed);
-      } else {
-        // Done typing, pause before deleting
-        timeout = setTimeout(() => {
-          setHeroPhase('deleting');
-        }, heroDisplayDuration);
-      }
-    } else if (heroPhase === 'deleting') {
-      if (heroDisplayedText.length > 0) {
-        timeout = setTimeout(() => {
-          setHeroDisplayedText(heroDisplayedText.slice(0, -1));
-        }, heroDeletingSpeed);
-      } else {
-        // Done deleting, move to next sentence
-        setHeroSentenceIndex((prev) => (prev + 1) % HERO_SENTENCES.length);
-        setHeroPhase('typing');
-      }
-    }
-
-    return () => clearTimeout(timeout);
-  }, [mounted, heroPhase, heroDisplayedText, heroSentenceIndex, heroTypingSpeed, heroDeletingSpeed, heroDisplayDuration]);
+    return () => clearInterval(interval);
+  }, [mounted]);
 
   useEffect(() => {
     setMounted(true);
@@ -302,12 +274,6 @@ export default function Home() {
     setFooterMessage(msg);
     setShowFooterMessage(true);
     setTimeout(() => setShowFooterMessage(false), 3000);
-  };
-
-  // Easter egg: stat glitch
-  const triggerStatGlitch = (index: number) => {
-    setGlitchedStat(index);
-    setTimeout(() => setGlitchedStat(null), 500);
   };
 
   // Easter egg: nav hover text change
@@ -527,8 +493,7 @@ export default function Home() {
               </p>
 
               <p className="text-sm sm:text-base text-slate-light mb-6 sm:mb-8 max-w-md mx-auto lg:mx-0 min-h-[6rem] sm:min-h-[4.5rem]">
-                {heroDisplayedText}
-                <span className="inline-block w-0.5 h-4 bg-slate-light ml-0.5 animate-blink align-middle" />
+                {HERO_SENTENCES[heroSentenceIndex]}
               </p>
 
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start mb-6 sm:mb-8">
@@ -573,33 +538,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* stats section */}
-      <section className="py-10 sm:py-16 px-4 sm:px-6 bg-slate-dark text-ivory-light border-y-4 border-danger-orange">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8">
-            {[
-              { label: 'total value locked', value: '$0', glitchValue: 'rugged', sublabel: '(infinite hype tho)' },
-              { label: 'pumpfun rug rate', value: '98.6%', glitchValue: '100%', sublabel: '(2-12hr lifespan)' },
-              { label: 'your position', value: 'exit liquidity', glitchValue: 'jeet', sublabel: '(always was)' },
-              { label: 'shipping status', value: 'q2', glitchValue: 'q∞', sublabel: '(forever)' },
-            ].map((stat, i) => (
-              <div
-                key={i}
-                className={`text-center p-3 sm:p-4 cursor-pointer select-none transition-transform hover:scale-105 flex flex-col justify-between h-full min-h-[100px] sm:min-h-[120px] ${glitchedStat === i ? 'animate-[glitch_0.1s_ease-in-out_5]' : ''}`}
-                onClick={() => triggerStatGlitch(i)}
-              >
-                <div className={`text-xl sm:text-2xl md:text-3xl font-mono font-bold mb-1 transition-colors min-h-[2em] flex items-center justify-center ${glitchedStat === i ? 'text-larp-red' : 'text-danger-orange'}`}>
-                  {glitchedStat === i ? stat.glitchValue : stat.value}
-                </div>
-                <div>
-                  <div className="text-xs sm:text-sm font-medium text-ivory-light">{stat.label}</div>
-                  <div className="text-[10px] sm:text-xs text-ivory-light/50">{stat.sublabel}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* ticker: hero → products */}
+      <WarningTicker messages={WARNING_TICKERS[0].messages} direction={WARNING_TICKERS[0].direction as 'left' | 'right'} />
 
       {/* products section */}
       <section id="products" className="py-16 sm:py-24 px-4 sm:px-6">
@@ -619,6 +559,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* ticker: products → mascot */}
+      <WarningTicker messages={WARNING_TICKERS[1].messages} direction={WARNING_TICKERS[1].direction as 'left' | 'right'} />
 
       {/* mascot section */}
       <section className="py-16 sm:py-24 px-4 sm:px-6 bg-slate-dark text-ivory-light overflow-hidden">
@@ -662,15 +605,24 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ticker: mascot → docs */}
+      <WarningTicker messages={WARNING_TICKERS[2].messages} direction={WARNING_TICKERS[2].direction as 'left' | 'right'} />
+
       {/* documentation section */}
       <section id="docs" className="py-16 sm:py-24 px-4 sm:px-6">
         <DocsSection />
       </section>
 
+      {/* ticker: docs → hall of shame */}
+      <WarningTicker messages={WARNING_TICKERS[3].messages} direction={WARNING_TICKERS[3].direction as 'left' | 'right'} />
+
       {/* hall of shame section */}
       <section id="victims">
         <HallOfShame />
       </section>
+
+      {/* ticker: hall of shame → roadmap */}
+      <WarningTicker messages={WARNING_TICKERS[4].messages} direction={WARNING_TICKERS[4].direction as 'left' | 'right'} />
 
       {/* roadmap section */}
       <section id="roadmap" className="py-16 sm:py-24 px-4 sm:px-6 bg-ivory-medium border-y-2 border-slate-dark">
@@ -746,6 +698,9 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ticker: roadmap → cta */}
+      <WarningTicker messages={WARNING_TICKERS[5].messages} direction={WARNING_TICKERS[5].direction as 'left' | 'right'} />
+
       {/* cta section */}
       <section className="py-16 sm:py-24 px-4 sm:px-6 relative">
         <div className="max-w-4xl mx-auto text-center">
@@ -782,6 +737,9 @@ export default function Home() {
           </p>
         </div>
       </section>
+
+      {/* ticker: cta → footer */}
+      <WarningTicker messages={WARNING_TICKERS[6].messages} direction={WARNING_TICKERS[6].direction as 'left' | 'right'} />
 
       <Footer />
 

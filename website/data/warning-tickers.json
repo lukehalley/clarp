@@ -1,0 +1,100 @@
+[
+  {
+    "id": "hero-to-products",
+    "direction": "left",
+    "messages": [
+      "⚠ THIS IS VAPORWARE",
+      "WHITEPAPER: BLANK (INTENTIONALLY)",
+      "YOU ARE EXIT LIQUIDITY",
+      "100 FAKE PRODUCTS BELOW ↓",
+      "CLARP AI WIN RATE: 41%",
+      "Q2 FOREVER",
+      "NGMI",
+      "ROADMAP: TRUST US BRO"
+    ]
+  },
+  {
+    "id": "products-to-mascot",
+    "direction": "right",
+    "messages": [
+      "YOU SCROLLED PAST 100 PRODUCTS",
+      "NONE OF THEM EXIST",
+      "CAROUSEL OF DISAPPOINTMENT: COMPLETE",
+      "VAPORWARE PORTFOLIO: VIEWED",
+      "YOUR BAGS: STILL HEAVY",
+      "COPIUM RESERVES: DEPLETING",
+      "SUNK COST FALLACY: ACTIVATED",
+      "KEEP SCROLLING (IT WON'T HELP)"
+    ]
+  },
+  {
+    "id": "mascot-to-docs",
+    "direction": "left",
+    "messages": [
+      "MASCOT DOESN'T RESPECT YOU",
+      "CLARP SEES YOUR BAGS",
+      "JUDGMENT: RENDERED",
+      "VIBES: IMMACULATE (YOURS AREN'T)",
+      "LOGO COST MORE THAN PRODUCT",
+      "AT LEAST WE HAVE BRANDING",
+      "THE MASCOT IS REAL (THE PRODUCT ISN'T)",
+      "CLARP > YOUR PORTFOLIO"
+    ]
+  },
+  {
+    "id": "docs-to-shame",
+    "direction": "right",
+    "messages": [
+      "YOU READ THE DOCS",
+      "COPE MANUAL: STUDIED",
+      "STILL NO PRODUCT",
+      "DOCUMENTATION OF NOTHING",
+      "INSTRUCTIONS: UNCLEAR",
+      "HELP: UNAVAILABLE",
+      "SUPPORT: NGMI",
+      "FAQ: WHY DID YOU BUY"
+    ]
+  },
+  {
+    "id": "shame-to-roadmap",
+    "direction": "left",
+    "messages": [
+      "HALL OF SHAME: COMPLETE",
+      "YOU SAW THE WARNINGS",
+      "THOSE BAGS WERE REAL",
+      "LEARN FROM OTHERS (YOU WON'T)",
+      "NGMI CONFIRMED",
+      "THEIR LOSS = YOUR FUTURE",
+      "PATTERN RECOGNITION: FAILED",
+      "NEXT: MORE EMPTY PROMISES ↓"
+    ]
+  },
+  {
+    "id": "roadmap-to-cta",
+    "direction": "right",
+    "messages": [
+      "Q2: ETERNAL",
+      "ROADMAP TO NOWHERE: VIEWED",
+      "99% LOADING FOREVER",
+      "PROGRESS: SIMULATED",
+      "SHIPPING: NEVER",
+      "MILESTONES: IMAGINARY",
+      "YOUR PATIENCE: WASTED",
+      "STILL WANT TO BUY? ↓"
+    ]
+  },
+  {
+    "id": "cta-to-footer",
+    "direction": "left",
+    "messages": [
+      "YOU MADE IT TO THE BOTTOM",
+      "ACHIEVEMENT UNLOCKED: NGMI",
+      "THANKS FOR SCROLLING",
+      "YOUR TIME: SUCCESSFULLY WASTED",
+      "REFRESH TO COPE AGAIN",
+      "THE EXIT WAS AT THE TOP",
+      "TOO LATE NOW",
+      "SEE YOU IN THE DISCORD (WE WON'T)"
+    ]
+  }
+]
