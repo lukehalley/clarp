@@ -63,16 +63,16 @@ export default function HallOfShame() {
   const [hoveredEntry, setHoveredEntry] = useState<number | null>(null);
 
   return (
-    <section className="py-16 sm:py-24 px-4 sm:px-6 bg-slate-dark text-ivory-light">
+    <section className="py-16 sm:py-24 px-4 sm:px-6">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-10 sm:mb-16">
           <span className="inline-block px-3 py-1 text-xs font-mono bg-larp-red text-black mb-3 sm:mb-4">
             hall of shame
           </span>
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4 font-display">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-dark mb-3 sm:mb-4 font-display">
             raised millions. shipped vibes.
           </h2>
-          <p className="text-sm sm:text-base text-ivory-light/70 max-w-2xl mx-auto px-2">
+          <p className="text-sm sm:text-base text-slate-light max-w-2xl mx-auto px-2">
             a tribute to the vaporware that came before us. names changed to protect the guilty.
           </p>
         </div>
@@ -81,9 +81,9 @@ export default function HallOfShame() {
           {SHAME_ENTRIES.map((entry, i) => (
             <div
               key={i}
-              className="relative bg-slate-medium/50 border-2 border-larp-red/30 p-4 sm:p-6 transition-all duration-300 hover:border-larp-red cursor-crosshair h-full flex flex-col"
+              className="relative bg-slate-dark border-2 border-larp-red/30 p-4 sm:p-6 transition-all duration-300 hover:border-larp-red cursor-crosshair h-full flex flex-col"
               style={{
-                boxShadow: hoveredEntry === i ? '0 0 20px rgba(239, 68, 68, 0.3)' : 'none',
+                boxShadow: hoveredEntry === i ? '0 0 20px rgba(239, 68, 68, 0.3)' : '4px 4px 0 var(--slate-dark)',
               }}
               onMouseEnter={() => setHoveredEntry(i)}
               onMouseLeave={() => setHoveredEntry(null)}
@@ -143,10 +143,10 @@ export default function HallOfShame() {
         </div>
 
         <div className="mt-8 sm:mt-12 text-center">
-          <p className="text-ivory-light/40 font-mono text-xs">
+          <p className="text-slate-light/60 font-mono text-xs">
             * any resemblance to actual projects is purely intentional
           </p>
-          <p className="text-ivory-light/30 font-mono text-[10px] mt-2">
+          <p className="text-slate-light/40 font-mono text-[10px] mt-2">
             if you're offended, you're probably on this list
           </p>
         </div>

@@ -103,7 +103,7 @@ export default function ProductCarousel() {
         </button>
 
         {/* Cards container - fixed height to prevent layout shift */}
-        <div className="flex-1 overflow-hidden -my-2 py-2">
+        <div className="flex-1 overflow-hidden -m-4 p-4">
           <div
             className="grid gap-4 sm:gap-6"
             style={{

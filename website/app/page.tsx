@@ -15,6 +15,7 @@ import ActivityNotifications from '@/components/ActivityNotifications';
 import HallOfShame from '@/components/HallOfShame';
 import PixelGithub from '@/components/PixelGithub';
 import WarningTicker from '@/components/WarningTicker';
+import Roadmap from '@/components/Roadmap';
 import TERMINAL_CONVERSATIONS from '@/data/terminal-conversations.json';
 import HERO_SENTENCES from '@/data/hero-sentences.json';
 import WARNING_TICKERS from '@/data/warning-tickers.json';
@@ -96,6 +97,11 @@ export default function Home() {
   const [rageClicks, setRageClicks] = useState(0);
   const [showRageMessage, setShowRageMessage] = useState(false);
   const [cursorTrail, setCursorTrail] = useState<{x: number, y: number, id: number}[]>([]);
+
+  // Roadmap button state - theatrical fake-out
+  const [roadmapClicks, setRoadmapClicks] = useState(0);
+  const [roadmapButtonText, setRoadmapButtonText] = useState('view roadmap');
+  const [isRoadmapScrolling, setIsRoadmapScrolling] = useState(false);
 
   // Terminal conversation typing animation
   useEffect(() => {
@@ -498,18 +504,58 @@ export default function Home() {
 
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start mb-6 sm:mb-8">
                 <div className="relative">
-                  <button className="btn-primary relative overflow-hidden group" onClick={(e) => {
-                    const btn = e.currentTarget;
-                    btn.classList.add('animate-[glitch_0.05s_ease-in-out_5]');
-                    setTimeout(() => btn.classList.remove('animate-[glitch_0.05s_ease-in-out_5]'), 300);
-                    setShowSmoke(true);
-                    setTimeout(() => setShowSmoke(false), 800);
-                  }}>
-                    <span className="group-active:opacity-0 transition-opacity">view roadmap</span>
+                  <button
+                    className={`btn-primary relative overflow-hidden group ${isRoadmapScrolling ? 'animate-pulse' : ''}`}
+                    onClick={(e) => {
+                      if (isRoadmapScrolling) return;
+
+                      const clickCount = roadmapClicks + 1;
+                      setRoadmapClicks(clickCount);
+
+                      // Glitch effect on the button
+                      const btn = e.currentTarget;
+                      btn.classList.add('animate-[glitch_0.1s_ease-in-out_3]');
+                      setTimeout(() => btn.classList.remove('animate-[glitch_0.1s_ease-in-out_3]'), 300);
+
+                      // Smoke effect
+                      setShowSmoke(true);
+                      setTimeout(() => setShowSmoke(false), 800);
+
+                      // Progressive mocking text based on click count
+                      const mockingTexts = [
+                        'ugh. fine.',
+                        'again?',
+                        'it\'s still there',
+                        'obsessed much?',
+                        'seek help',
+                      ];
+
+                      // Change text after smoke starts
+                      setTimeout(() => {
+                        setRoadmapButtonText(mockingTexts[Math.min(clickCount - 1, mockingTexts.length - 1)]);
+                        setIsRoadmapScrolling(true);
+                      }, 400);
+
+                      // Scroll to roadmap after theatrical delay
+                      setTimeout(() => {
+                        document.getElementById('roadmap')?.scrollIntoView({ behavior: 'smooth' });
+                        setIsRoadmapScrolling(false);
+                        // Reset text after a bit
+                        setTimeout(() => {
+                          if (clickCount < 3) {
+                            setRoadmapButtonText('view roadmap');
+                          }
+                        }, 2000);
+                      }, 900);
+                    }}
+                  >
+                    <span className={`transition-opacity ${isRoadmapScrolling ? 'opacity-70' : ''}`}>
+                      {roadmapButtonText}
+                    </span>
                     <span className="absolute inset-0 flex items-center justify-center opacity-0 group-active:opacity-100 text-black font-mono text-xs tracking-widest">░░░░░░░</span>
                   </button>
                   {showSmoke && (
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
                       <span className="absolute smoke-particle smoke-1 text-slate-dark/70 font-mono text-sm">░░</span>
                       <span className="absolute smoke-particle smoke-2 text-slate-dark/60 font-mono text-xs">░░░</span>
                       <span className="absolute smoke-particle smoke-3 text-danger-orange/50 font-mono text-sm">░</span>
@@ -541,30 +587,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ticker: hero → products */}
+      {/* ticker: hero → mascot */}
       <WarningTicker messages={WARNING_TICKERS[0].messages} direction={WARNING_TICKERS[0].direction as 'left' | 'right'} />
-
-      {/* products section */}
-      <section id="products" className="py-16 sm:py-24 px-4 sm:px-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-10 sm:mb-16">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-dark mb-3 sm:mb-4 font-display">
-              products
-            </h2>
-            <p className="text-sm sm:text-base text-slate-light max-w-2xl mx-auto px-2">
-              100 products. none exist. neither do theirs. you know this.
-              you're still scrolling.
-            </p>
-          </div>
-
-          <div className="relative pt-8">
-            <ProductCarousel />
-          </div>
-        </div>
-      </section>
-
-      {/* ticker: products → mascot */}
-      <WarningTicker messages={WARNING_TICKERS[1].messages} direction={WARNING_TICKERS[1].direction as 'left' | 'right'} />
 
       {/* mascot section */}
       <section className="py-16 sm:py-24 px-4 sm:px-6 bg-slate-dark text-ivory-light overflow-hidden">
@@ -608,11 +632,33 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ticker: mascot → docs */}
+      {/* ticker: mascot → products */}
+      <WarningTicker messages={WARNING_TICKERS[1].messages} direction={WARNING_TICKERS[1].direction as 'left' | 'right'} />
+
+      {/* products section */}
+      <section id="products" className="py-16 sm:py-24 px-4 sm:px-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-10 sm:mb-16">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-dark mb-3 sm:mb-4 font-display">
+              products
+            </h2>
+            <p className="text-sm sm:text-base text-slate-light max-w-2xl mx-auto px-2">
+              100 products. none exist. neither do theirs. you know this.
+              you're still scrolling.
+            </p>
+          </div>
+
+          <div className="relative pt-8">
+            <ProductCarousel />
+          </div>
+        </div>
+      </section>
+
+      {/* ticker: products → docs */}
       <WarningTicker messages={WARNING_TICKERS[2].messages} direction={WARNING_TICKERS[2].direction as 'left' | 'right'} />
 
       {/* documentation section */}
-      <section id="docs" className="py-16 sm:py-24 px-4 sm:px-6">
+      <section id="docs" className="py-16 sm:py-24 px-4 sm:px-6 bg-slate-dark">
         <DocsSection />
       </section>
 
@@ -628,78 +674,7 @@ export default function Home() {
       <WarningTicker messages={WARNING_TICKERS[4].messages} direction={WARNING_TICKERS[4].direction as 'left' | 'right'} />
 
       {/* roadmap section */}
-      <section id="roadmap" className="py-16 sm:py-24 px-4 sm:px-6 bg-ivory-medium border-y-2 border-slate-dark">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-10 sm:mb-16">
-            <span className="badge badge-error mb-3 sm:mb-4">roadmap</span>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-dark mb-3 sm:mb-4 font-display">
-              roadmap
-            </h2>
-            <p className="text-sm sm:text-base text-slate-light">
-              you've seen this format a hundred times. it never matters.
-            </p>
-          </div>
-
-          <div className="space-y-4 sm:space-y-6">
-            {[
-              { phase: 'q1 2025', title: 'admit it\'s vaporware', items: ['deploy $CLARP bonding curve', 'write "exit liquidity" on the homepage', 'make this roadmap (done)'], status: 'complete' },
-              { phase: 'q2 2025', title: 'continue admitting', items: ['update this section monthly (we won\'t)', 'add more fake products to the carousel', 'you\'re reading this right now'], status: 'current' },
-              { phase: 'q2 2025', title: 'keep not shipping', items: ['decline vc money (they didn\'t offer)', 'partnership with other admitted vaporware', 'audit the blank whitepaper'], status: 'upcoming' },
-              { phase: 'q2 forever', title: 'ship actual product', items: ['coming q2 (which q2? yes)', 'the q2 that this entire site mocks', 'ngmi (but honestly)'], status: 'never' },
-            ].map((phase, i) => (
-              <div
-                key={i}
-                className={`p-4 sm:p-6 border-2 ${
-                  phase.status === 'complete'
-                    ? 'bg-larp-green/5 border-larp-green'
-                    : phase.status === 'current'
-                    ? 'bg-danger-orange/5 border-danger-orange'
-                    : phase.status === 'never'
-                    ? 'bg-larp-red/5 border-larp-red'
-                    : 'bg-ivory-light border-slate-dark'
-                }`}
-                style={{ boxShadow: '4px 4px 0 var(--slate-dark)' }}
-              >
-                <div className="flex items-start justify-between mb-3 sm:mb-4 gap-2">
-                  <div>
-                    <span className="text-[10px] sm:text-xs font-mono text-slate-light">{phase.phase}</span>
-                    <h3 className="text-lg sm:text-xl font-bold text-slate-dark">{phase.title}</h3>
-                  </div>
-                  <Badge
-                    variant={
-                      phase.status === 'complete' ? 'success' :
-                      phase.status === 'current' ? 'warning' :
-                      phase.status === 'never' ? 'error' : 'default'
-                    }
-                  >
-                    {phase.status === 'complete' ? 'done' :
-                     phase.status === 'current' ? 'larping' :
-                     phase.status === 'never' ? 'never' : 'copium'}
-                  </Badge>
-                </div>
-                <ul className="space-y-1.5 sm:space-y-2">
-                  {phase.items.map((item, j) => (
-                    <li key={j} className="flex items-start gap-2 text-xs sm:text-sm text-slate-light">
-                      <span className={`shrink-0 ${
-                        phase.status === 'complete' ? 'text-larp-green' :
-                        phase.status === 'never' ? 'text-larp-red' : 'text-cloud-medium'
-                      }`}>
-                        {phase.status === 'complete' ? '✓' : phase.status === 'never' ? '✗' : '○'}
-                      </span>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-                {phase.status === 'current' && (
-                  <div className="mt-4">
-                    <ProgressBar progress={99} label="progress (perpetually stuck)" showPercent />
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <Roadmap />
 
       {/* ticker: roadmap → cta */}
       <WarningTicker messages={WARNING_TICKERS[5].messages} direction={WARNING_TICKERS[5].direction as 'left' | 'right'} />
