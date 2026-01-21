@@ -59,6 +59,7 @@ const NAV_HOVER_TEXT: Record<string, string> = {
   ai: 'chatgpt wrapper',
   docs: 'cope manual',
   'hall of shame': 'your portfolio',
+  'detector': 'snitch mode',
 };
 
 // Animation phases: 'typing' | 'paused' | 'deleting'
@@ -332,6 +333,12 @@ export default function Home() {
               {navHoverText['hall of shame'] || 'hall of shame'}
             </a>
             <a
+              href="/vapourware-detector"
+              className="text-sm text-danger-orange hover:text-larp-red transition-colors"
+            >
+              snitch mode
+            </a>
+            <a
               href="https://github.com/chrmln/clarp"
               target="_blank"
               rel="noopener noreferrer"
@@ -382,6 +389,13 @@ export default function Home() {
                 onClick={() => setMobileMenuOpen(false)}
               >
                 hall of shame
+              </a>
+              <a
+                href="/vapourware-detector"
+                className="block py-2 text-danger-orange hover:text-larp-red transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                snitch mode
               </a>
               <div className="flex gap-2 mt-2">
                 <a
