@@ -103,17 +103,17 @@ function Redacted({ width = 60 }: { width?: number }) {
 
 export default function Roadmap() {
   return (
-    <section id="roadmap" className="py-16 sm:py-24 px-4 sm:px-6 bg-slate-dark text-ivory-light overflow-hidden">
+    <section id="roadmap" className="py-16 sm:py-24 px-4 sm:px-6 overflow-hidden">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8 sm:mb-12">
           <span className="inline-block px-3 py-1 text-xs font-mono bg-larp-red text-white mb-3 sm:mb-4 border border-black">
             leaked document
           </span>
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-ivory-light mb-3 sm:mb-4 font-display">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-dark mb-3 sm:mb-4 font-display">
             internal roadmap memo
           </h2>
-          <p className="text-sm sm:text-base text-ivory-light/70 max-w-xl mx-auto">
+          <p className="text-sm sm:text-base text-slate-light max-w-xl mx-auto">
             this wasn't supposed to be public. now you know why.
           </p>
         </div>

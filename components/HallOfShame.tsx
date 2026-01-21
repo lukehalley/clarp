@@ -69,10 +69,10 @@ export default function HallOfShame() {
           <span className="inline-block px-3 py-1 text-xs font-mono bg-larp-red text-black mb-3 sm:mb-4">
             hall of shame
           </span>
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-dark mb-3 sm:mb-4 font-display">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-ivory-light mb-3 sm:mb-4 font-display">
             raised millions. shipped vibes.
           </h2>
-          <p className="text-sm sm:text-base text-slate-light max-w-2xl mx-auto px-2">
+          <p className="text-sm sm:text-base text-ivory-light/70 max-w-2xl mx-auto px-2">
             a tribute to the vaporware that came before us. names changed to protect the guilty.
           </p>
         </div>

@@ -504,7 +504,7 @@ export default function Home() {
             </div>
 
             {/* right: hero copy */}
-            <div className="order-1 lg:order-2 text-center lg:text-left">
+            <div className="order-1 lg:order-2 text-center lg:text-left overflow-hidden">
               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-slate-dark leading-tight mb-4 sm:mb-6 font-display">
                 $clarp
               </h1>
@@ -520,7 +520,7 @@ export default function Home() {
                 {HERO_SENTENCES[heroSentenceIndex]}
               </p>
 
-              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start mb-6 sm:mb-8">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start mb-6 sm:mb-8 w-full max-w-full">
                 <div className="relative">
                   <button
                     className={`btn-primary relative overflow-hidden group ${isRoadmapScrolling ? 'animate-pulse' : ''}`}
@@ -594,7 +594,7 @@ export default function Home() {
 
               {/* CA Box */}
               <div
-                className="bg-slate-dark border-2 border-danger-orange px-4 sm:px-6 py-3 sm:py-4 font-mono flex items-center gap-3 sm:gap-4 group cursor-pointer hover:border-larp-green transition-colors w-full max-w-2xl"
+                className="bg-slate-dark border-2 border-danger-orange px-4 sm:px-6 py-3 sm:py-4 font-mono flex items-center gap-3 sm:gap-4 group cursor-pointer hover:border-larp-green transition-colors w-full max-w-2xl overflow-hidden"
                 style={{ boxShadow: '4px 4px 0 #FF6B35' }}
                 onClick={() => {
                   navigator.clipboard.writeText(CA_ADDRESS);
@@ -603,7 +603,7 @@ export default function Home() {
                 }}
               >
                 <span className="text-danger-orange font-bold text-sm sm:text-base shrink-0">ca:</span>
-                <span className="text-ivory-light text-xs sm:text-sm flex-1">{CA_ADDRESS}</span>
+                <span className="text-ivory-light text-xs sm:text-sm flex-1 truncate min-w-0">{CA_ADDRESS}</span>
                 <span className={`shrink-0 text-xs sm:text-sm px-3 py-1 border transition-all ${caCopied ? 'bg-larp-green text-black border-larp-green' : 'bg-transparent text-ivory-light/60 border-ivory-light/30 group-hover:border-larp-green group-hover:text-larp-green'}`}>
                   {caCopied ? '✓ copied' : 'copy'}
                 </span>
@@ -680,38 +680,129 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ticker: products → docs */}
+      {/* ticker: products → charity */}
       <WarningTicker messages={WARNING_TICKERS[2].messages} direction={WARNING_TICKERS[2].direction as 'left' | 'right'} />
 
+      {/* charity section - the plot twist */}
+      <section className="py-16 sm:py-24 px-4 sm:px-6 overflow-hidden bg-slate-dark">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+            {/* Left: The twist */}
+            <div className="text-center lg:text-left">
+              <span className="badge badge-success mb-4 sm:mb-6">plot twist</span>
+              <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-ivory-light mb-4 sm:mb-6 font-display">
+                <span className="text-larp-green">100%</span>
+              </h2>
+              <p className="text-lg sm:text-xl md:text-2xl text-ivory-light/90 mb-2">
+                of fees go to charity.
+              </p>
+              <div className="w-32 sm:w-48 h-1 bg-danger-orange mb-6 mx-auto lg:mx-0" />
+              <p className="text-base sm:text-lg text-ivory-light/70 mb-6 sm:mb-8 max-w-md mx-auto lg:mx-0">
+                if you're gonna buy vaporware, it might as well help someone.
+              </p>
+              <ul className="space-y-2 sm:space-y-3 mb-6 sm:mb-8 text-left max-w-md mx-auto lg:mx-0">
+                {[
+                  'every transaction.',
+                  'public proof.',
+                  'no trust required.',
+                ].map((item, i) => (
+                  <li key={i} className="flex items-start gap-2 sm:gap-3 text-sm sm:text-base text-ivory-light/80">
+                    <span className="text-larp-green shrink-0">▸</span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              <p className="text-xs sm:text-sm text-danger-orange font-mono font-bold">
+                vaporware with a conscience.
+              </p>
+            </div>
+
+            {/* Right: Receipt/proof card */}
+            <div className="flex justify-center order-first lg:order-last">
+              <div
+                className="relative bg-ivory-light border-2 sm:border-3 border-slate-dark w-full max-w-sm"
+                style={{ boxShadow: '4px 4px 0 #0a0a09' }}
+              >
+                {/* Receipt header */}
+                <div className="bg-slate-dark px-4 sm:px-6 py-3 sm:py-4">
+                  <p className="text-ivory-light font-mono text-sm sm:text-base text-center">DONATION RECEIPT</p>
+                </div>
+
+                {/* Receipt content */}
+                <div className="p-4 sm:p-6 space-y-4">
+                  <div>
+                    <p className="text-slate-light font-mono text-xs mb-1">FROM:</p>
+                    <p className="text-slate-dark font-mono text-sm">$CLARP Protocol Fees</p>
+                  </div>
+
+                  <div className="border-t border-dashed border-slate-light/30" />
+
+                  <div>
+                    <p className="text-slate-light font-mono text-xs mb-1">TO:</p>
+                    <p className="text-slate-dark font-mono text-sm">Verified Charity Partner</p>
+                  </div>
+
+                  <div className="border-t border-dashed border-slate-light/30" />
+
+                  <div>
+                    <p className="text-slate-light font-mono text-xs mb-1">AMOUNT:</p>
+                    <p className="text-larp-green font-mono text-xl sm:text-2xl font-bold">100% OF FEES</p>
+                  </div>
+
+                  <div className="border-t border-dashed border-slate-light/30" />
+
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-slate-light font-mono text-xs mb-1">STATUS:</p>
+                      <span className="inline-block bg-larp-green text-black font-mono text-xs px-3 py-1 font-bold">
+                        VERIFIED
+                      </span>
+                    </div>
+                    <span className="text-larp-green text-3xl">✓</span>
+                  </div>
+
+                  <p className="text-slate-light/60 font-mono text-[10px] text-center pt-2">
+                    on-chain proof available
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ticker: charity → docs */}
+      <WarningTicker messages={WARNING_TICKERS[3].messages} direction={WARNING_TICKERS[3].direction as 'left' | 'right'} />
+
       {/* documentation section */}
-      <section id="docs" className="py-16 sm:py-24 px-4 sm:px-6 bg-slate-dark">
+      <section id="docs" className="py-16 sm:py-24 px-4 sm:px-6">
         <DocsSection />
       </section>
 
       {/* ticker: docs → hall of shame */}
-      <WarningTicker messages={WARNING_TICKERS[3].messages} direction={WARNING_TICKERS[3].direction as 'left' | 'right'} />
+      <WarningTicker messages={WARNING_TICKERS[4].messages} direction={WARNING_TICKERS[4].direction as 'left' | 'right'} />
 
       {/* hall of shame section */}
-      <section id="victims">
+      <section id="victims" className="bg-slate-dark">
         <HallOfShame />
       </section>
 
       {/* ticker: hall of shame → roadmap */}
-      <WarningTicker messages={WARNING_TICKERS[4].messages} direction={WARNING_TICKERS[4].direction as 'left' | 'right'} />
+      <WarningTicker messages={WARNING_TICKERS[5].messages} direction={WARNING_TICKERS[5].direction as 'left' | 'right'} />
 
       {/* roadmap section */}
       <Roadmap />
 
       {/* ticker: roadmap → cta */}
-      <WarningTicker messages={WARNING_TICKERS[5].messages} direction={WARNING_TICKERS[5].direction as 'left' | 'right'} />
+      <WarningTicker messages={WARNING_TICKERS[6].messages} direction={WARNING_TICKERS[6].direction as 'left' | 'right'} />
 
       {/* cta section */}
-      <section className="py-16 sm:py-24 px-4 sm:px-6 relative">
+      <section className="py-16 sm:py-24 px-4 sm:px-6 relative bg-slate-dark">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-dark mb-4 sm:mb-6 font-display">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-ivory-light mb-4 sm:mb-6 font-display">
             {ctaClicks.doIt >= 3 ? 'you\'re still clicking' : ctaClicks.pretend >= 3 ? 'liar' : 'you made it to the bottom'}
           </h2>
-          <p className="text-base sm:text-xl text-slate-light mb-2 sm:mb-4">
+          <p className="text-base sm:text-xl text-ivory-light/70 mb-2 sm:mb-4">
             {ctaClicks.doIt >= 5 ? 'seriously?' : ctaClicks.pretend >= 5 ? 'we both know you\'re lying.' : 'of a website that exists purely to mock you.'}
           </p>
           <p className="text-sm sm:text-lg text-danger-orange mb-6 sm:mb-8 font-mono font-bold">
@@ -736,14 +827,14 @@ export default function Home() {
               {ctaClicks.pretend >= 5 ? 'cope' : ctaClicks.pretend >= 3 ? 'sure you won\'t' : ctaClicks.pretend >= 1 ? 'you\'re lying' : 'pretend you won\'t'}
             </button>
           </div>
-          <p className="text-xs text-slate-light/50 mt-6 font-mono">
+          <p className="text-xs text-ivory-light/50 mt-6 font-mono">
             {ctaClicks.doIt + ctaClicks.pretend >= 5 ? 'you\'ve clicked ' + (ctaClicks.doIt + ctaClicks.pretend) + ' times. the button still does nothing.' : 'this button does nothing. like every "launch app" button you\'ve clicked.'}
           </p>
         </div>
       </section>
 
       {/* ticker: cta → footer */}
-      <WarningTicker messages={WARNING_TICKERS[6].messages} direction={WARNING_TICKERS[6].direction as 'left' | 'right'} />
+      <WarningTicker messages={WARNING_TICKERS[7].messages} direction={WARNING_TICKERS[7].direction as 'left' | 'right'} />
 
       <Footer />
 

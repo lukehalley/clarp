@@ -127,10 +127,10 @@ export default function DocsSection() {
     <div className="max-w-6xl mx-auto">
       <div className="text-center mb-8 sm:mb-12">
         <span className="badge badge-error mb-3 sm:mb-4">cope manual</span>
-        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-ivory-light mb-3 sm:mb-4 font-display">
+        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-dark mb-3 sm:mb-4 font-display">
           documentation
         </h2>
-        <p className="text-sm sm:text-base text-ivory-light/70 max-w-2xl mx-auto px-2">
+        <p className="text-sm sm:text-base text-slate-light max-w-2xl mx-auto px-2">
           everything you need to get rekt with clarp.
         </p>
       </div>

@@ -28,22 +28,36 @@
     ]
   },
   {
-    "id": "products-to-docs",
+    "id": "products-to-charity",
     "direction": "left",
     "messages": [
       "YOU SCROLLED PAST 100 PRODUCTS",
       "NONE OF THEM EXIST",
-      "CAROUSEL OF DISAPPOINTMENT: COMPLETE",
-      "VAPORWARE PORTFOLIO: VIEWED",
-      "COPIUM RESERVES: DEPLETING",
-      "SUNK COST FALLACY: ACTIVATED",
-      "DOCUMENTATION BELOW (OF NOTHING)",
-      "COPE MANUAL: LOADING"
+      "BUT WAIT",
+      "THERE'S MORE",
+      "PLOT TWIST INCOMING",
+      "NO SERIOUSLY",
+      "THIS PART IS REAL",
+      "KEEP SCROLLING"
+    ]
+  },
+  {
+    "id": "charity-to-docs",
+    "direction": "right",
+    "messages": [
+      "100% TO CHARITY",
+      "WAIT THAT'S ACTUALLY REAL",
+      "VAPORWARE WITH A CONSCIENCE",
+      "YOUR BAGS MIGHT HELP SOMEONE",
+      "ON-CHAIN PROOF",
+      "NO TRUST REQUIRED",
+      "THE HONESTY IS THE PRODUCT",
+      "STILL VAPORWARE THOUGH"
     ]
   },
   {
     "id": "docs-to-shame",
-    "direction": "right",
+    "direction": "left",
     "messages": [
       "YOU READ THE DOCS",
       "COPE MANUAL: STUDIED",
@@ -57,7 +71,7 @@
   },
   {
     "id": "shame-to-roadmap",
-    "direction": "left",
+    "direction": "right",
     "messages": [
       "HALL OF SHAME: COMPLETE",
       "YOU SAW THE WARNINGS",
@@ -71,7 +85,7 @@
   },
   {
     "id": "roadmap-to-cta",
-    "direction": "right",
+    "direction": "left",
     "messages": [
       "Q2: ETERNAL",
       "ROADMAP TO NOWHERE: VIEWED",
@@ -85,7 +99,7 @@
   },
   {
     "id": "cta-to-footer",
-    "direction": "left",
+    "direction": "right",
     "messages": [
       "YOU MADE IT TO THE BOTTOM",
       "ACHIEVEMENT UNLOCKED: NGMI",
