@@ -19,6 +19,7 @@ import Roadmap from '@/components/Roadmap';
 import TERMINAL_CONVERSATIONS from '@/data/terminal-conversations.json';
 import HERO_SENTENCES from '@/data/hero-sentences.json';
 import WARNING_TICKERS from '@/data/warning-tickers.json';
+import DONATIONS from '@/data/donations.json';
 
 const ASCII_LOGO = `
  ██████╗██╗      █████╗ ██████╗ ██████╗
@@ -768,6 +769,46 @@ export default function Home() {
               </div>
             </div>
           </div>
+
+          {/* Donations list */}
+          {DONATIONS.length > 0 && (
+            <div className="mt-12 sm:mt-16">
+              <div className="flex items-center gap-3 mb-6">
+                <span className="text-larp-green text-lg">▸</span>
+                <h3 className="text-lg sm:text-xl font-mono text-ivory-light font-bold">
+                  verified donations ({DONATIONS.length})
+                </h3>
+              </div>
+              <div className="space-y-3">
+                {DONATIONS.map((donation, i) => (
+                  <a
+                    key={i}
+                    href={`https://solscan.io/tx/${donation.tx}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-between p-4 bg-ivory-light/5 border border-ivory-light/10 hover:border-larp-green/50 transition-colors group"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <span className="text-larp-green shrink-0">✓</span>
+                      <span className="font-mono text-sm text-ivory-light/80 truncate">
+                        {donation.tx.slice(0, 8)}...{donation.tx.slice(-8)}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3 shrink-0">
+                      {donation.amount && (
+                        <span className="font-mono text-sm text-larp-green">{donation.amount}</span>
+                      )}
+                      <span className="text-xs text-ivory-light/40 font-mono">{donation.date}</span>
+                      <span className="text-ivory-light/40 group-hover:text-larp-green transition-colors">→</span>
+                    </div>
+                  </a>
+                ))}
+              </div>
+              <p className="text-xs text-ivory-light/30 font-mono mt-4 text-center">
+                click any transaction to verify on solscan
+              </p>
+            </div>
+          )}
         </div>
       </section>
 
