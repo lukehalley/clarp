@@ -77,7 +77,7 @@ export default function Navbar({ onConnectWallet, showWalletButton = true }: Nav
             </Link>
             <div className="flex items-center gap-2 ml-2">
               <a
-                href="https://t.me/claboratory"
+                href="https://t.me/CLARPTG"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-9 h-9 flex items-center justify-center border-2 border-slate-dark bg-white hover:bg-slate-dark hover:text-white text-slate-dark transition-all"
@@ -150,7 +150,7 @@ export default function Navbar({ onConnectWallet, showWalletButton = true }: Nav
               </Link>
               <div className="flex gap-3 pt-3 border-t border-slate-dark/10">
                 <a
-                  href="https://t.me/claboratory"
+                  href="https://t.me/CLARPTG"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex-1 flex items-center justify-center gap-2 py-3 border-2 border-slate-dark bg-white text-slate-dark font-mono text-sm"

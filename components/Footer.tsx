@@ -63,7 +63,7 @@ export default function Footer() {
                 <span className="text-lg">𝕏</span>
               </a>
               <a
-                href="https://t.me/claboratory"
+                href="https://t.me/CLARPTG"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-10 h-10 bg-slate-medium flex items-center justify-center text-ivory-light/60 hover:text-danger-orange hover:bg-slate-light/20 transition-colors border border-slate-light/20"
