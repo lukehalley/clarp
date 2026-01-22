@@ -5,41 +5,50 @@ import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import WarningTicker from '@/components/WarningTicker';
 import Footer from '@/components/Footer';
-import { Skull, AlertTriangle, AlertCircle, CheckCircle, Sparkles, Bot, FileText, Ghost, ClipboardCopy, Users, FlaskConical } from 'lucide-react';
+import { Skull, AlertTriangle, AlertCircle, CheckCircle, Sparkles, Bot, FileText, Ghost, ClipboardCopy, Users, FlaskConical, Loader2, ExternalLink } from 'lucide-react';
 
-// Fake scan results for the mockup
-const SCAN_VERDICTS = [
-  { score: 97, verdict: 'CONFIRMED VAPOURWARE', color: 'larp-red', icon: 'skull' },
-  { score: 84, verdict: 'LIKELY RUGPULL', color: 'larp-red', icon: 'alert-triangle' },
-  { score: 72, verdict: 'SUSPICIOUS AF', color: 'larp-yellow', icon: 'alert-circle' },
-  { score: 45, verdict: 'PROBABLY FINE', color: 'larp-green', icon: 'check-circle' },
-  { score: 12, verdict: 'SOMEHOW REAL', color: 'larp-green', icon: 'sparkles' },
-];
+interface Finding {
+  label: string;
+  value: string;
+  severity: 'critical' | 'warning' | 'info' | 'good';
+}
 
-const SCAN_FINDINGS = [
-  { label: 'ai-generated code', value: '94%', bad: true },
-  { label: 'meaningful commits', value: '3', bad: true },
-  { label: 'actual functions', value: '12', bad: true },
-  { label: 'readme-to-code ratio', value: '47:1', bad: true },
-  { label: 'console.log statements', value: '847', bad: true },
-  { label: 'todo: fix later', value: '156', bad: true },
-  { label: 'copy-pasted from stack overflow', value: '67%', bad: true },
-  { label: 'last real commit', value: '4 months ago', bad: true },
-  { label: 'contributor wallets', value: 'all same person', bad: true },
-  { label: 'test coverage', value: '0%', bad: true },
-];
+interface ScanResult {
+  repoName: string;
+  repoFullName: string;
+  repoUrl: string;
+  score: number;
+  verdict: string;
+  verdictColor: string;
+  verdictIcon: string;
+  summary: string;
+  findings: Finding[];
+  recommendation: string;
+  ropiScore: number;
+  metadata: {
+    stars: number;
+    forks: number;
+    language: string | null;
+    codeFiles: number;
+    testFiles: number;
+    lastCommitDaysAgo: number;
+    uniqueContributors: number;
+    readmeLength: number;
+  };
+  scannedAt: string;
+}
 
-const FAKE_REPOS = [
-  { name: 'ai-agent-pro-max', verdict: 97, tag: 'vapourware' },
-  { name: 'defi-yield-optimizer', verdict: 89, tag: 'rugpull' },
-  { name: 'quantum-blockchain-ai', verdict: 96, tag: 'buzzword soup' },
-  { name: 'gpt-wrapper-saas', verdict: 78, tag: 'chatgpt with extra steps' },
-  { name: 'web3-social-protocol', verdict: 91, tag: 'just a readme' },
-];
+interface RecentScan {
+  repoName: string;
+  score: number;
+  verdict: string;
+  tag: string;
+  scannedAt: string;
+}
 
 const TICKER_MESSAGES = [
   'ai recognizes ai',
-  'scanning github repos since never',
+  'scanning github repos live',
   'detecting vapourware professionally',
   'trust no readme',
   'your portfolio is a warning sign',
@@ -71,77 +80,133 @@ const DetectionIcon = ({ icon, className = '' }: { icon: string; className?: str
   }
 };
 
+const getSeverityColor = (severity: Finding['severity']): string => {
+  switch (severity) {
+    case 'critical': return 'text-larp-red';
+    case 'warning': return 'text-larp-yellow';
+    case 'good': return 'text-larp-green';
+    default: return 'text-ivory-light/60';
+  }
+};
+
 export default function VapourwareDetector() {
   const [mounted, setMounted] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
-  const [scanComplete, setScanComplete] = useState(false);
+  const [scanResult, setScanResult] = useState<ScanResult | null>(null);
+  const [scanError, setScanError] = useState<string | null>(null);
   const [scanProgress, setScanProgress] = useState(0);
   const [currentScanStep, setCurrentScanStep] = useState('');
-  const [selectedVerdict, setSelectedVerdict] = useState(SCAN_VERDICTS[0]);
   const [inputValue, setInputValue] = useState('');
   const [tweetCopied, setTweetCopied] = useState(false);
-  const [demoClicks, setDemoClicks] = useState(0);
+  const [scanCount, setScanCount] = useState(0);
+  const [recentScans, setRecentScans] = useState<RecentScan[]>([]);
   const terminalRef = useRef<HTMLDivElement>(null);
 
   const SCAN_STEPS = [
     'connecting to github api...',
-    'downloading repository...',
+    'fetching repository metadata...',
     'analyzing commit history...',
+    'scanning file structure...',
+    'downloading readme...',
     'detecting ai-generated patterns...',
-    'counting meaningful code...',
-    'checking for actual tests...',
-    'scanning for copy-paste signatures...',
-    'evaluating readme bloat...',
-    'cross-referencing kol wallets...',
-    'calculating vapourware score...',
-    'generating verdict...',
+    'evaluating code quality metrics...',
+    'calculating buzzword density...',
+    'cross-referencing contributor data...',
+    'generating ai verdict...',
+    'compiling final report...',
   ];
 
   useEffect(() => {
     setMounted(true);
+    fetchRecentScans();
   }, []);
 
   useEffect(() => {
     if (terminalRef.current) {
       terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
     }
-  }, [currentScanStep, scanProgress]);
+  }, [currentScanStep, scanProgress, scanResult]);
 
-  const runFakeScan = () => {
-    if (isScanning) return;
+  const fetchRecentScans = async () => {
+    try {
+      const response = await fetch('/api/scan');
+      if (response.ok) {
+        const data = await response.json();
+        setRecentScans(data.scans || []);
+      }
+    } catch {
+      // Silently fail - recent scans are non-critical
+    }
+  };
+
+  const runScan = async () => {
+    if (isScanning || !inputValue.trim()) return;
 
     setIsScanning(true);
-    setScanComplete(false);
+    setScanResult(null);
+    setScanError(null);
     setScanProgress(0);
     setCurrentScanStep('');
+    setScanCount(prev => prev + 1);
 
-    // Pick a random verdict
-    const verdict = SCAN_VERDICTS[Math.floor(Math.random() * SCAN_VERDICTS.length)];
-    setSelectedVerdict(verdict);
-
+    // Animate progress steps
     let stepIndex = 0;
     const stepInterval = setInterval(() => {
-      if (stepIndex < SCAN_STEPS.length) {
+      if (stepIndex < SCAN_STEPS.length - 1) {
         setCurrentScanStep(SCAN_STEPS[stepIndex]);
-        setScanProgress(Math.min(((stepIndex + 1) / SCAN_STEPS.length) * 100, 99));
+        setScanProgress(Math.min(((stepIndex + 1) / SCAN_STEPS.length) * 90, 89));
         stepIndex++;
-      } else {
-        clearInterval(stepInterval);
-        setScanProgress(100);
-        setCurrentScanStep('scan complete.');
-        setTimeout(() => {
-          setIsScanning(false);
-          setScanComplete(true);
-        }, 500);
       }
-    }, 400);
+    }, 800);
+
+    try {
+      const response = await fetch('/api/scan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: inputValue.trim() }),
+      });
+
+      clearInterval(stepInterval);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Scan failed');
+      }
+
+      const result: ScanResult = await response.json();
+
+      setCurrentScanStep('scan complete.');
+      setScanProgress(100);
+
+      setTimeout(() => {
+        setScanResult(result);
+        setIsScanning(false);
+        fetchRecentScans(); // Refresh recent scans
+      }, 500);
+
+    } catch (error: any) {
+      clearInterval(stepInterval);
+      setScanError(error.message || 'Failed to scan repository');
+      setCurrentScanStep('scan failed.');
+      setScanProgress(0);
+      setIsScanning(false);
+    }
   };
 
   const copyTweet = () => {
-    const tweet = `@CLARP_bot scan https://github.com/example/repo`;
+    const repoUrl = scanResult?.repoUrl || 'https://github.com/example/repo';
+    const tweet = `@CLARP scan ${repoUrl}`;
     navigator.clipboard.writeText(tweet);
     setTweetCopied(true);
     setTimeout(() => setTweetCopied(false), 2000);
+  };
+
+  const clearScan = () => {
+    setScanResult(null);
+    setScanError(null);
+    setInputValue('');
+    setScanProgress(0);
+    setCurrentScanStep('');
   };
 
   if (!mounted) return null;
@@ -168,9 +233,9 @@ export default function VapourwareDetector() {
 
         <div className="max-w-4xl mx-auto relative text-center">
           {/* badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-larp-red/10 border border-larp-red/30 text-larp-red font-mono text-xs mb-6">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-larp-green/10 border border-larp-green/30 text-larp-green font-mono text-xs mb-6">
             <span className="animate-pulse">●</span>
-            coming q2 (the eternal q2)
+            live - powered by claude ai
           </div>
 
           {/* title */}
@@ -189,8 +254,8 @@ export default function VapourwareDetector() {
           </p>
 
           <p className="text-sm sm:text-base text-slate-light max-w-2xl mx-auto mb-12">
-            tag <span className="text-danger-orange font-bold">@CLARP</span> on x with any github repo link.
-            our ai will scan the codebase and tell you if it's real or just another
+            paste any <span className="text-danger-orange font-bold">github url</span> below.
+            our ai will scan the codebase, analyze commits, and tell you if it's real or just another
             <span className="text-larp-red"> chatgpt wrapper with extra steps</span>.
           </p>
 
@@ -198,20 +263,24 @@ export default function VapourwareDetector() {
           <div className="bg-slate-dark border-2 border-danger-orange p-6 sm:p-8 text-left max-w-xl mx-auto mb-12" style={{ boxShadow: '6px 6px 0 #FF6B35' }}>
             <div className="flex items-center gap-2 mb-4">
               <span className="text-danger-orange">$</span>
-              <span className="text-ivory-light font-mono text-sm">how to use</span>
+              <span className="text-ivory-light font-mono text-sm">how it works</span>
             </div>
             <div className="space-y-3 font-mono text-sm">
               <div className="flex items-start gap-3">
                 <span className="text-larp-green shrink-0">1.</span>
-                <span className="text-ivory-light/80">find suspicious repo on github</span>
+                <span className="text-ivory-light/80">paste github url in the scanner below</span>
               </div>
               <div className="flex items-start gap-3">
                 <span className="text-larp-green shrink-0">2.</span>
-                <span className="text-ivory-light/80">tweet: <span className="text-danger-orange">@CLARP scan [github url]</span></span>
+                <span className="text-ivory-light/80">we fetch repo data via github api</span>
               </div>
               <div className="flex items-start gap-3">
                 <span className="text-larp-green shrink-0">3.</span>
-                <span className="text-ivory-light/80">receive verdict. lose faith in humanity.</span>
+                <span className="text-ivory-light/80">claude ai analyzes code, commits, readme</span>
+              </div>
+              <div className="flex items-start gap-3">
+                <span className="text-larp-green shrink-0">4.</span>
+                <span className="text-ivory-light/80">receive verdict. question your life choices.</span>
               </div>
             </div>
           </div>
@@ -261,16 +330,16 @@ export default function VapourwareDetector() {
       {/* ticker */}
       <WarningTicker messages={['scanning for truth in a sea of lies', 'your due diligence starts here', 'ai vs ai: the final boss']} direction="right" />
 
-      {/* live demo section */}
+      {/* live scanner section */}
       <section className="py-16 sm:py-24 px-4 sm:px-6">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
-            <span className="badge badge-warning mb-4">interactive demo</span>
+            <span className="badge badge-warning mb-4">live scanner</span>
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-dark mb-4 font-display">
-              try it <span className="text-danger-orange">yourself</span>
+              scan a <span className="text-danger-orange">repo</span>
             </h2>
             <p className="text-sm sm:text-base text-slate-light">
-              paste any github url. watch the magic. (it's fake but the vibes are real)
+              paste any public github url. get a real ai-powered verdict.
             </p>
           </div>
 
@@ -280,9 +349,9 @@ export default function VapourwareDetector() {
               <div className="terminal-dot bg-larp-red opacity-50" />
               <div className="terminal-dot bg-larp-yellow opacity-50" />
               <div className="terminal-dot bg-larp-green opacity-50" />
-              <span className="ml-3 text-xs text-ivory-light/50 font-mono">vapourware-detector v0.0.1</span>
+              <span className="ml-3 text-xs text-ivory-light/50 font-mono">vapourware-detector v1.0.0</span>
             </div>
-            <div ref={terminalRef} className="terminal-body min-h-[200px] max-h-[400px] overflow-y-auto">
+            <div ref={terminalRef} className="terminal-body min-h-[250px] max-h-[500px] overflow-y-auto">
               {/* input row */}
               <div className="flex items-center gap-2 mb-4">
                 <span className="text-danger-orange shrink-0">$</span>
@@ -291,71 +360,129 @@ export default function VapourwareDetector() {
                   type="text"
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
-                  placeholder="https://github.com/example/repo"
+                  placeholder="https://github.com/owner/repo"
                   className="flex-1 bg-transparent border-none outline-none text-ivory-light font-mono text-sm placeholder:text-ivory-light/30"
-                  onKeyDown={(e) => e.key === 'Enter' && runFakeScan()}
+                  onKeyDown={(e) => e.key === 'Enter' && runScan()}
                   disabled={isScanning}
                 />
               </div>
 
-              {/* scan output */}
-              {(isScanning || scanComplete) && (
+              {/* scan progress */}
+              {isScanning && (
                 <div className="space-y-2 font-mono text-sm">
-                  {isScanning && (
-                    <>
-                      <div className="text-ivory-light/60">{currentScanStep}</div>
-                      <div className="w-full bg-slate-medium h-2 overflow-hidden">
-                        <div
-                          className="h-full bg-danger-orange transition-all duration-300"
-                          style={{ width: `${scanProgress}%` }}
-                        />
-                      </div>
-                      <div className="text-ivory-light/40 text-xs">{Math.floor(scanProgress)}% complete</div>
-                    </>
-                  )}
+                  <div className="flex items-center gap-2 text-ivory-light/60">
+                    <Loader2 className="w-4 h-4 animate-spin text-danger-orange" />
+                    <span>{currentScanStep}</span>
+                  </div>
+                  <div className="w-full bg-slate-medium h-2 overflow-hidden">
+                    <div
+                      className="h-full bg-danger-orange transition-all duration-300"
+                      style={{ width: `${scanProgress}%` }}
+                    />
+                  </div>
+                  <div className="text-ivory-light/40 text-xs">{Math.floor(scanProgress)}% complete</div>
+                </div>
+              )}
 
-                  {scanComplete && (
-                    <div className="animate-fade-in">
-                      <div className="border-t border-ivory-light/20 pt-4 mt-4">
-                        <div className="flex items-center gap-3 mb-4">
-                          <VerdictIcon icon={selectedVerdict.icon} className={`text-${selectedVerdict.color}`} />
-                          <div>
-                            <div className={`text-${selectedVerdict.color} font-bold text-lg`}>
-                              {selectedVerdict.verdict}
-                            </div>
-                            <div className="text-ivory-light/40 text-xs">
-                              vapourware score: {selectedVerdict.score}/100
-                            </div>
-                          </div>
+              {/* error display */}
+              {scanError && (
+                <div className="animate-fade-in border-t border-ivory-light/20 pt-4 mt-4">
+                  <div className="flex items-center gap-3 text-larp-red">
+                    <AlertTriangle size={20} />
+                    <span className="font-mono text-sm">{scanError}</span>
+                  </div>
+                </div>
+              )}
+
+              {/* results display */}
+              {scanResult && (
+                <div className="animate-fade-in">
+                  <div className="border-t border-ivory-light/20 pt-4 mt-4">
+                    {/* verdict header */}
+                    <div className="flex items-center gap-3 mb-4">
+                      <VerdictIcon icon={scanResult.verdictIcon} className={`text-${scanResult.verdictColor}`} />
+                      <div>
+                        <div className={`text-${scanResult.verdictColor} font-bold text-lg`}>
+                          {scanResult.verdict}
                         </div>
-
-                        <div className="grid grid-cols-2 gap-2 text-xs">
-                          {SCAN_FINDINGS.slice(0, 6).map((finding, i) => (
-                            <div key={i} className="flex justify-between items-center py-1 border-b border-ivory-light/10">
-                              <span className="text-ivory-light/60">{finding.label}</span>
-                              <span className={finding.bad ? 'text-larp-red' : 'text-larp-green'}>{finding.value}</span>
-                            </div>
-                          ))}
-                        </div>
-
-                        <div className="mt-4 pt-4 border-t border-ivory-light/20">
-                          <div className="text-danger-orange text-xs">recommendation:</div>
-                          <div className="text-ivory-light/80 text-sm mt-1">
-                            {selectedVerdict.score > 70
-                              ? 'do not invest. this is literally nothing wrapped in a readme.'
-                              : selectedVerdict.score > 40
-                              ? 'proceed with extreme caution. probably fine. probably.'
-                              : 'somehow this appears to be a real project. rare.'}
-                          </div>
+                        <div className="text-ivory-light/40 text-xs">
+                          vapourware score: {scanResult.score}/100
                         </div>
                       </div>
                     </div>
-                  )}
+
+                    {/* repo info */}
+                    <div className="mb-4 p-3 bg-ivory-light/5 border border-ivory-light/10">
+                      <a
+                        href={scanResult.repoUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 text-danger-orange hover:underline font-mono text-sm"
+                      >
+                        <span>{scanResult.repoFullName}</span>
+                        <ExternalLink size={14} />
+                      </a>
+                      <div className="text-ivory-light/60 text-xs mt-1 italic">
+                        "{scanResult.summary}"
+                      </div>
+                    </div>
+
+                    {/* findings grid */}
+                    <div className="grid grid-cols-2 gap-2 text-xs mb-4">
+                      {scanResult.findings.map((finding, i) => (
+                        <div key={i} className="flex justify-between items-center py-1 border-b border-ivory-light/10">
+                          <span className="text-ivory-light/60">{finding.label}</span>
+                          <span className={getSeverityColor(finding.severity)}>{finding.value}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* metadata */}
+                    <div className="grid grid-cols-4 gap-2 text-xs mb-4 p-3 bg-ivory-light/5 border border-ivory-light/10">
+                      <div className="text-center">
+                        <div className="text-ivory-light/40">stars</div>
+                        <div className="text-ivory-light font-bold">{scanResult.metadata.stars}</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-ivory-light/40">code files</div>
+                        <div className="text-ivory-light font-bold">{scanResult.metadata.codeFiles}</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-ivory-light/40">test files</div>
+                        <div className={`font-bold ${scanResult.metadata.testFiles > 0 ? 'text-larp-green' : 'text-larp-red'}`}>
+                          {scanResult.metadata.testFiles}
+                        </div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-ivory-light/40">contributors</div>
+                        <div className="text-ivory-light font-bold">{scanResult.metadata.uniqueContributors}</div>
+                      </div>
+                    </div>
+
+                    {/* recommendation */}
+                    <div className="pt-4 border-t border-ivory-light/20">
+                      <div className="text-danger-orange text-xs">recommendation:</div>
+                      <div className="text-ivory-light/80 text-sm mt-1">
+                        {scanResult.recommendation}
+                      </div>
+                    </div>
+
+                    {/* ROPI score */}
+                    <div className="mt-4 p-3 bg-danger-orange/10 border border-danger-orange/30">
+                      <div className="text-xs text-danger-orange">return on perceived investment (ROPI™)</div>
+                      <div className="text-2xl font-bold text-danger-orange">{scanResult.ropiScore}/100</div>
+                      <div className="text-xs text-ivory-light/40">
+                        {scanResult.ropiScore > 70 ? 'high likelihood of disappointment' :
+                         scanResult.ropiScore > 40 ? 'manage your expectations' :
+                         'might actually be worth looking at'}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               )}
 
               {/* cursor */}
-              {!isScanning && !scanComplete && (
+              {!isScanning && !scanResult && !scanError && (
                 <div className="flex items-center gap-2">
                   <span className="inline-block w-2 h-4 bg-danger-orange animate-blink" />
                 </div>
@@ -366,39 +493,37 @@ export default function VapourwareDetector() {
           {/* action buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button
-              onClick={() => {
-                setDemoClicks(prev => prev + 1);
-                runFakeScan();
-              }}
-              disabled={isScanning}
-              className={`btn-primary ${isScanning ? 'opacity-50 cursor-not-allowed' : ''}`}
+              onClick={runScan}
+              disabled={isScanning || !inputValue.trim()}
+              className={`btn-primary ${(isScanning || !inputValue.trim()) ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
-              {isScanning ? 'scanning...' : demoClicks > 3 ? 'you love this' : 'run scan'}
+              {isScanning ? (
+                <span className="flex items-center gap-2">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  scanning...
+                </span>
+              ) : scanCount > 3 ? 'scan another' : 'run scan'}
             </button>
             <button
-              onClick={() => {
-                setScanComplete(false);
-                setInputValue('');
-                setScanProgress(0);
-              }}
+              onClick={clearScan}
               className="btn-secondary"
             >
               clear
             </button>
           </div>
 
-          {demoClicks > 5 && (
+          {scanCount > 5 && (
             <p className="text-center text-xs text-slate-light/50 mt-4 font-mono">
-              you've run {demoClicks} scans. on a demo. that does nothing.
+              you've run {scanCount} scans. finding lots of vapourware out there?
             </p>
           )}
         </div>
       </section>
 
       {/* ticker */}
-      <WarningTicker messages={['recent scans: 47,832 repos analyzed', '94% confirmed vapourware', 'the other 6% were forks of vapourware']} direction="left" />
+      <WarningTicker messages={['real scans. real verdicts.', 'powered by claude ai', 'github api integration active']} direction="left" />
 
-      {/* recent scans mockup */}
+      {/* recent scans */}
       <section className="py-16 sm:py-24 px-4 sm:px-6 bg-slate-dark text-ivory-light">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
@@ -407,36 +532,42 @@ export default function VapourwareDetector() {
               recent <span className="text-danger-orange">scans</span>
             </h2>
             <p className="text-sm sm:text-base text-ivory-light/60">
-              a sample of repos our users have exposed. names changed to protect the guilty.
+              repos analyzed by the community. the hall of shame updates in real time.
             </p>
           </div>
 
-          <div className="space-y-3">
-            {FAKE_REPOS.map((repo, i) => (
-              <div
-                key={i}
-                className="flex items-center justify-between p-4 bg-ivory-light/5 border border-ivory-light/10 hover:border-danger-orange/30 transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <span className="text-danger-orange">▸</span>
-                  <span className="font-mono text-sm">{repo.name}</span>
-                  <span className="text-xs px-2 py-0.5 bg-larp-red/20 text-larp-red border border-larp-red/30">
-                    {repo.tag}
-                  </span>
+          {recentScans.length > 0 ? (
+            <div className="space-y-3">
+              {recentScans.map((scan, i) => (
+                <div
+                  key={i}
+                  className="flex items-center justify-between p-4 bg-ivory-light/5 border border-ivory-light/10 hover:border-danger-orange/30 transition-colors"
+                >
+                  <div className="flex items-center gap-3 overflow-hidden">
+                    <span className="text-danger-orange shrink-0">▸</span>
+                    <span className="font-mono text-sm truncate">{scan.repoName}</span>
+                    <span className="hidden sm:inline text-xs px-2 py-0.5 bg-larp-red/20 text-larp-red border border-larp-red/30 shrink-0 truncate max-w-[150px]">
+                      {scan.tag}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="text-xs text-ivory-light/40">score:</span>
+                    <span className={`font-mono font-bold ${scan.score > 80 ? 'text-larp-red' : scan.score > 50 ? 'text-larp-yellow' : 'text-larp-green'}`}>
+                      {scan.score}
+                    </span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-ivory-light/40">score:</span>
-                  <span className={`font-mono font-bold ${repo.verdict > 80 ? 'text-larp-red' : repo.verdict > 50 ? 'text-larp-yellow' : 'text-larp-green'}`}>
-                    {repo.verdict}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 border border-ivory-light/10">
+              <p className="text-ivory-light/40 font-mono text-sm">no scans yet. be the first to expose some vapourware.</p>
+            </div>
+          )}
 
           <div className="text-center mt-8">
             <p className="text-xs text-ivory-light/30 font-mono">
-              refreshing never. this is a static mockup. like their products.
+              scans are stored temporarily and reset on server restart
             </p>
           </div>
         </div>
@@ -446,18 +577,17 @@ export default function VapourwareDetector() {
       <section className="py-16 sm:py-24 px-4 sm:px-6">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-dark mb-6 font-display">
-            ready to expose <span className="text-danger-orange">vapourware</span>?
+            share your <span className="text-danger-orange">findings</span>
           </h2>
           <p className="text-base sm:text-lg text-slate-light mb-8">
-            follow <span className="text-danger-orange font-bold">@CLARP</span> on x. tag us with any repo.
-            we'll do the rest. (when we build it) (q2)
+            found some vapourware? share it with the <span className="text-danger-orange font-bold">$CLARP</span> community on x.
           </p>
 
           {/* tweet template */}
           <div className="bg-slate-dark border-2 border-danger-orange p-6 text-left max-w-md mx-auto mb-8" style={{ boxShadow: '4px 4px 0 #FF6B35' }}>
-            <div className="text-xs text-ivory-light/40 mb-2 font-mono">copy this tweet:</div>
+            <div className="text-xs text-ivory-light/40 mb-2 font-mono">share on x:</div>
             <div className="font-mono text-sm text-ivory-light mb-4">
-              <span className="text-danger-orange">@CLARP_bot</span> scan https://github.com/example/repo
+              <span className="text-danger-orange">@CLARP</span> scan {scanResult?.repoUrl || 'https://github.com/example/repo'}
             </div>
             <button
               onClick={copyTweet}
@@ -482,13 +612,13 @@ export default function VapourwareDetector() {
           </div>
 
           <p className="text-xs text-slate-light/50 mt-8 font-mono">
-            disclaimer: this feature doesn't exist yet. like 94% of crypto projects.
+            rate limit: 10 scans per hour. don't abuse the detector. we're watching.
           </p>
         </div>
       </section>
 
       {/* final ticker */}
-      <WarningTicker messages={['ai recognizes ai', 'trust no readme', 'dyor means nothing if the code is fake', 'vapourware detector: shipping q2']} direction="right" />
+      <WarningTicker messages={['ai recognizes ai', 'trust no readme', 'dyor means nothing if the code is fake', 'vapourware detector: now live']} direction="right" />
 
       <Footer />
     </main>

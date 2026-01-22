@@ -91,6 +91,12 @@ export default function Navbar({ onConnectWallet, showWalletButton = true }: Nav
             >
               snitch mode
             </Link>
+            <Link
+              href="/roadmap"
+              className="text-sm text-slate-light hover:text-danger-orange transition-colors"
+            >
+              roadmap
+            </Link>
             <a
               href="https://github.com/lukehalley/Clarp"
               target="_blank"
@@ -153,6 +159,13 @@ export default function Navbar({ onConnectWallet, showWalletButton = true }: Nav
                 onClick={() => setMobileMenuOpen(false)}
               >
                 snitch mode
+              </Link>
+              <Link
+                href="/roadmap"
+                className="block py-2 text-slate-light hover:text-danger-orange transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                roadmap
               </Link>
               <div className="flex gap-2 mt-2">
                 <a
