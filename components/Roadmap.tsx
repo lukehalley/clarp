@@ -3,35 +3,35 @@
 const ROADMAP_PHASES = [
   {
     phase: 'q1 2025',
-    title: 'admit it\'s vaporware',
-    items: ['deploy $CLARP bonding curve', 'write "exit liquidity" on the homepage', 'make this roadmap (done)'],
-    status: 'complete',
-    stamp: 'DONE',
+    title: 'C[LARP] ALPHA',
+    items: ['polymarket API integration', 'project mapping system', 'CLARP analysis overlay'],
+    status: 'current',
+    stamp: 'BUILDING',
+    crossedDates: [],
+  },
+  {
+    phase: 'q1 2025',
+    title: 'C[LARP] AGENT',
+    items: ['autonomous X bot (@CLARP)', 'github repo scanner', 'LARP score (0-100)'],
+    status: 'upcoming',
+    stamp: 'PLANNED',
+    crossedDates: [],
+  },
+  {
+    phase: 'q1/q2 2025',
+    title: 'rebrand detection',
+    items: ['wallet history tracking', 'logo similarity detection', 'KOL accountability tracker'],
+    status: 'upcoming',
+    stamp: 'PLANNED',
     crossedDates: [],
   },
   {
     phase: 'q2 2025',
-    title: 'continue admitting',
-    items: ['update this section monthly (we won\'t)', 'add more fake products to the carousel', 'you\'re reading this right now'],
-    status: 'current',
-    stamp: 'IN PROGRESS',
-    crossedDates: ['q1 2024', 'q3 2024', 'q4 2024'],
-  },
-  {
-    phase: 'q3 2025',
-    title: 'keep not shipping',
-    items: ['decline vc money (they didn\'t offer)', 'partnership with other admitted vaporware', 'audit the blank whitepaper'],
+    title: 'snitch mode',
+    items: ['anonymous reporting with bounties', 'hall of shame v2', 'community verification'],
     status: 'upcoming',
-    stamp: 'PENDING',
-    crossedDates: ['q2 2024', 'q3 2024'],
-  },
-  {
-    phase: 'q∞',
-    title: 'ship actual product',
-    items: ['coming q2 (which q2? yes)', 'the q2 that this entire site mocks', 'ngmi (but honestly)'],
-    status: 'never',
-    stamp: 'REJECTED',
-    crossedDates: ['q2 2023', 'q4 2023', 'q2 2024', 'q4 2024', 'q2 2025'],
+    stamp: 'PLANNED',
+    crossedDates: [],
   },
 ];
 
@@ -114,7 +114,7 @@ export default function Roadmap() {
             internal roadmap memo
           </h2>
           <p className="text-sm sm:text-base text-slate-light max-w-xl mx-auto">
-            this wasn't supposed to be public. now you know why.
+            first autonomous trust pilot. polymarket + on-chain analysis.
           </p>
         </div>
 
@@ -167,9 +167,9 @@ export default function Roadmap() {
           {/* Opening paragraph */}
           <div className="relative mb-8">
             <p className="font-mono text-sm text-slate-dark leading-relaxed">
-              This document outlines our <Redacted width={70} /> development roadmap for <Redacted width={50} />.
-              All timelines are <span className="line-through">firm</span> <span className="line-through">tentative</span> approximate.
-              Please treat this information as <span className="line-through">confidential</span> public.
+              This document outlines our <span className="font-bold">C[LARP]</span> development roadmap for <span className="font-bold">Q1-Q2 2025</span>.
+              First autonomous trust pilot for crypto. Polymarket odds + on-chain analysis.
+              No one else is building this.
             </p>
           </div>
 
@@ -210,8 +210,7 @@ export default function Roadmap() {
                     <Stamp
                       text={phase.stamp}
                       variant={
-                        phase.status === 'complete' ? 'approved' :
-                        phase.status === 'never' ? 'rejected' : 'pending'
+                        phase.status === 'current' ? 'pending' : 'pending'
                       }
                       rotation={[-8, -4, 6, -10][i]}
                     />
@@ -228,30 +227,15 @@ export default function Roadmap() {
                   {phase.items.map((item, j) => (
                     <li key={j} className="font-mono text-xs text-slate-dark/80 flex items-start gap-2">
                       <span className="text-slate-dark/40">
-                        {phase.status === 'complete' ? '☑' : phase.status === 'never' ? '☒' : '☐'}
+                        {phase.status === 'current' ? '▸' : '☐'}
                       </span>
-                      <span className={phase.status === 'complete' ? 'line-through opacity-60' : ''}>
+                      <span>
                         {item}
                       </span>
                     </li>
                   ))}
                 </ul>
 
-                {/* Progress bar for current phase */}
-                {phase.status === 'current' && (
-                  <div className="mt-3 max-w-xs">
-                    <div className="flex justify-between font-mono text-[10px] text-slate-dark/60 mb-1">
-                      <span>Progress</span>
-                      <span>99%</span>
-                    </div>
-                    <div className="h-3 bg-slate-dark/20 border border-slate-dark/30">
-                      <div className="h-full bg-danger-orange" style={{ width: '99%' }} />
-                    </div>
-                    <div className="font-mono text-[10px] text-slate-dark/50 mt-1">
-                      (has been at 99% since q3 2024)
-                    </div>
-                  </div>
-                )}
               </div>
             ))}
           </div>

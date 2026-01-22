@@ -9,80 +9,88 @@ const DOCS_TABS = [
     id: 'quickstart',
     label: 'quick start',
     content: {
-      title: 'bonding curve casino',
-      description: 'step 1: ape.\nstep 2: cope.\nthere is no step 3.',
-      code: `$ clarp launch --pumpfun
+      title: 'how CLARP works',
+      description: 'polymarket shows sentiment.\nwe show evidence.\nfirst of its kind.',
+      code: `$ clarp scan --project TROVE
 
-> deploying bonding curve...
-> kol bundle: 80% allocated
-> telegram raid: scheduled
-> product: none
+> fetching polymarket odds... 80%
+> scanning github repo...
+> checking x account age...
+> analyzing contract deployer...
 
-WARN: 98.6% of tokens rug within 2-12hrs
-WARN: you are exit liquidity
-WARN: ser this is a casino
+SIGNAL: rebrand detected
+SIGNAL: same wallets as UFO Gaming
+SIGNAL: KOL undisclosed payments
 
-$ clarp --jeet-status
+LARP SCORE: 94/100
+VERDICT: high risk
 
-> checking paper hands...
-> your sell threshold: -5%
-> recommendation: ngmi`,
+$ clarp --why
+
+> polymarket sentiment: bullish
+> on-chain evidence: bearish
+> recommendation: dyor harder`,
       notes: [
-        'bonding curve = casino with extra steps',
-        'soft rug in progress (always)',
-        'at least we told you',
+        'polymarket odds + on-chain analysis',
+        '6 signal detection matrix',
+        'first autonomous trust pilot',
       ],
     },
   },
   {
     id: 'api',
-    label: 'audit theater',
+    label: 'detection matrix',
     content: {
-      title: 'security',
-      description: 'we paid $200k for a pdf. it says we\'re fine.',
-      code: `// CERTIK AUDIT RESULTS v1.0.0
+      title: 'LARP score signals',
+      description: 'we check everything. others check one thing.',
+      code: `// CLARP DETECTION MATRIX v1.0.0
 
-CRITICAL: 7 findings
-HIGH: 12 findings
-MEDIUM: 23 findings
-LOW: 47 findings
+SIGNAL 1: AI-generated code
+SIGNAL 2: README bloat / doc theater
+SIGNAL 3: ghost commits / suspicious patterns
+SIGNAL 4: fake contributors
+SIGNAL 5: test coverage analysis
+SIGNAL 6: contract fork detection
 
-STATUS: all ignored
-
-// CERTIK SCORE: 87/100
-// (score sponsored by project treasury)
-
-// see also: nothing changed
-// see also: we shipped anyway`,
+// SCORING
+// 90-100: confirmed vaporware
+// 70-89: highly suspicious
+// 50-69: yellow flags
+// 30-49: probably fine
+// 0-29: appears legitimate (rare)`,
       notes: [
-        'audited ≠ safe',
-        'badge goes on website regardless',
-        '0 exploits found (so far)',
+        'comprehensive analysis',
+        'no single point of failure',
+        'evidence > vibes',
       ],
     },
   },
   {
     id: 'examples',
-    label: 'tokenomics',
+    label: 'case study',
     content: {
-      title: 'supply distribution',
-      description: 'fair launch* (*terms and conditions apply)',
-      code: `// $CLARP TOKENOMICS
+      title: 'TROVE analysis',
+      description: '80% polymarket odds. 95% crash in 10 minutes.',
+      code: `// TROVE CASE STUDY
 
-team:        20% (vested until rug)
-kol bundle:  30% (instant unlock)
-treasury:    25% ("ecosystem growth")
-liquidity:   15% (locked 7 days lol)
-community:   10% (you are here)
+polymarket odds: 80% to raise $20M
+actual result: raised $20M
+what happened: kept $12.7M
 
-// vesting schedule:
-// - team: unlocks when you stop watching
-// - advisor: already dumped
-// - community: permanent liquidity`,
+// CLARP SIGNALS (if we existed then)
+
+REBRAND: UFO Gaming -> TROVE
+WALLETS: same deployer addresses
+LOGO: same asterisk design
+KOLS: undisclosed paid promotions
+
+// OUTCOME
+token crashed 95% in 10 minutes
+sentiment ≠ evidence`,
       notes: [
-        'you are the 10%',
-        'they are the 90%',
-        'math checks out',
+        'polymarket showed crowd sentiment',
+        'CLARP shows on-chain evidence',
+        'different signals. both matter.',
       ],
     },
   },
@@ -90,30 +98,31 @@ community:   10% (you are here)
     id: 'faq',
     label: 'faq',
     content: {
-      title: 'frequently coped',
-      description: 'questions and their answers.',
-      code: `q: when launch?
-a: q2 (the q2 that never ends)
+      title: 'frequently asked',
+      description: 'questions about CLARP.',
+      code: `q: what is CLARP?
+a: first autonomous trust pilot
+   polymarket + on-chain analysis
 
-q: wen product?
-a: vibes only. roadmap: vibes only.
+q: how is it different?
+a: others check one thing
+   we check everything
 
-q: is this a rug?
-a: it's vaporware-as-a-service
-   (technically different)
+q: wen launch?
+a: Q1 2025. actually.
+   check the roadmap.
 
-q: dev do something?
-a: *becomes exit liquidity*
+q: is this real?
+a: we detect vaporware
+   that's the whole product
 
-q: wen product?
-a: shipping v2. we're so back.
-
-q: ngmi?
-a: correct.`,
+q: why polymarket?
+a: sentiment without evidence
+   is just vibes. we add receipts.`,
       notes: [
-        'these are all the questions',
-        'these are all the answers',
-        'cope accordingly',
+        'CLARP spots LARP',
+        'first mover advantage',
+        'you\'re early',
       ],
     },
   },
@@ -126,12 +135,12 @@ export default function DocsSection() {
   return (
     <div className="max-w-6xl mx-auto">
       <div className="text-center mb-8 sm:mb-12">
-        <span className="badge badge-error mb-3 sm:mb-4">cope manual</span>
+        <span className="badge badge-error mb-3 sm:mb-4">how it works</span>
         <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-dark mb-3 sm:mb-4 font-display">
           documentation
         </h2>
         <p className="text-sm sm:text-base text-slate-light max-w-2xl mx-auto px-2">
-          everything you need to get rekt with clarp.
+          polymarket odds + on-chain analysis. first of its kind.
         </p>
       </div>
 

@@ -359,10 +359,10 @@ export default function Home() {
               </h1>
 
               <p className="text-lg sm:text-xl md:text-2xl text-slate-light mb-2 sm:mb-4">
-                vaporware-as-a-service
+                first autonomous trust pilot
               </p>
               <p className="text-base sm:text-lg text-danger-orange font-mono mb-4 sm:mb-6 font-bold">
-                building nothing, together
+                polymarket odds + on-chain receipts
               </p>
 
               <p className="text-sm sm:text-base text-slate-light mb-6 sm:mb-8 max-w-md mx-auto lg:mx-0 min-h-[6rem] sm:min-h-[4.5rem]">
@@ -425,10 +425,10 @@ export default function Home() {
               </p>
               <ul className="space-y-2 sm:space-y-3 mb-6 sm:mb-8 text-left">
                 {[
-                  'the official mascot of admitted vaporware.',
-                  'more product than your $50m ai agent.',
-                  'under construction forever. like everything you\'ve invested in.',
-                  'at least $CLARP tells you it ships nothing.',
+                  'the official mascot of autonomous rug detection.',
+                  'more due diligence than your $50m ai agent.',
+                  'scanning polymarket while you sleep.',
+                  'CLARP spots LARP. that\'s the whole product.',
                 ].map((item, i) => (
                   <li key={i} className="flex items-start gap-2 sm:gap-3 text-xs sm:text-sm text-ivory-light/80">
                     <span className="text-danger-orange shrink-0">▸</span>
@@ -440,7 +440,7 @@ export default function Home() {
                 className="btn-outline text-sm sm:text-base"
                 onClick={() => setShowWhitepaperModal(true)}
               >
-                whitepaper (blank, like theirs)
+                whitepaper (still blank though)
               </button>
             </div>
             <div className="flex justify-center order-first lg:order-last">
@@ -463,8 +463,8 @@ export default function Home() {
               products
             </h2>
             <p className="text-sm sm:text-base text-slate-light max-w-2xl mx-auto px-2">
-              100 products. none exist. neither do theirs. you know this.
-              you're still scrolling.
+              100 products they promised. none exist. ours does.
+              scroll to see the receipts.
             </p>
           </div>
 
@@ -492,7 +492,7 @@ export default function Home() {
               </p>
               <div className="w-32 sm:w-48 h-1 bg-danger-orange mb-6 mx-auto lg:mx-0" />
               <p className="text-base sm:text-lg text-ivory-light/70 mb-6 sm:mb-8 max-w-md mx-auto lg:mx-0">
-                if you're gonna buy vaporware, it might as well help someone.
+                rug detection that funds ai safety research. full circle.
               </p>
               <ul className="space-y-2 sm:space-y-3 mb-6 sm:mb-8 text-left max-w-md mx-auto lg:mx-0">
                 {[
@@ -507,7 +507,7 @@ export default function Home() {
                 ))}
               </ul>
               <p className="text-xs sm:text-sm text-danger-orange font-mono font-bold">
-                vaporware with a conscience.
+                utility with a conscience.
               </p>
             </div>
 
@@ -637,10 +637,10 @@ export default function Home() {
             {ctaClicks.doIt >= 3 ? 'you\'re still clicking' : ctaClicks.pretend >= 3 ? 'liar' : 'you made it to the bottom'}
           </h2>
           <p className="text-base sm:text-xl text-ivory-light/70 mb-2 sm:mb-4">
-            {ctaClicks.doIt >= 5 ? 'seriously?' : ctaClicks.pretend >= 5 ? 'we both know you\'re lying.' : 'of a website that exists purely to mock you.'}
+            {ctaClicks.doIt >= 5 ? 'seriously?' : ctaClicks.pretend >= 5 ? 'we both know you\'re lying.' : 'now you know what we\'re building.'}
           </p>
           <p className="text-sm sm:text-lg text-danger-orange mb-6 sm:mb-8 font-mono font-bold">
-            {ctaClicks.doIt + ctaClicks.pretend >= 10 ? `clicked ${ctaClicks.doIt + ctaClicks.pretend} times. seek help.` : 'and you\'re still considering it.'}
+            {ctaClicks.doIt + ctaClicks.pretend >= 10 ? `clicked ${ctaClicks.doIt + ctaClicks.pretend} times. seek help.` : 'first mover. no one else is doing this.'}
           </p>
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
             <button
@@ -657,7 +657,7 @@ export default function Home() {
             </button>
           </div>
           <p className="text-xs text-ivory-light/50 mt-6 font-mono">
-            {ctaClicks.doIt + ctaClicks.pretend >= 5 ? 'you\'ve clicked ' + (ctaClicks.doIt + ctaClicks.pretend) + ' times. the button still does nothing.' : 'this button does nothing. like every "launch app" button you\'ve clicked.'}
+            {ctaClicks.doIt + ctaClicks.pretend >= 5 ? 'you\'ve clicked ' + (ctaClicks.doIt + ctaClicks.pretend) + ' times. you\'re early.' : 'polymarket odds + on-chain analysis. first of its kind.'}
           </p>
         </div>
       </section>

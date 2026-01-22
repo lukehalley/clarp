@@ -2,9 +2,9 @@ import { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'Clarp - AI Vaporware Generator',
+    name: 'Clarp - First Autonomous Trust Pilot',
     short_name: 'Clarp',
-    description: 'The AI coding assistant that exclusively generates vaporware. Now shipping nothing to production.',
+    description: 'First autonomous trust pilot for crypto. Polymarket odds + on-chain analysis.',
     start_url: '/',
     display: 'standalone',
     background_color: '#000000',

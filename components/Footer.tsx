@@ -3,16 +3,16 @@
 import { useState } from 'react';
 
 const LINK_MESSAGES = [
-  'this link goes nowhere. like your investments.',
-  'did you expect documentation?',
-  'the real treasure was the gas fees we paid along the way.',
-  'page not found. neither is the product.',
-  '404: honesty not found (just kidding, we\'re honest)',
-  'you clicked a footer link. on a parody site.',
-  'there\'s nothing here. you knew that.',
-  'connecting to server... jk there is no server.',
-  'loading... forever.',
-  'error: expectations too high',
+  'this feature is coming. check the roadmap.',
+  'polymarket integration in progress.',
+  'building the rug detector. patience.',
+  'autonomous trust pilot loading...',
+  'first mover advantage: secured.',
+  'CLARP spots LARP. soon you will too.',
+  'Q1 shipping. check the roadmap.',
+  'connecting to polymarket...',
+  'scanning for rugs...',
+  'rebrand detection: coming soon',
 ];
 
 export default function Footer() {
@@ -50,7 +50,7 @@ export default function Footer() {
               <span className="text-danger-orange">$</span>clarp
             </div>
             <p className="text-sm sm:text-base text-ivory-light/60 mb-4 sm:mb-6 max-w-sm">
-              self-aware vaporware. no product. just vibes.
+              first autonomous trust pilot. polymarket + on-chain analysis.
             </p>
             <div className="flex gap-3 sm:gap-4">
               <a
@@ -94,23 +94,23 @@ export default function Footer() {
 
           {/* Links - two columns that should align */}
           <div className="h-full">
-            <h4 className="font-mono text-xs sm:text-sm text-danger-orange mb-3 sm:mb-4 h-5">vaporware</h4>
+            <h4 className="font-mono text-xs sm:text-sm text-danger-orange mb-3 sm:mb-4 h-5">coming soon</h4>
             <ul className="space-y-2 sm:space-y-3">
               {[
-                { name: 'clarp terminal', note: 'never' },
-                { name: 'larpscan', note: 'no' },
-                { name: 'clarp x402', note: 'cope' },
-                { name: 'larp academy', note: 'youtube exists' },
+                { name: 'markets dashboard', note: 'q1' },
+                { name: 'x bot (@CLARP)', note: 'q1' },
+                { name: 'rebrand detector', note: 'q1/q2' },
+                { name: 'snitch mode', note: 'q2' },
               ].map(item => (
                 <li key={item.name} className="min-h-[24px] flex items-center">
                   <button
                     onClick={(e) => handleLinkClick(e, item.name)}
                     className={`text-sm text-left transition-colors flex items-center gap-2 ${
-                      clickedLink === item.name ? 'text-larp-red' : 'text-ivory-light/60 hover:text-ivory-light'
+                      clickedLink === item.name ? 'text-danger-orange' : 'text-ivory-light/60 hover:text-ivory-light'
                     }`}
                   >
-                    {clickedLink === item.name ? '✗ ' : ''}{item.name}
-                    <span className="text-[10px] text-larp-red shrink-0">({item.note})</span>
+                    {clickedLink === item.name ? '▸ ' : ''}{item.name}
+                    <span className="text-[10px] text-danger-orange shrink-0">({item.note})</span>
                   </button>
                 </li>
               ))}

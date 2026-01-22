@@ -3,13 +3,13 @@
     "id": "hero-to-mascot",
     "direction": "left",
     "messages": [
-      "THIS IS VAPORWARE",
-      "WHITEPAPER: BLANK (INTENTIONALLY)",
-      "YOU ARE EXIT LIQUIDITY",
-      "CLARP AI WIN RATE: 41%",
-      "Q2 FOREVER",
-      "NGMI",
-      "ROADMAP: TRUST US BRO",
+      "FIRST AUTONOMOUS TRUST PILOT",
+      "POLYMARKET + ON-CHAIN ANALYSIS",
+      "CLARP SPOTS LARP",
+      "YOU'RE EARLY",
+      "FIRST MOVER",
+      "BUILDING NOW",
+      "NO ONE ELSE IS DOING THIS",
       "MEET THE MASCOT BELOW"
     ]
   },
@@ -17,14 +17,14 @@
     "id": "mascot-to-products",
     "direction": "right",
     "messages": [
-      "THE MASCOT IS REAL (THE PRODUCT ISN'T)",
+      "THE MASCOT IS REAL (SO IS THE PRODUCT)",
       "CLARP > YOUR PORTFOLIO",
       "100 FAKE PRODUCTS BELOW",
-      "CAROUSEL OF DISAPPOINTMENT: LOADING",
-      "VAPORWARE PORTFOLIO: INCOMING",
-      "NONE OF THEM EXIST",
-      "KEEP SCROLLING (IT WON'T HELP)",
-      "YOUR BAGS: STILL HEAVY"
+      "THEIRS NOT OURS",
+      "WE ACTUALLY SHIP",
+      "SCROLL FOR PROOF",
+      "RECEIPTS INCOMING",
+      "DUE DILIGENCE AUTOMATED"
     ]
   },
   {
@@ -33,11 +33,11 @@
     "messages": [
       "YOU SCROLLED PAST 100 PRODUCTS",
       "NONE OF THEM EXIST",
-      "BUT WAIT",
-      "THERE'S MORE",
+      "OURS DOES",
       "PLOT TWIST INCOMING",
-      "NO SERIOUSLY",
-      "THIS PART IS REAL",
+      "100% TO CHARITY",
+      "AI SAFETY RESEARCH",
+      "ON-CHAIN PROOF",
       "KEEP SCROLLING"
     ]
   },
@@ -46,13 +46,13 @@
     "direction": "right",
     "messages": [
       "100% TO CHARITY",
-      "WAIT THAT'S ACTUALLY REAL",
-      "VAPORWARE WITH A CONSCIENCE",
-      "YOUR BAGS MIGHT HELP SOMEONE",
+      "AI DETECTS SCAMS",
+      "FEES FUND AI SAFETY",
+      "FULL CIRCLE",
       "ON-CHAIN PROOF",
       "NO TRUST REQUIRED",
-      "THE HONESTY IS THE PRODUCT",
-      "STILL VAPORWARE THOUGH"
+      "VERIFIABLE DONATIONS",
+      "MIRI + FUTURE OF LIFE"
     ]
   },
   {
@@ -60,41 +60,41 @@
     "direction": "left",
     "messages": [
       "YOU READ THE DOCS",
-      "COPE MANUAL: STUDIED",
-      "STILL NO PRODUCT",
-      "DOCUMENTATION OF NOTHING",
-      "INSTRUCTIONS: UNCLEAR",
-      "HELP: UNAVAILABLE",
-      "SUPPORT: NGMI",
-      "FAQ: WHY DID YOU BUY"
+      "DUE DILIGENCE COMPLETE",
+      "DETECTION MATRIX: 6 SIGNALS",
+      "LARP SCORE: 0-100",
+      "POLYMARKET ODDS LOADED",
+      "ON-CHAIN ANALYSIS READY",
+      "HALL OF SHAME NEXT",
+      "LEARN FROM THE RUGS"
     ]
   },
   {
     "id": "shame-to-roadmap",
     "direction": "right",
     "messages": [
-      "HALL OF SHAME: COMPLETE",
-      "YOU SAW THE WARNINGS",
-      "THOSE BAGS WERE REAL",
-      "LEARN FROM OTHERS (YOU WON'T)",
-      "NGMI CONFIRMED",
-      "THEIR LOSS = YOUR FUTURE",
-      "PATTERN RECOGNITION: FAILED",
-      "NEXT: MORE EMPTY PROMISES"
+      "HALL OF SHAME: DOCUMENTED",
+      "TROVE KEPT $12.7M",
+      "95% CRASH IN 10 MINUTES",
+      "POLYMARKET SHOWED 80% ODDS",
+      "CLARP SHOWS EVIDENCE",
+      "PATTERN RECOGNITION",
+      "ROADMAP NEXT",
+      "SEE WHAT WE'RE BUILDING"
     ]
   },
   {
     "id": "roadmap-to-cta",
     "direction": "left",
     "messages": [
-      "Q2: ETERNAL",
-      "ROADMAP TO NOWHERE: VIEWED",
-      "99% LOADING FOREVER",
-      "PROGRESS: SIMULATED",
-      "SHIPPING: NEVER",
-      "MILESTONES: IMAGINARY",
-      "YOUR PATIENCE: WASTED",
-      "STILL WANT TO BUY?"
+      "SHIPPING Q1",
+      "POLYMARKET INTEGRATION",
+      "AUTONOMOUS X BOT",
+      "REBRAND DETECTION",
+      "KOL ACCOUNTABILITY",
+      "FIRST MOVER LOCKED",
+      "CATEGORY: OURS",
+      "YOU'RE EARLY"
     ]
   },
   {
@@ -102,13 +102,13 @@
     "direction": "right",
     "messages": [
       "YOU MADE IT TO THE BOTTOM",
-      "ACHIEVEMENT UNLOCKED: NGMI",
-      "THANKS FOR SCROLLING",
-      "YOUR TIME: SUCCESSFULLY WASTED",
-      "REFRESH TO COPE AGAIN",
-      "THE EXIT WAS AT THE TOP",
-      "TOO LATE NOW",
-      "SEE YOU IN THE DISCORD (WE WON'T)"
+      "NOW YOU KNOW WHAT WE BUILD",
+      "FIRST AUTONOMOUS TRUST PILOT",
+      "POLYMARKET + ON-CHAIN",
+      "JOIN EARLY",
+      "CHECK THE ROADMAP",
+      "CLARP SPOTS LARP",
+      "SEE YOU IN THE COMMUNITY"
     ]
   }
 ]

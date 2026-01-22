@@ -169,7 +169,7 @@ export default function ProductCarousel() {
         <span className="text-danger-orange">{currentIndex + 1}</span>
         <span className="mx-1">/</span>
         <span>{PRODUCTS.length}</span>
-        <span className="ml-1 sm:ml-2 text-slate-light/50 hidden sm:inline">(all vaporware)</span>
+        <span className="ml-1 sm:ml-2 text-slate-light/50 hidden sm:inline">(theirs, not ours)</span>
       </div>
     </div>
   );
