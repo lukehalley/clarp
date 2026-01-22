@@ -63,10 +63,10 @@ export default function Navbar({ onConnectWallet, showWalletButton = true }: Nav
           {/* Desktop nav */}
           <div className="hidden md:flex items-center gap-4">
             <Link
-              href="/vapourware-detector"
+              href="/clarp-agent"
               className="text-sm text-danger-orange hover:text-larp-red transition-colors font-mono font-bold"
             >
-              snitch mode
+              C(LARP) AGENT
             </Link>
             <Link
               href="/roadmap"
@@ -134,11 +134,11 @@ export default function Navbar({ onConnectWallet, showWalletButton = true }: Nav
           <div className="md:hidden border-t border-slate-dark/20 bg-ivory-light">
             <div className="px-4 py-4 space-y-3">
               <Link
-                href="/vapourware-detector"
+                href="/clarp-agent"
                 className="block py-2 text-danger-orange hover:text-larp-red transition-colors font-mono font-bold"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                snitch mode
+                C(LARP) AGENT
               </Link>
               <Link
                 href="/roadmap"

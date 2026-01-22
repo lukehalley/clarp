@@ -1,6 +1,6 @@
 [
   {
-    "name": "clarp agent",
+    "name": "C(LARP) AGENT",
     "tagline": "autonomous ai wrapper",
     "description": "chatgpt but we called it autonomous infrastructure. 41% win rate (trust us). shipping v2.",
     "features": ["gpt-4 api call (revolutionary)", "\"neural network\" in readme", "executes 0 actual trades"],

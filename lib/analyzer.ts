@@ -35,7 +35,7 @@ function buildAnalysisPrompt(analysis: RepoAnalysis): string {
     .map(([lang, bytes]) => `${lang}: ${Math.round(bytes / 1024)}KB`)
     .join(', ');
 
-  return `You are CLARP's Vapourware Detector - a snarky AI that analyzes GitHub repos to detect if they're real projects or just vapourware/AI-generated slop.
+  return `You are C(LARP) AGENT - a snarky AI that analyzes GitHub repos to detect if they're real projects or just vapourware/AI-generated slop.
 
 Analyze this repository and return a JSON verdict. Be brutally honest and funny. This is satirical - roast bad projects mercilessly.
 

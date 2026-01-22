@@ -103,8 +103,8 @@ interface RoadmapPhase {
 const ROADMAP_PHASES: RoadmapPhase[] = [
   {
     id: 'v1',
-    version: 'v1.0',
-    title: 'polymarket intel',
+    version: '1',
+    title: 'C(LARP) ALPHA',
     status: 'building',
     description: 'prediction odds + on-chain analysis. first of its kind.',
     longDescription: 'TROVE had 80% odds to raise $20M. They did. Then kept $12.7M. Prediction markets show sentiment. We show evidence. First mover in a category that doesn\'t exist yet.',
@@ -175,13 +175,13 @@ const ROADMAP_PHASES: RoadmapPhase[] = [
         icon: <FileText size={18} />,
       },
     ],
-    eta: 'q1 2025',
+    eta: 'q1',
     snarkyNote: 'other tools check one thing. we check everything.',
   },
   {
     id: 'v2',
-    version: 'v2.0',
-    title: 'x bot',
+    version: '2',
+    title: 'C(LARP) AGENT',
     status: 'planned',
     description: 'tag @CLARP. get a verdict. 24/7 autonomous.',
     longDescription: 'Tag @CLARP with any project. Get instant LARP score. Public accountability. No one can hide. Runs 24/7.',
@@ -206,7 +206,7 @@ const ROADMAP_PHASES: RoadmapPhase[] = [
         details: [
           'Parses GitHub URLs in multiple formats',
           'Fetches repository metadata via GitHub API',
-          'Analyzes code patterns with Claude AI',
+          'Analyzes code patterns with Grok',
           'Detects AI-generated code signatures',
           'README-to-code ratio analysis',
         ],
@@ -240,12 +240,12 @@ const ROADMAP_PHASES: RoadmapPhase[] = [
         icon: <Scan size={18} />,
       },
     ],
-    eta: 'q2 2025',
+    eta: 'q1',
     snarkyNote: 'autonomous. 24/7. public. the trust pilot ct deserves.',
   },
   {
     id: 'v3',
-    version: 'v3.0',
+    version: '3',
     title: 'rebrand detection',
     status: 'planned',
     description: 'same team. new name. we see you.',
@@ -302,12 +302,12 @@ const ROADMAP_PHASES: RoadmapPhase[] = [
         icon: <Award size={18} />,
       },
     ],
-    eta: 'q2 2025',
+    eta: 'q1',
     snarkyNote: '$20M raised. $12.7M kept. we see you.',
   },
   {
     id: 'v4',
-    version: 'v4.0',
+    version: '4',
     title: 'snitch mode',
     status: 'future',
     description: 'report rugs. earn bounties. hall of shame.',
@@ -353,12 +353,12 @@ const ROADMAP_PHASES: RoadmapPhase[] = [
         icon: <Database size={18} />,
       },
     ],
-    eta: 'q3 2025',
+    eta: 'q1/q2',
     snarkyNote: 'trust no one. verify everything. snitch often.',
   },
   {
     id: 'v5',
-    version: 'v5.0',
+    version: '5',
     title: 'ai safety donations',
     status: 'future',
     description: 'fees fund ai safety. on-chain receipts.',
@@ -402,7 +402,7 @@ const ROADMAP_PHASES: RoadmapPhase[] = [
         icon: <Shield size={18} />,
       },
     ],
-    eta: '2026',
+    eta: 'q1/q2',
     snarkyNote: 'ai built this page. ai detects the scams. might as well fund ai safety.',
   },
 ];
@@ -629,13 +629,12 @@ export default function RoadmapPage() {
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-dark leading-tight mb-6">
                 THE <span className="text-danger-orange">ROADMAP</span>
               </h1>
-              <div className="w-48 sm:w-64 lg:w-80 h-1.5 bg-danger-orange mb-6 mx-auto lg:mx-0" />
 
               <p className="text-xl sm:text-2xl text-slate-dark font-bold mb-3">
                 first autonomous trust pilot
               </p>
               <p className="text-lg text-slate-light mb-6">
-                polymarket + on-chain + ai. <span className="text-danger-orange font-bold">no one else.</span>
+                just CLARP spotting LARP. <span className="text-danger-orange font-bold">no one else.</span>
               </p>
 
               {/* Progress Card */}
@@ -736,19 +735,30 @@ export default function RoadmapPage() {
                   onClick={() => handlePhaseClick(phase.id)}
                 >
                   <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-                    <div className="flex items-start gap-5">
-                      <span className={`text-3xl sm:text-4xl font-bold font-mono leading-none ${
-                        phase.status === 'building' ? 'text-danger-orange' :
-                        isExpanded ? 'text-danger-orange' : 'text-ivory-light'
-                      }`}>
+                    <div className="flex items-start gap-4 sm:gap-5">
+                      <div
+                        className={`w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center font-mono text-xl sm:text-2xl font-bold border-2 shrink-0 ${
+                          isExpanded
+                            ? 'bg-danger-orange border-slate-dark text-ivory-light'
+                            : phase.status === 'building'
+                            ? 'bg-danger-orange/20 border-danger-orange text-danger-orange'
+                            : 'bg-ivory-light/10 border-ivory-light/50 text-ivory-light'
+                        }`}
+                        style={{
+                          boxShadow: isExpanded
+                            ? '4px 4px 0 #141413'
+                            : phase.status === 'building'
+                            ? '3px 3px 0 #FF6B35'
+                            : '3px 3px 0 rgba(250,249,245,0.2)'
+                        }}
+                      >
                         {phase.version}
-                      </span>
+                      </div>
                       <div>
                         <h2 className={`text-xl sm:text-2xl font-bold uppercase tracking-wide ${isExpanded ? 'text-slate-dark' : 'text-ivory-light'}`}>
                           {phase.title}
                         </h2>
-                        <div className={`w-20 h-1 my-3 ${isExpanded ? 'bg-danger-orange' : 'bg-ivory-light/20'}`} />
-                        <p className={`text-base sm:text-lg ${isExpanded ? 'text-slate-dark font-bold' : 'text-ivory-light/80'}`}>
+                        <p className={`text-base sm:text-lg mt-2 ${isExpanded ? 'text-slate-dark font-bold' : 'text-ivory-light/80'}`}>
                           {phase.description}
                         </p>
                       </div>
@@ -878,8 +888,7 @@ export default function RoadmapPage() {
                                     {feature.name}
                                     {feature.status === 'done' && <span className="ml-2">✓</span>}
                                   </h3>
-                                  <div className="w-12 h-0.5 bg-danger-orange/50 my-2" />
-                                  <p className="text-sm sm:text-base text-slate-medium font-medium">{feature.description}</p>
+                                  <p className="text-sm sm:text-base text-slate-medium font-medium mt-1">{feature.description}</p>
                                 </div>
                               </div>
                               <span className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono font-bold border ${
@@ -896,7 +905,7 @@ export default function RoadmapPage() {
                               {feature.details.map((detail, i) => {
                                 // Highlight certain keywords in details
                                 const highlightedDetail = detail
-                                  .replace(/GitHub API|Claude AI|Polymarket|LARP score/g, '<span class="font-bold text-slate-dark">$&</span>')
+                                  .replace(/GitHub API|Grok|Polymarket|LARP score/g, '<span class="font-bold text-slate-dark">$&</span>')
                                   .replace(/\d+%|\d+ days?|\d+\/\d+|24\/7/g, '<span class="font-mono text-danger-orange font-bold">$&</span>')
                                   .replace(/"[^"]+"/g, '<span class="font-mono bg-slate-dark/5 px-1">$&</span>');
 
@@ -978,17 +987,16 @@ export default function RoadmapPage() {
       <section className="py-16 sm:py-24 px-4 sm:px-6 relative">
         <div className="absolute inset-0 bg-grid bg-[size:24px_24px] opacity-30" />
         <div className="max-w-4xl mx-auto text-center relative z-10">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-dark mb-4 uppercase tracking-wide">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-dark mb-6 uppercase tracking-wide">
             {totalPhaseClicks >= 15
               ? 'YOU DID THE RESEARCH'
               : 'FIRST MOVER'
             }
           </h2>
-          <div className="w-48 sm:w-64 h-1.5 bg-danger-orange mx-auto mb-8" />
           <p className="text-xl sm:text-2xl text-slate-dark font-bold mb-3">
             {totalPhaseClicks >= 15
               ? 'most won\'t read this far.'
-              : 'polymarket + on-chain + ai.'
+              : 'just CLARP spotting LARP.'
             }
           </p>
           <p className="text-lg text-slate-light mb-8">

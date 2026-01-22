@@ -67,7 +67,7 @@ const GITHUB_API = 'https://api.github.com';
 function getHeaders(): HeadersInit {
   const headers: HeadersInit = {
     'Accept': 'application/vnd.github.v3+json',
-    'User-Agent': 'CLARP-Vapourware-Detector',
+    'User-Agent': 'CLARP-Agent',
   };
 
   if (process.env.GITHUB_TOKEN) {

@@ -88,7 +88,7 @@ const getSeverityColor = (severity: Finding['severity']): string => {
   }
 };
 
-export default function VapourwareDetector() {
+export default function ClarpAgent() {
   const [mounted, setMounted] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
   const [scanResult, setScanResult] = useState<ScanResult | null>(null);
@@ -232,32 +232,39 @@ export default function VapourwareDetector() {
           {/* badge */}
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-danger-orange/10 border border-danger-orange/30 text-danger-orange font-mono text-xs mb-6">
             <span className="animate-pulse">●</span>
-            demo - powered by claude ai
+            demo - powered by grok
           </div>
 
           {/* title */}
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-slate-dark leading-tight mb-6 font-display">
-            vapourware
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-slate-dark leading-tight mb-4 sm:mb-6 font-display">
+            C(LARP)
             <br />
-            <span className="text-danger-orange">detector</span>
+            <span className="text-danger-orange">AGENT</span>
           </h1>
 
           {/* tagline */}
-          <p className="text-xl sm:text-2xl text-slate-light mb-4 font-mono">
+          <p className="text-lg sm:text-xl md:text-2xl text-slate-light mb-2 sm:mb-4 font-mono">
             ai recognizes ai.
           </p>
-          <p className="text-base sm:text-lg text-danger-orange font-mono font-bold mb-8">
+          <p className="text-base sm:text-lg text-danger-orange font-mono font-bold mb-4 sm:mb-6">
             scan any github repo. expose the slop.
           </p>
 
-          <p className="text-sm sm:text-base text-slate-light max-w-2xl mx-auto mb-12">
+          <p className="text-sm sm:text-base text-slate-light max-w-md mx-auto mb-6 sm:mb-8">
             paste any <span className="text-danger-orange font-bold">github url</span> below.
-            our ai will scan the codebase, analyze commits, and tell you if it's real or just another
-            <span className="text-larp-red"> chatgpt wrapper with extra steps</span>.
+            our ai scans the codebase and tells you if it's real or just another
+            <span className="text-larp-red"> chatgpt wrapper</span>.
           </p>
+        </div>
+      </section>
 
-          {/* how it works preview */}
-          <div className="bg-slate-dark border-2 border-danger-orange p-6 sm:p-8 text-left max-w-xl mx-auto mb-12" style={{ boxShadow: '6px 6px 0 #FF6B35' }}>
+      {/* ticker */}
+      <WarningTicker messages={TICKER_MESSAGES} direction="left" />
+
+      {/* how it works section */}
+      <section className="py-12 sm:py-16 px-4 sm:px-6 bg-slate-dark">
+        <div className="max-w-xl mx-auto">
+          <div className="border-2 border-danger-orange p-6 sm:p-8" style={{ boxShadow: '6px 6px 0 #FF6B35' }}>
             <div className="flex items-center gap-2 mb-4">
               <span className="text-danger-orange">$</span>
               <span className="text-ivory-light font-mono text-sm">how it works</span>
@@ -273,7 +280,7 @@ export default function VapourwareDetector() {
               </div>
               <div className="flex items-start gap-3">
                 <span className="text-larp-green shrink-0">3.</span>
-                <span className="text-ivory-light/80">claude ai analyzes code, commits, readme</span>
+                <span className="text-ivory-light/80">grok analyzes code, commits, readme</span>
               </div>
               <div className="flex items-start gap-3">
                 <span className="text-larp-green shrink-0">4.</span>
@@ -285,7 +292,7 @@ export default function VapourwareDetector() {
       </section>
 
       {/* ticker */}
-      <WarningTicker messages={TICKER_MESSAGES} direction="left" />
+      <WarningTicker messages={['scanning for truth in a sea of lies', 'your due diligence starts here', 'ai vs ai: the final boss']} direction="right" />
 
       {/* what we detect section */}
       <section className="py-16 sm:py-24 px-4 sm:px-6 bg-slate-dark text-ivory-light">
@@ -302,7 +309,7 @@ export default function VapourwareDetector() {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {[
-              { icon: 'bot', title: 'ai-generated code', desc: 'detects claude/gpt patterns. the "helpful assistant" energy is unmistakable.' },
+              { icon: 'bot', title: 'ai-generated code', desc: 'detects ai-generated patterns. the "helpful assistant" energy is unmistakable.' },
               { icon: 'file-text', title: 'readme bloat', desc: 'when the readme is longer than the actual code, that\'s a red flag.' },
               { icon: 'ghost', title: 'ghost commits', desc: 'bulk commits at 3am. "initial commit" with 10k lines. sus.' },
               { icon: 'clipboard-copy', title: 'copy-paste signatures', desc: 'we know that stack overflow code. we\'ve seen it 47,000 times.' },
@@ -324,9 +331,6 @@ export default function VapourwareDetector() {
         </div>
       </section>
 
-      {/* ticker */}
-      <WarningTicker messages={['scanning for truth in a sea of lies', 'your due diligence starts here', 'ai vs ai: the final boss']} direction="right" />
-
       {/* live scanner section */}
       <section className="py-16 sm:py-24 px-4 sm:px-6">
         <div className="max-w-4xl mx-auto">
@@ -346,7 +350,7 @@ export default function VapourwareDetector() {
               <div className="terminal-dot bg-larp-red opacity-50" />
               <div className="terminal-dot bg-larp-yellow opacity-50" />
               <div className="terminal-dot bg-larp-green opacity-50" />
-              <span className="ml-3 text-xs text-ivory-light/50 font-mono">vapourware-detector v1.0.0</span>
+              <span className="ml-3 text-xs text-ivory-light/50 font-mono">C(LARP) AGENT v1.0.0</span>
             </div>
             <div ref={terminalRef} className="terminal-body min-h-[250px] max-h-[500px] overflow-y-auto">
               {/* input row */}
@@ -518,7 +522,7 @@ export default function VapourwareDetector() {
       </section>
 
       {/* ticker */}
-      <WarningTicker messages={['real scans. real verdicts.', 'powered by claude ai', 'github api integration active']} direction="left" />
+      <WarningTicker messages={['real scans. real verdicts.', 'powered by grok', 'github api integration active']} direction="left" />
 
       {/* recent scans */}
       <section className="py-16 sm:py-24 px-4 sm:px-6 bg-slate-dark text-ivory-light">
@@ -615,7 +619,7 @@ export default function VapourwareDetector() {
       </section>
 
       {/* final ticker */}
-      <WarningTicker messages={['ai recognizes ai', 'trust no readme', 'dyor means nothing if the code is fake', 'vapourware detector: demo']} direction="right" />
+      <WarningTicker messages={['AI RECOGNIZES AI', 'TRUST NO README', 'DYOR MEANS NOTHING IF THE CODE IS FAKE', 'C(LARP) AGENT: DEMO']} direction="right" />
 
       <Footer />
     </main>
