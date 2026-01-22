@@ -76,8 +76,7 @@ export default function Navbar() {
             </div>
             <Link
               href="/roadmap"
-              className="text-sm font-mono font-bold px-4 py-2 ml-2 border-2 border-slate-dark bg-clay text-white hover:bg-accent-orange transition-all"
-              style={{ boxShadow: '2px 2px 0 #0a0a09' }}
+              className="btn-primary ml-2"
             >
               roadmap
             </Link>
@@ -145,8 +144,7 @@ export default function Navbar() {
               </div>
               <Link
                 href="/roadmap"
-                className="block w-full text-center text-sm font-mono font-bold px-4 py-3 mt-2 border-2 border-slate-dark bg-clay text-white hover:bg-accent-orange transition-all"
-                style={{ boxShadow: '2px 2px 0 #0a0a09' }}
+                className="btn-primary block w-full text-center mt-2"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 roadmap
