@@ -382,7 +382,7 @@ export default function Home() {
                   rel="noopener noreferrer"
                   className="btn-secondary hover:opacity-100 transition-opacity"
                 >
-                  get started
+                  dexscreener
                 </a>
               </div>
 
