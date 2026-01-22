@@ -1,0 +1,114 @@
+<svg width="400" height="600" viewBox="0 0 400 600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <pattern id="noise1" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse">
+      <filter id="noiseFilter1">
+        <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" stitchTiles="stitch"/>
+      </filter>
+      <rect width="100" height="100" filter="url(#noiseFilter1)" opacity="0.15"/>
+    </pattern>
+    <pattern id="scanlines1" x="0" y="0" width="4" height="4" patternUnits="userSpaceOnUse">
+      <rect width="4" height="2" fill="transparent"/>
+      <rect y="2" width="4" height="2" fill="rgba(0,0,0,0.2)"/>
+    </pattern>
+    <pattern id="stripes1" x="0" y="0" width="28.28" height="28.28" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="14.14" height="28.28" fill="#FF6B35"/>
+      <rect x="14.14" width="14.14" height="28.28" fill="#0a0a09"/>
+    </pattern>
+  </defs>
+
+  <!-- Background -->
+  <rect width="400" height="600" fill="#0a0a09"/>
+  <rect width="400" height="600" fill="url(#noise1)" opacity="0.3"/>
+
+  <!-- Border -->
+  <rect x="1.5" y="1.5" width="397" height="597" fill="none" stroke="#FF6B35" stroke-width="3"/>
+
+  <!-- Terminal header -->
+  <rect x="0" y="0" width="400" height="44" fill="rgba(255,107,53,0.15)"/>
+  <rect x="0" y="42" width="400" height="2" fill="rgba(255,107,53,0.5)"/>
+  <circle cx="20" cy="22" r="6" fill="rgba(231,76,60,0.5)"/>
+  <circle cx="40" cy="22" r="6" fill="rgba(255,217,61,0.5)"/>
+  <circle cx="60" cy="22" r="6" fill="#2ECC71"/>
+  <text x="80" y="26" font-family="monospace" font-size="11" fill="rgba(250,249,245,0.5)">clarp_alpha.exe</text>
+
+  <!-- Phase badge -->
+  <rect x="24" y="60" width="70" height="28" fill="rgba(255,107,53,0.2)" stroke="#FF6B35" stroke-width="1"/>
+  <text x="59" y="79" font-family="monospace" font-size="11" fill="#FF6B35" text-anchor="middle" font-weight="bold">PHASE 1</text>
+
+  <rect x="104" y="60" width="80" height="28" fill="rgba(46,204,113,0.2)" stroke="#2ECC71" stroke-width="1"/>
+  <text x="144" y="79" font-family="monospace" font-size="11" fill="#2ECC71" text-anchor="middle" font-weight="bold">BUILDING</text>
+
+  <!-- Title -->
+  <text x="24" y="125" font-family="monospace" font-size="32" fill="#FAF9F5" font-weight="bold">C[LARP] ALPHA</text>
+
+  <!-- Tagline -->
+  <text x="24" y="155" font-family="monospace" font-size="16" fill="#FF6B35" font-weight="bold">prediction odds + on-chain analysis</text>
+
+  <!-- Terminal output box -->
+  <rect x="24" y="175" width="352" height="200" fill="rgba(0,0,0,0.5)" stroke="rgba(250,249,245,0.2)" stroke-width="1"/>
+
+  <text x="36" y="200" font-family="monospace" font-size="11" fill="rgba(250,249,245,0.5)">$ clarp scan --market trove</text>
+
+  <text x="36" y="235" font-family="monospace" font-size="13" fill="rgba(250,249,245,0.7)">polymarket odds:</text>
+  <text x="340" y="235" font-family="monospace" font-size="13" fill="#2ECC71" font-weight="bold" text-anchor="end">80%</text>
+
+  <text x="36" y="260" font-family="monospace" font-size="13" fill="rgba(250,249,245,0.7)">amount raised:</text>
+  <text x="340" y="260" font-family="monospace" font-size="13" fill="#FF6B35" font-weight="bold" text-anchor="end">$20M</text>
+
+  <text x="36" y="285" font-family="monospace" font-size="13" fill="rgba(250,249,245,0.7)">amount kept:</text>
+  <text x="340" y="285" font-family="monospace" font-size="13" fill="#E74C3C" font-weight="bold" text-anchor="end">$12.7M</text>
+
+  <line x1="36" y1="300" x2="340" y2="300" stroke="rgba(250,249,245,0.2)" stroke-width="1"/>
+
+  <text x="36" y="325" font-family="monospace" font-size="13" fill="rgba(250,249,245,0.7)">larp score:</text>
+  <text x="340" y="330" font-family="monospace" font-size="22" fill="#E74C3C" font-weight="bold" text-anchor="end">94/100</text>
+
+  <text x="36" y="360" font-family="monospace" font-size="11" fill="#E74C3C">! warning: high probability rug detected</text>
+
+  <!-- Features list -->
+  <text x="36" y="400" font-family="monospace" font-size="12" fill="#2ECC71">▸</text>
+  <text x="54" y="400" font-family="monospace" font-size="12" fill="rgba(250,249,245,0.8)">polymarket api integration</text>
+
+  <text x="36" y="420" font-family="monospace" font-size="12" fill="#2ECC71">▸</text>
+  <text x="54" y="420" font-family="monospace" font-size="12" fill="rgba(250,249,245,0.8)">project mapping system</text>
+
+  <text x="36" y="440" font-family="monospace" font-size="12" fill="#2ECC71">▸</text>
+  <text x="54" y="440" font-family="monospace" font-size="12" fill="rgba(250,249,245,0.8)">clarp analysis overlay</text>
+
+  <text x="36" y="460" font-family="monospace" font-size="12" fill="rgba(250,249,245,0.3)">○</text>
+  <text x="54" y="460" font-family="monospace" font-size="12" fill="rgba(250,249,245,0.5)">markets dashboard</text>
+
+  <!-- Progress bar -->
+  <text x="24" y="495" font-family="monospace" font-size="11" fill="rgba(250,249,245,0.5)">progress</text>
+  <text x="376" y="495" font-family="monospace" font-size="11" fill="#FF6B35" font-weight="bold" text-anchor="end">99%</text>
+  <text x="376" y="495" font-family="monospace" font-size="11" fill="#E74C3C" text-anchor="end">   (stuck)</text>
+
+  <rect x="24" y="502" width="352" height="10" fill="rgba(250,249,245,0.1)" stroke="rgba(250,249,245,0.2)" stroke-width="1"/>
+  <rect x="25" y="503" width="347" height="8" fill="#FF6B35"/>
+
+  <!-- Bottom text -->
+  <text x="24" y="545" font-family="monospace" font-size="10" fill="rgba(250,249,245,0.4)" letter-spacing="2">FIRST OF ITS KIND</text>
+  <text x="24" y="565" font-family="monospace" font-size="14" fill="#FF6B35" font-weight="bold">Coming Soon™</text>
+
+  <!-- Clarp mascot -->
+  <g transform="translate(310, 522)">
+    <rect width="64" height="64" fill="#D97757" stroke="#FF6B35" stroke-width="2"/>
+    <g transform="translate(32, 32) scale(0.22) translate(-128, -128)">
+      <rect x="28" y="38" width="200" height="120" fill="#0a0a09"/>
+      <rect x="8" y="66" width="20" height="30" fill="#0a0a09"/>
+      <rect x="228" y="66" width="20" height="30" fill="#0a0a09"/>
+      <rect x="64" y="80" width="32" height="48" fill="#D97757"/>
+      <rect x="160" y="80" width="32" height="48" fill="#D97757"/>
+      <rect x="40" y="158" width="40" height="60" fill="#0a0a09"/>
+      <rect x="100" y="158" width="30" height="60" fill="#0a0a09"/>
+      <rect x="126" y="158" width="30" height="60" fill="#0a0a09"/>
+      <rect x="176" y="158" width="40" height="60" fill="#0a0a09"/>
+    </g>
+  </g>
+
+  <!-- Construction stripe at bottom -->
+  <rect x="0" y="590" width="400" height="10" fill="url(#stripes1)"/>
+
+  <!-- Scanlines overlay -->
+  <rect width="400" height="600" fill="url(#scanlines1)" opacity="0.3"/>
+</svg>

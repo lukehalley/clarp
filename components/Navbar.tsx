@@ -2,22 +2,9 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Send, MapPin } from 'lucide-react';
+import { Send } from 'lucide-react';
 import Clarp from '@/components/Clarp';
 import PixelGithub from '@/components/PixelGithub';
-
-const WALLET_MESSAGES = [
-  'your wallet is already empty. we checked.',
-  'connecting... jk, we don\'t have a blockchain',
-  'wallet connected! balance: -$47,000 (unrealized)',
-  'metamask says no. even it knows better.',
-  'transaction pending... forever.',
-];
-
-interface NavbarProps {
-  onConnectWallet?: () => void;
-  showWalletButton?: boolean;
-}
 
 // Custom X (Twitter) icon component
 function XIcon({ size = 16, className = '' }: { size?: number; className?: string }) {
@@ -34,21 +21,8 @@ function XIcon({ size = 16, className = '' }: { size?: number; className?: strin
   );
 }
 
-export default function Navbar({ onConnectWallet, showWalletButton = true }: NavbarProps) {
+export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [walletMessage, setWalletMessage] = useState('');
-  const [showWalletMessage, setShowWalletMessage] = useState(false);
-
-  const handleWalletClick = () => {
-    if (onConnectWallet) {
-      onConnectWallet();
-    } else {
-      const msg = WALLET_MESSAGES[Math.floor(Math.random() * WALLET_MESSAGES.length)];
-      setWalletMessage(msg);
-      setShowWalletMessage(true);
-      setTimeout(() => setShowWalletMessage(false), 3000);
-    }
-  };
 
   return (
     <header className="sticky top-0 z-50">
@@ -67,13 +41,6 @@ export default function Navbar({ onConnectWallet, showWalletButton = true }: Nav
               className="text-sm text-danger-orange hover:text-larp-red transition-colors font-mono font-bold preserve-case"
             >
               C[LARP] AGENT
-            </Link>
-            <Link
-              href="/roadmap"
-              className="text-sm text-slate-light hover:text-danger-orange transition-colors flex items-center gap-1.5 group"
-            >
-              <MapPin size={14} className="group-hover:animate-bounce" />
-              roadmap
             </Link>
             <div className="flex items-center gap-2 ml-2">
               <a
@@ -107,12 +74,13 @@ export default function Navbar({ onConnectWallet, showWalletButton = true }: Nav
                 <PixelGithub size={16} className="group-hover:animate-[glitch_0.1s_ease-in-out_2]" />
               </a>
             </div>
-            <button
-              className={`btn-secondary text-sm px-4 py-2 ml-2 ${!showWalletButton ? 'invisible' : ''}`}
-              onClick={handleWalletClick}
+            <Link
+              href="/roadmap"
+              className="text-sm font-mono font-bold px-4 py-2 ml-2 border-2 border-slate-dark bg-clay text-white hover:bg-accent-orange transition-all"
+              style={{ boxShadow: '2px 2px 0 #0a0a09' }}
             >
-              connect wallet
-            </button>
+              roadmap
+            </Link>
           </div>
 
           {/* Mobile hamburger */}
@@ -139,14 +107,6 @@ export default function Navbar({ onConnectWallet, showWalletButton = true }: Nav
                 onClick={() => setMobileMenuOpen(false)}
               >
                 C[LARP] AGENT
-              </Link>
-              <Link
-                href="/roadmap"
-                className="flex items-center gap-2 py-2 text-slate-light hover:text-danger-orange transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                <MapPin size={16} />
-                roadmap
               </Link>
               <div className="flex gap-3 pt-3 border-t border-slate-dark/10">
                 <a
@@ -183,22 +143,18 @@ export default function Navbar({ onConnectWallet, showWalletButton = true }: Nav
                   source
                 </a>
               </div>
-              <button
-                className={`w-full btn-secondary text-sm px-4 py-3 mt-2 ${!showWalletButton ? 'invisible' : ''}`}
-                onClick={() => { handleWalletClick(); setMobileMenuOpen(false); }}
+              <Link
+                href="/roadmap"
+                className="block w-full text-center text-sm font-mono font-bold px-4 py-3 mt-2 border-2 border-slate-dark bg-clay text-white hover:bg-accent-orange transition-all"
+                style={{ boxShadow: '2px 2px 0 #0a0a09' }}
+                onClick={() => setMobileMenuOpen(false)}
               >
-                connect wallet
-              </button>
+                roadmap
+              </Link>
             </div>
           </div>
         )}
 
-        {/* Wallet message toast */}
-        {showWalletMessage && (
-          <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-4 py-2 bg-slate-dark text-ivory-light text-sm font-mono border-2 border-danger-orange animate-fade-in z-50">
-            {walletMessage}
-          </div>
-        )}
       </nav>
     </header>
   );
