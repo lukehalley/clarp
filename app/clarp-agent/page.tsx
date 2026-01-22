@@ -236,7 +236,7 @@ export default function ClarpAgent() {
           </div>
 
           {/* title */}
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-slate-dark leading-tight mb-4 sm:mb-6 font-display">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-slate-dark leading-tight mb-4 sm:mb-6 font-display preserve-case">
             C(LARP)
             <br />
             <span className="text-danger-orange">AGENT</span>

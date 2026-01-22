@@ -104,7 +104,7 @@ const ROADMAP_PHASES: RoadmapPhase[] = [
   {
     id: 'v1',
     version: '1',
-    title: 'C(LARP) ALPHA',
+    title: 'C[LARP] ALPHA',
     status: 'building',
     description: 'prediction odds + on-chain analysis. first of its kind.',
     longDescription: 'TROVE had 80% odds to raise $20M. They did. Then kept $12.7M. Prediction markets show sentiment. We show evidence. First mover in a category that doesn\'t exist yet.',
@@ -181,7 +181,7 @@ const ROADMAP_PHASES: RoadmapPhase[] = [
   {
     id: 'v2',
     version: '2',
-    title: 'C(LARP) AGENT',
+    title: 'C[LARP] AGENT',
     status: 'planned',
     description: 'tag @CLARP. get a verdict. 24/7 autonomous.',
     longDescription: 'Tag @CLARP with any project. Get instant LARP score. Public accountability. No one can hide. Runs 24/7.',
@@ -755,7 +755,7 @@ export default function RoadmapPage() {
                         {phase.version}
                       </div>
                       <div>
-                        <h2 className={`text-xl sm:text-2xl font-bold uppercase tracking-wide ${isExpanded ? 'text-slate-dark' : 'text-ivory-light'}`}>
+                        <h2 className={`text-xl sm:text-2xl font-bold uppercase tracking-wide preserve-case ${isExpanded ? 'text-slate-dark' : 'text-ivory-light'}`}>
                           {phase.title}
                         </h2>
                         <p className={`text-base sm:text-lg mt-2 ${isExpanded ? 'text-slate-dark font-bold' : 'text-ivory-light/80'}`}>

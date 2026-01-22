@@ -64,9 +64,9 @@ export default function Navbar({ onConnectWallet, showWalletButton = true }: Nav
           <div className="hidden md:flex items-center gap-4">
             <Link
               href="/clarp-agent"
-              className="text-sm text-danger-orange hover:text-larp-red transition-colors font-mono font-bold"
+              className="text-sm text-danger-orange hover:text-larp-red transition-colors font-mono font-bold preserve-case"
             >
-              C(LARP) AGENT
+              C[LARP] AGENT
             </Link>
             <Link
               href="/roadmap"
@@ -135,10 +135,10 @@ export default function Navbar({ onConnectWallet, showWalletButton = true }: Nav
             <div className="px-4 py-4 space-y-3">
               <Link
                 href="/clarp-agent"
-                className="block py-2 text-danger-orange hover:text-larp-red transition-colors font-mono font-bold"
+                className="block py-2 text-danger-orange hover:text-larp-red transition-colors font-mono font-bold preserve-case"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                C(LARP) AGENT
+                C[LARP] AGENT
               </Link>
               <Link
                 href="/roadmap"
