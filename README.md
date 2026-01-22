@@ -1,7 +1,5 @@
 <div align="center">
 
-<img src="marketing-assets/twitter-pfp.png" alt="$CLARP" width="128" />
-
 # $CLARP
 
 **vaporware-as-a-service**
@@ -41,10 +39,6 @@ $CLARP is self-aware vaporware. no product. no roadmap. just vibes and a token.
 | restaking primitive | |
 | intent-based architecture | |
 | real yield (lol) | |
-
-<br>
-
-<img src="marketing-assets/promo-card-3.png" alt="clarp quote" width="100%" />
 
 <br>
 

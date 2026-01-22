@@ -38,3 +38,13 @@ next-env.d.ts
 # OS
 .DS_Store
 Thumbs.db
+
+# Internal/Private - Do not commit to public repo
+chats/
+marketing-assets/
+moodboard/
+research/
+MARKETING_PLAN.md
+PROJECT_CONCEPT.md
+ROADMAP_V1.pdf
+ROADMAP_PUBLIC.md

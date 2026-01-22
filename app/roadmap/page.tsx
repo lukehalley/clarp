@@ -72,7 +72,7 @@ const ROADMAP_PHASES: RoadmapPhase[] = [
           'Fetches repository metadata via GitHub API (stars, forks, creation date, last push)',
           'Retrieves full file tree structure up to 500 files',
           'Downloads and analyzes README content',
-          'Rate-limited to respect GitHub API limits (60 req/hr unauthenticated, 5000 with token)',
+          'Rate-limited to respect GitHub API limits',
         ],
         icon: <GitBranch size={20} />,
       },
@@ -90,7 +90,7 @@ const ROADMAP_PHASES: RoadmapPhase[] = [
         icon: <Bot size={20} />,
       },
       {
-        name: 'vapourware score (0-100)',
+        name: 'LARP score (0-100)',
         status: 'in-progress',
         description: 'quantified assessment of project legitimacy',
         details: [
@@ -107,38 +107,14 @@ const ROADMAP_PHASES: RoadmapPhase[] = [
         status: 'in-progress',
         description: 'multi-dimensional analysis of red flags',
         details: [
-          'AI-generated code: Detects Claude/GPT patterns, "helpful assistant" energy',
-          'README bloat: Flags when documentation exceeds actual code substance',
-          'Ghost commits: Bulk commits at odd hours, suspicious "initial commit" dumps',
-          'Copy-paste signatures: Identifies Stack Overflow code and common boilerplate',
-          'Fake contributors: Single dev claiming team, wallet sybil patterns',
-          'Test coverage: Zero tests = zero confidence in the product',
+          'AI-generated code: Detects Claude/GPT patterns',
+          'README bloat: Docs exceed code substance',
+          'Ghost commits: Bulk commits, suspicious patterns',
+          'Copy-paste signatures: Stack Overflow code detection',
+          'Fake contributors: Single dev claiming team',
+          'Test coverage: Zero tests = zero confidence',
         ],
         icon: <Scan size={20} />,
-      },
-      {
-        name: 'ROPI score (return on perceived investment)',
-        status: 'in-progress',
-        description: 'satirical metric for expected disappointment',
-        details: [
-          'Proprietary algorithm measuring gap between marketing and reality',
-          'Higher score = higher likelihood of disappointment',
-          'Factors in buzzword density, roadmap ambition vs. code reality',
-          'Displayed prominently to manage investor expectations',
-        ],
-        icon: <TrendingUp size={20} />,
-      },
-      {
-        name: 'recent scans feed',
-        status: 'planned',
-        description: 'community-driven hall of shame',
-        details: [
-          'Real-time feed of repos scanned by the community',
-          'Shows repo name, verdict, and score',
-          'Temporary storage (resets on server restart for now)',
-          'Public accountability - scans are visible to all',
-        ],
-        icon: <MessageSquare size={20} />,
       },
     ],
     eta: 'q1 2025',
@@ -147,79 +123,98 @@ const ROADMAP_PHASES: RoadmapPhase[] = [
   {
     id: 'v1',
     version: 'v1.0',
-    title: 'distribution layer',
-    status: 'building',
-    description: 'make scanning frictionless. tag us. we expose.',
-    longDescription: 'Expanding access to the vapourware detector beyond the website. The goal is zero-friction scanning - see a suspicious project on X? Tag us. Want to audit before you commit? Use the Claude skill. Building the viral loop that makes CLARP the default DD tool.',
+    title: 'polymarket intelligence layer',
+    status: 'planned',
+    description: 'polymarket shows what people bet. we show why they\'re wrong.',
+    longDescription: 'Polymarket has crypto betting markets - "will X ship?", "will Y refund?". But betting odds don\'t tell you if the project is legit. TROVE had 80% "will raise $20M" odds. They did. Then kept $12.7M. CLARP adds the evidence layer: pull markets, analyze underlying projects, show both together.',
     features: [
       {
-        name: 'x bot (@CLARP)',
-        status: 'in-progress',
-        description: 'tag to scan any project publicly on x',
+        name: 'polymarket API integration',
+        status: 'planned',
+        description: 'pull all crypto markets (tag_id=21)',
         details: [
-          'Mention @CLARP with a GitHub URL to trigger a scan',
-          'Bot replies with verdict in CLARP\'s deadpan voice',
-          'Public replies create social accountability',
-          'Queue system to handle volume spikes',
-          'Rate limiting per user to prevent abuse',
-          'Example: "@CLARP scan https://github.com/suspicious/repo"',
-          'Response: "scanned. larp score: 94. one contributor. forked from uniswap. last commit: 47 days ago. godspeed."',
+          'Connect to Polymarket Gamma API',
+          'Filter for crypto-related markets only',
+          'Fetch market title, outcomes, prices, volume',
+          'Real-time odds data',
+          'Daily refresh via Vercel cron',
         ],
-        icon: <Twitter size={20} />,
+        icon: <TrendingUp size={20} />,
       },
       {
-        name: 'claude skill (MCP)',
+        name: 'project mapping system',
         status: 'planned',
-        description: 'scan local repos via claude code',
+        description: 'link markets to underlying projects',
         details: [
-          'Model Context Protocol (MCP) skill for Claude Code',
-          'Run /clarp-scan on any local directory',
-          'No API calls needed - runs entirely locally',
-          'Developers can self-audit before shipping',
-          'Investors can scan repos before committing capital',
-          'Distribution via Claude Code marketplace',
-          'Easy win - low complexity, high value',
+          'Map market_id → GitHub, X handle, contract',
+          'Manual curation for top 20 markets (MVP)',
+          'Extract project identifiers from market text',
+          'Flag unmapped markets as "unanalyzed"',
+          'Community submissions for new mappings',
         ],
-        icon: <Terminal size={20} />,
+        icon: <Database size={20} />,
       },
       {
-        name: 'x profile scanner',
+        name: 'CLARP analysis overlay',
         status: 'planned',
-        description: 'scan social accounts for larp signals',
+        description: 'run CLARP scan on each project',
         details: [
-          'Analyze X profiles beyond just GitHub links',
-          'Detect AI-generated tweet patterns',
-          'Follower/following ratio analysis',
-          'Account age vs. activity patterns',
-          'Cross-reference promises made in tweets vs. GitHub activity',
-          'Team claims verification (do the "co-founders" actually exist?)',
-          'Engagement authenticity scoring',
+          'GitHub analysis (if repo exists)',
+          'X/Twitter account analysis (age, activity, patterns)',
+          'Contract analysis (fork detection, deployer history)',
+          'Rebrand detection (wallet connections)',
+          'No code? That\'s a signal itself.',
         ],
-        icon: <Users size={20} />,
+        icon: <Search size={20} />,
+      },
+      {
+        name: 'markets dashboard',
+        status: 'planned',
+        description: '/markets page showing combined data',
+        details: [
+          'Card layout: market title + odds + CLARP score',
+          'Red flags prominently displayed',
+          'Filter by: All / High LARP / Low LARP',
+          'Sort by: Volume / CLARP Score / Ending Soon',
+          'Link to Polymarket for betting',
+        ],
+        icon: <Eye size={20} />,
+      },
+      {
+        name: 'market detail pages',
+        status: 'planned',
+        description: 'deep dive on individual markets',
+        details: [
+          'Full CLARP analysis breakdown',
+          'Polymarket odds history',
+          'Project background and flags',
+          'Related markets',
+          'Share button for X',
+        ],
+        icon: <FileText size={20} />,
       },
     ],
     eta: 'q1 2025',
-    snarkyNote: 'soon. but like, actually soon. not "crypto soon" where it means never.',
+    snarkyNote: 'polymarket = what people bet. CLARP = what the code says. together = full picture before you ape.',
   },
   {
     id: 'v2',
     version: 'v2.0',
     title: 'enhanced detection',
     status: 'planned',
-    description: 'more signals. better detection. nowhere to hide.',
-    longDescription: 'Expanding the detection matrix from 6 signals to 9+, with particular focus on detecting serial offenders. Inspired by the TROVE/Space/UFO Gaming pattern - projects that fail, rebrand, and ICO again. You can change your name, but you can\'t hide your history.',
+    description: 'catch serial offenders. nowhere to hide.',
+    longDescription: 'Inspired by the TROVE/Space/UFO Gaming pattern - projects that fail, rebrand, and ICO again. You can change your name, but you can\'t hide your wallet history. Enhanced detection catches rebrands, tracks team wallets, and monitors KOL accountability.',
     features: [
       {
         name: 'rebrand detection',
         status: 'planned',
-        description: 'catch serial ICO offenders who rebrand and try again',
+        description: 'catch serial ICO offenders',
         details: [
-          'Build database of failed/rugged project identifiers',
+          'Database of failed/rugged project identifiers',
           'Track team wallet addresses across projects',
-          'Detect when same wallets appear in "new" projects',
-          'Flag projects with connections to known bad actors',
-          'Case study: TROVE raised $20M, kept $12.7M - same team as failed UFO Gaming',
-          'Alert users to historical connections before they ape',
+          'Flag when same wallets appear in "new" projects',
+          'Case study: TROVE = UFO Gaming rebrand',
+          'Alert users before they ape',
         ],
         icon: <AlertTriangle size={20} />,
       },
@@ -228,11 +223,10 @@ const ROADMAP_PHASES: RoadmapPhase[] = [
         status: 'planned',
         description: 'same asterisk, different name',
         details: [
-          'Perceptual hash comparison against database of known project logos',
-          'Detect visual similarity even with color/minor changes',
-          'Flag suspicious visual branding overlap',
-          'Example: UFO Gaming → TROVE → Space all used asterisk logo variants',
-          'Build community-contributed logo database of rugged projects',
+          'Perceptual hash comparison against known logos',
+          'Detect visual similarity with color changes',
+          'UFO Gaming → TROVE → Space logo pattern',
+          'Community-contributed logo database',
         ],
         icon: <Eye size={20} />,
       },
@@ -241,44 +235,25 @@ const ROADMAP_PHASES: RoadmapPhase[] = [
         status: 'planned',
         description: 'follow the money across projects',
         details: [
-          'On-chain analysis of deployer and team wallets',
-          'Cross-reference with wallets from known rugs',
+          'On-chain analysis of deployer wallets',
+          'Cross-reference with known rug wallets',
           'Detect wallet clustering patterns',
-          'Identify when "new team" is actually old team with new wallets',
-          'Integration with existing wallet tracking services',
+          '"New team" = old team with new wallets',
         ],
-        icon: <Database size={20} />,
+        icon: <Coins size={20} />,
       },
       {
-        name: 'KOL tracking',
+        name: 'KOL accountability tracker',
         status: 'planned',
         description: 'who shilled what. with receipts.',
         details: [
-          'Track which influencers promote which projects',
-          'Cross-reference with project outcomes (ship vs. rug)',
-          'Build influencer reliability scores',
-          'Case study: wale.moca promoted TROVE, now apologizing for undisclosed paid relationship',
-          'Help users evaluate promoter credibility',
+          'Track influencer → project relationships',
+          'Cross-reference with project outcomes',
+          'Build KOL reliability scores',
+          'wale.moca promoted TROVE, now apologizing',
+          'Undisclosed paid relationships flagged',
         ],
         icon: <Award size={20} />,
-      },
-      {
-        name: 'composite LARP score',
-        status: 'planned',
-        description: '9 weighted signals, normalized 0-1',
-        details: [
-          'Originality: Clone/fork similarity detection',
-          'Contributor distribution: Single-wallet dev vs. real team',
-          'Commit patterns: Pre-launch bursts, abandonment signals',
-          'Dependency hygiene: Outdated/vulnerable packages',
-          'Documentation quality: Substance vs. marketing fluff',
-          'Test presence: Actual coverage, not just existence',
-          'Bus factor: Maintainer risk assessment',
-          'Security signals: Audit status, known vulnerabilities',
-          'Rebrand detection: Serial offender flagging',
-          'Weights tuned based on historical rug data',
-        ],
-        icon: <Target size={20} />,
       },
     ],
     eta: 'q2 2025',
@@ -287,151 +262,124 @@ const ROADMAP_PHASES: RoadmapPhase[] = [
   {
     id: 'v3',
     version: 'v3.0',
-    title: 'prediction markets',
+    title: 'distribution & community',
     status: 'future',
-    description: 'put your money where your mouth is.',
-    longDescription: 'Static analysis tells you how a project looks right now. Prediction markets tell you what the crowd believes will happen. Auto-resolving markets with no oracle trust required - outcomes verified directly via GitHub API. Crowdsourced conviction with skin in the game.',
+    description: 'make scanning viral. snitch mode activated.',
+    longDescription: 'Expanding access beyond the website. Tag @CLARP on X to scan any project publicly. Use the Claude Code skill for local scanning. Community intel layer with anonymous reporting and bounties for catching rugs early.',
     features: [
       {
-        name: 'ship market',
+        name: 'x bot (@CLARP)',
         status: 'planned',
-        description: '"will this repo publish a release in the next 30/60 days?"',
+        description: 'tag to scan any project publicly',
         details: [
-          'Binary market: YES/NO on release publication',
-          'Automatically resolves by checking GitHub releases API',
-          'No oracle needed - outcome is programmatically verifiable',
-          'Timeframes: 30 days, 60 days, 90 days',
-          'Market makers incentivized to provide liquidity',
+          'Mention @CLARP with GitHub URL to scan',
+          'Bot replies with LARP score and flags',
+          'Public accountability via replies',
+          'Queue system for volume spikes',
+          '"scanned. larp score: 94. godspeed."',
         ],
-        icon: <Rocket size={20} />,
+        icon: <Twitter size={20} />,
       },
       {
-        name: 'sustain market',
+        name: 'claude code skill',
         status: 'planned',
-        description: '"will repo have ≥N external contributors in 60 days?"',
+        description: 'scan repos locally via MCP',
         details: [
-          'Measures genuine community contribution',
-          'Defines "external" as non-core team contributors',
-          'Resolves via GitHub contributors API',
-          'Tests claim of "growing community"',
-          'Higher bar than just having a Discord',
+          'Model Context Protocol skill for Claude Code',
+          'Run /clarp-scan on any directory',
+          'No API calls - runs locally',
+          'Self-audit before shipping',
+          'Distribution via Claude marketplace',
         ],
-        icon: <Users size={20} />,
-      },
-      {
-        name: 'deliver market',
-        status: 'planned',
-        description: '"will milestone X be completed by date Y?"',
-        details: [
-          'Tied to GitHub milestones (if project uses them)',
-          'Resolves when milestone is closed or deadline passes',
-          'Tests roadmap credibility with real stakes',
-          'Projects with no milestones can\'t participate (feature, not bug)',
-        ],
-        icon: <CheckCircle size={20} />,
-      },
-      {
-        name: 'quality market',
-        status: 'planned',
-        description: '"will ≥K PRs from non-core contributors be merged by date Y?"',
-        details: [
-          'Measures actual open-source health',
-          'Non-core = not in initial team wallets/accounts',
-          'Merged PRs indicate real collaboration',
-          'Resolves via GitHub PR API',
-        ],
-        icon: <Code size={20} />,
-      },
-      {
-        name: 'auto-resolution engine',
-        status: 'planned',
-        description: 'github api verification. no oracle trust required.',
-        details: [
-          'All market outcomes verifiable via public APIs',
-          'Smart contract reads GitHub API at resolution time',
-          'No centralized oracle making judgment calls',
-          'Fully transparent resolution logic',
-          'Appeals process for edge cases',
-        ],
-        icon: <Zap size={20} />,
-      },
-    ],
-    eta: 'q3 2025',
-    snarkyNote: 'CLARP would be first token on BAGS with prediction markets. probably.',
-  },
-  {
-    id: 'v4',
-    version: 'v4.0',
-    title: 'charity flywheel + community intel',
-    status: 'future',
-    description: 'buy $CLARP to save ourselves from AI domination.',
-    longDescription: 'Two components: a fee distribution model that funds AI safety research, and a community intelligence layer for decentralized due diligence. Snitch mode activated - anonymous reporting with bounties for catching rugs early.',
-    features: [
-      {
-        name: 'charity flywheel',
-        status: 'planned',
-        description: 'fee distribution to AI safety organizations',
-        details: [
-          'Buy $CLARP → Generate fees → Distribute:',
-          '40% Buyback & burn (deflationary pressure)',
-          '30% AI safety charity donations',
-          '20% Development funding',
-          '10% Community rewards',
-          'Transparent on-chain donation tracking',
-          'Potential partners: MIRI, Future of Life Institute, AI safety research orgs',
-        ],
-        icon: <Heart size={20} />,
+        icon: <Terminal size={20} />,
       },
       {
         name: 'snitch mode',
         status: 'planned',
         description: 'anonymous reporting with bounties',
         details: [
-          'Submit intel on suspicious projects anonymously',
-          'Stake $CLARP to submit (skin in the game)',
-          'Bounties for reports that prove accurate',
+          'Submit intel on suspicious projects',
+          'Stake $CLARP to submit (skin in game)',
+          'Bounties for accurate reports',
+          'Early warning system',
           'Whistleblower protections',
-          'Early warning system for the community',
         ],
         icon: <AlertTriangle size={20} />,
+      },
+      {
+        name: 'hall of shame v2',
+        status: 'planned',
+        description: 'historical rug archive',
+        details: [
+          'Comprehensive rugged project database',
+          'Pattern analysis across rugs',
+          'Team connection mapping',
+          'Searchable by wallet, name, team',
+          '"Learn from history or repeat it"',
+        ],
+        icon: <Database size={20} />,
+      },
+    ],
+    eta: 'q3 2025',
+    snarkyNote: 'trust no one. verify everything. snitch often.',
+  },
+  {
+    id: 'v4',
+    version: 'v4.0',
+    title: 'charity flywheel',
+    status: 'future',
+    description: 'buy $CLARP to save ourselves from AI domination.',
+    longDescription: 'A fee distribution model that funds AI safety research. Because if we\'re using AI to detect AI-generated scams, we should probably also fund the people trying to make sure AI doesn\'t destroy us all.',
+    features: [
+      {
+        name: 'fee distribution',
+        status: 'planned',
+        description: 'sustainable tokenomics',
+        details: [
+          '40% Buyback & burn',
+          '30% AI safety charity donations',
+          '20% Development funding',
+          '10% Community rewards',
+          'Transparent on-chain tracking',
+        ],
+        icon: <Coins size={20} />,
+      },
+      {
+        name: 'verified donations',
+        status: 'planned',
+        description: 'provable charity contributions',
+        details: [
+          'MIRI, Future of Life Institute partnerships',
+          'On-chain donation receipts',
+          'Public donation dashboard',
+          'Community governance on recipients',
+        ],
+        icon: <Heart size={20} />,
       },
       {
         name: 'community verification',
         status: 'planned',
         description: 'stake $CLARP to validate intel',
         details: [
-          'Community votes on submitted intel validity',
-          'Stakers rewarded for accurate verification',
-          'Slashing for consistently wrong votes',
-          'Decentralized curation of threat intelligence',
+          'Vote on submitted intel validity',
+          'Rewards for accurate verification',
+          'Slashing for wrong votes',
+          'Decentralized threat intelligence',
         ],
         icon: <Shield size={20} />,
       },
-      {
-        name: 'hall of shame v2',
-        status: 'planned',
-        description: 'historical rug archive with analytics',
-        details: [
-          'Comprehensive database of rugged projects',
-          'Patterns and commonalities analysis',
-          'Team connection mapping',
-          'Searchable by wallet, team member, project name',
-          '"Learn from history or repeat it"',
-        ],
-        icon: <Database size={20} />,
-      },
     ],
     eta: '2026',
-    snarkyNote: 'trust no one. verify everything. snitch often. donate to prevent skynet.',
+    snarkyNote: 'ai built this page. ai detects the scams. might as well fund ai safety.',
   },
 ];
 
 const TICKER_MESSAGES = [
   'roadmap loaded. actually.',
-  'building features not vapourware',
-  'progress that moves',
+  'polymarket + clarp = full picture',
+  'odds without evidence is gambling',
   'building in public',
-  'judging in private',
+  'judging their code',
   'trust no roadmap except this one',
 ];
 
@@ -537,10 +485,10 @@ export default function RoadmapPage() {
               <span className={`inline-block w-2 h-4 bg-danger-orange ml-1 ${showCursor ? 'opacity-100' : 'opacity-0'}`} />
             </div>
             <div className="mt-3 text-xs text-ivory-light/60 font-mono space-y-1">
-              <div><span className="text-larp-green">✓</span> loading comprehensive roadmap...</div>
-              <div><span className="text-larp-green">✓</span> no empty promises detected</div>
-              <div><span className="text-larp-green">✓</span> verbose mode enabled</div>
-              <div><span className="text-danger-orange">!</span> warning: we might actually ship all of this</div>
+              <div><span className="text-larp-green">✓</span> autonomous trust pilot initialized...</div>
+              <div><span className="text-larp-green">✓</span> polymarket integration planned</div>
+              <div><span className="text-larp-green">✓</span> evidence layer: active</div>
+              <div><span className="text-danger-orange">!</span> warning: we might actually keep you safe</div>
             </div>
           </div>
 
@@ -550,11 +498,11 @@ export default function RoadmapPage() {
           </h1>
 
           <p className="text-lg sm:text-xl text-slate-light mb-4 font-mono">
-            a roadmap with details. revolutionary.
+            the first autonomous trust pilot for crypto.
           </p>
           <p className="text-sm sm:text-base text-slate-light max-w-2xl mx-auto">
-            unlike your last 47 crypto investments, we tell you exactly what we're building,
-            how it works, and <span className="text-danger-orange font-bold">then actually build it</span>.
+            polymarket shows what people bet. CLARP shows why they're wrong.
+            we're building the <span className="text-danger-orange font-bold">evidence layer</span> that keeps you safe from rugs and larps.
           </p>
         </div>
       </section>
@@ -653,7 +601,7 @@ export default function RoadmapPage() {
       </section>
 
       {/* Ticker */}
-      <WarningTicker messages={['we\'ll ship. they won\'t.', 'roadmap !== whitepaper', 'details matter', 'actually building']} direction="right" />
+      <WarningTicker messages={['autonomous trust pilot', 'polymarket odds + clarp evidence', 'keeping you safe from rugs', 'actually building']} direction="right" />
 
       {/* Mission Section */}
       <section className="py-16 sm:py-24 px-4 sm:px-6 bg-slate-dark">
@@ -662,6 +610,9 @@ export default function RoadmapPage() {
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-ivory-light mb-4 font-display">
               the <span className="text-danger-orange">mission</span>
             </h2>
+            <p className="text-lg text-ivory-light/60 font-mono">
+              the first autonomous trust pilot for crypto
+            </p>
           </div>
 
           <div className="space-y-6 font-mono text-base sm:text-lg">
@@ -677,11 +628,17 @@ export default function RoadmapPage() {
                 <span className="text-larp-green font-bold">$CLARP</span> tells you if there's anything behind the contract at all.
               </p>
             </div>
+            <div className="flex items-start gap-4 p-6 bg-ivory-light/5 border border-ivory-light/10">
+              <span className="text-larp-yellow shrink-0 text-xl">▸</span>
+              <p className="text-ivory-light/80">
+                <span className="text-larp-yellow font-bold">polymarket</span> tells you what people bet. <span className="text-danger-orange font-bold">CLARP</span> tells you why they're wrong.
+              </p>
+            </div>
           </div>
 
           <div className="mt-12 text-center">
             <p className="text-ivory-light/40 text-sm font-mono mb-8">
-              trustpilot for crypto. but honest.
+              autonomous trust pilot. keeping you safe from rugs and larps.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/vapourware-detector" className="btn-primary">
@@ -710,7 +667,7 @@ export default function RoadmapPage() {
       </section>
 
       {/* Final ticker */}
-      <WarningTicker messages={['roadmap documented', 'details included', 'no empty promises', 'building continues']} direction="left" />
+      <WarningTicker messages={['autonomous trust pilot', 'evidence over odds', 'safe from rugs', 'building continues']} direction="left" />
 
       <Footer />
     </main>

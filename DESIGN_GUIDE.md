@@ -6,15 +6,6 @@
 
 ---
 
-## Moodboard Reference
-
-See `/moodboard/` folder for reference images:
-- `1-medium.png` - "CLARP" pixel block typography
-- `2-profile.jpg` - Clarp mascot walking scene (light bg)
-- `3-twitter-thumb.jpg` - Clarp mascot solo (dark bg)
-- `4-twitter-banner.jpg` - Full banner with terminal window
-- `5-clarp-mascot.png` - Clarp variant
-
 ### The "Clarp" Character
 The official Clarp mascot is a pixel art creature called "Clarp":
 - Simple 4-legged boxy body
