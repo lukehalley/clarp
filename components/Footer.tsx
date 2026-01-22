@@ -15,17 +15,9 @@ const LINK_MESSAGES = [
   'error: expectations too high',
 ];
 
-const SOCIAL_MESSAGES = [
-  'imagine if we had social media.',
-  'this would go to twitter. if we had one.',
-  'the discord is just you. alone.',
-  'telegram: 1 member (you, refreshing)',
-];
-
 export default function Footer() {
   const [clickedLink, setClickedLink] = useState<string | null>(null);
   const [message, setMessage] = useState('');
-  const [socialClicks, setSocialClicks] = useState(0);
   const [copyrightClicks, setCopyrightClicks] = useState(0);
 
   const handleLinkClick = (e: React.MouseEvent, linkName: string) => {
@@ -33,15 +25,6 @@ export default function Footer() {
     const msg = LINK_MESSAGES[Math.floor(Math.random() * LINK_MESSAGES.length)];
     setMessage(msg);
     setClickedLink(linkName);
-    setTimeout(() => setClickedLink(null), 2000);
-  };
-
-  const handleSocialClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    setSocialClicks(prev => prev + 1);
-    const msg = SOCIAL_MESSAGES[Math.floor(Math.random() * SOCIAL_MESSAGES.length)];
-    setMessage(msg);
-    setClickedLink('social');
     setTimeout(() => setClickedLink(null), 2000);
   };
 
