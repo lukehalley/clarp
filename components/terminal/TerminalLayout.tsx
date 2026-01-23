@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import SearchInput from './SearchInput';
 import TerminalLoader from './TerminalLoader';
 import {
@@ -34,15 +34,25 @@ interface TerminalLayoutProps {
 
 export default function TerminalLayout({ children }: TerminalLayoutProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [alertsOpen, setAlertsOpen] = useState(false);
   const [showLoader, setShowLoader] = useState(true);
   const [booted, setBooted] = useState(false);
+  const [isFadingOut, setIsFadingOut] = useState(false);
 
   // Always play the boot animation for dramatic effect
   const handleBootComplete = () => {
     setShowLoader(false);
     setBooted(true);
+  };
+
+  // Fade out and navigate back to landing page
+  const handleBackToHome = () => {
+    setIsFadingOut(true);
+    setTimeout(() => {
+      router.push('/');
+    }, 500);
   };
 
   const isActive = (href: string) => {
@@ -65,13 +75,13 @@ export default function TerminalLayout({ children }: TerminalLayoutProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
           {/* Back + Logo */}
           <div className="flex items-center gap-3 shrink-0">
-            <Link
-              href="/"
-              className="flex items-center justify-center w-8 h-8 border border-ivory-light/20 text-ivory-light/50 hover:text-ivory-light hover:border-danger-orange hover:bg-danger-orange/10 transition-all"
+            <button
+              onClick={handleBackToHome}
+              className="flex items-center justify-center w-8 h-8 border border-ivory-light/20 text-ivory-light/50 hover:text-ivory-light hover:border-danger-orange hover:bg-danger-orange/10 transition-all cursor-pointer"
               title="Back to home"
             >
               <ArrowLeft size={16} />
-            </Link>
+            </button>
             <Link
               href="/terminal"
               className="flex items-center gap-2 text-ivory-light font-mono font-bold text-lg"
@@ -261,17 +271,19 @@ export default function TerminalLayout({ children }: TerminalLayoutProps) {
                 </Link>
               </div>
               <div className="border-t border-ivory-light/10 mt-2 pt-2">
-                <Link
-                  href="/"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center justify-between px-4 py-3 font-mono text-sm text-ivory-light/50 hover:text-ivory-light"
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    handleBackToHome();
+                  }}
+                  className="w-full flex items-center justify-between px-4 py-3 font-mono text-sm text-ivory-light/50 hover:text-ivory-light cursor-pointer"
                 >
                   <span className="flex items-center gap-3">
                     <ArrowLeft size={18} />
                     Back to Home
                   </span>
                   <ChevronRight size={16} className="text-ivory-light/30" />
-                </Link>
+                </button>
               </div>
             </nav>
           </div>
@@ -300,9 +312,9 @@ export default function TerminalLayout({ children }: TerminalLayoutProps) {
               <span>Terminal v1.0</span>
             </div>
             <div className="flex items-center gap-4">
-              <Link href="/" className="hover:text-ivory-light/60 transition-colors">
+              <button onClick={handleBackToHome} className="hover:text-ivory-light/60 transition-colors cursor-pointer">
                 Home
-              </Link>
+              </button>
               <Link href="/roadmap" className="hover:text-ivory-light/60 transition-colors">
                 Roadmap
               </Link>
@@ -324,6 +336,13 @@ export default function TerminalLayout({ children }: TerminalLayoutProps) {
           </p>
         </div>
       </footer>
+
+      {/* Fade out overlay */}
+      <div
+        className={`fixed inset-0 bg-black z-[150] pointer-events-none transition-opacity duration-500 ${
+          isFadingOut ? 'opacity-100' : 'opacity-0'
+        }`}
+      />
     </div>
   );
 }
