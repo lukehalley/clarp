@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import Terminal from './Terminal';
-import Badge from './Badge';
 
 const DOCS_TABS = [
   {

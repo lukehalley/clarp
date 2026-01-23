@@ -7,7 +7,6 @@ import WarningTicker from '@/components/WarningTicker';
 import Terminal from '@/components/Terminal';
 import {
   Terminal as TerminalIcon,
-  Bot,
   Scan,
   TrendingUp,
   AlertTriangle,
@@ -479,7 +478,7 @@ export default function RoadmapPage() {
   const [asciiClicks, setAsciiClicks] = useState(0);
   const [totalPhaseClicks, setTotalPhaseClicks] = useState(0);
   const [progressClicks, setProgressClicks] = useState(0);
-  const [progressHoverMsg, setProgressHoverMsg] = useState('');
+  const [_progressHoverMsg, setProgressHoverMsg] = useState('');
   const [showPhaseClickMsg, setShowPhaseClickMsg] = useState(false);
   const [phaseClickMsg, setPhaseClickMsg] = useState('');
   const [showSmoke, setShowSmoke] = useState(false);

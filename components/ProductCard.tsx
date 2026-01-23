@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import Badge from './Badge';
 import ProgressBar from './ProgressBar';
-import Button from './Button';
 
 const LOADING_EXCUSES = [
   'connecting to bonding curve (casino)...',

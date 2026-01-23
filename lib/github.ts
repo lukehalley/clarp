@@ -80,8 +80,8 @@ function getHeaders(): HeadersInit {
 export function parseGitHubUrl(url: string): { owner: string; repo: string } | null {
   // Handle various GitHub URL formats
   const patterns = [
-    /github\.com\/([^\/]+)\/([^\/\?#]+)/,
-    /^([^\/]+)\/([^\/]+)$/,
+    /github\.com\/([^/]+)\/([^/?#]+)/,
+    /^([^/]+)\/([^/]+)$/,
   ];
 
   for (const pattern of patterns) {

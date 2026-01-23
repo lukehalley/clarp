@@ -1017,7 +1017,7 @@ ${FILESYSTEM.etc?.children?.motd?.content || ''}
                   .replace(/&lt;dir&gt;/g, '<span class="text-sky-400">')
                   .replace(/&lt;\/dir&gt;/g, '</span>')
                   // Style the ASCII logo in orange with glow
-                  .replace(/( ██████╗██╗[\s\S]*?╚═════╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝)/g,
+                  .replace(/([ ]██████╗██╗[\s\S]*?╚═════╝╚══════╝╚═╝[ ]{2}╚═╝╚═╝[ ]{2}╚═╝╚═╝)/g,
                     '<span class="text-danger-orange" style="text-shadow: 0 0 10px rgba(255, 107, 53, 0.5), 0 0 20px rgba(255, 107, 53, 0.3);">$1</span>'
                   )
               }}
