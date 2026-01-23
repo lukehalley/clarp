@@ -1,250 +1,281 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import ProjectCard from '@/components/terminal/ProjectCard';
+import IntelCard from '@/components/terminal/IntelCard';
+import IntelCarousel from '@/components/terminal/IntelCarousel';
 import {
   MOCK_PROJECTS,
-  MOCK_WATCHLIST,
-  MOCK_ALERTS,
-  getMockScore,
   getRiskSpikes,
   getTrendingRisky,
+  getTrustedProjects,
+  getRecentlyVerified,
 } from '@/lib/terminal/mock-data';
-import {
-  TrendingUp,
-  AlertTriangle,
-  Bookmark,
-  Bell,
-  ChevronRight,
-  Activity,
-} from 'lucide-react';
+import { Shield, AlertTriangle, TrendingUp, Activity, Zap, Eye } from 'lucide-react';
 
 export default function TerminalDashboard() {
   const [mounted, setMounted] = useState(false);
   const [riskSpikes, setRiskSpikes] = useState<ReturnType<typeof getRiskSpikes>>([]);
   const [trendingRisky, setTrendingRisky] = useState<ReturnType<typeof getTrendingRisky>>([]);
+  const [trustedProjects, setTrustedProjects] = useState<ReturnType<typeof getTrustedProjects>>([]);
+  const [verifiedProjects, setVerifiedProjects] = useState<ReturnType<typeof getRecentlyVerified>>([]);
 
   useEffect(() => {
     setMounted(true);
     setRiskSpikes(getRiskSpikes());
     setTrendingRisky(getTrendingRisky());
+    setTrustedProjects(getTrustedProjects());
+    setVerifiedProjects(getRecentlyVerified());
   }, []);
 
   if (!mounted) return null;
 
-  const unreadAlerts = MOCK_ALERTS.filter(a => !a.read).length;
+  // Stats
+  const totalProjects = MOCK_PROJECTS.length;
+  const verifiedCount = MOCK_PROJECTS.filter((p) => p.verified).length;
+  const criticalCount = trendingRisky.filter((p) => p.score.score >= 70).length;
+  const lowRiskCount = trustedProjects.length;
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-mono font-bold text-ivory-light">
-            Dashboard
-          </h1>
-          <p className="text-ivory-light/50 font-mono text-sm mt-1">
-            Real-time risk intelligence
-          </p>
+    <div className="space-y-12 sm:space-y-16">
+      {/* Hero Header */}
+      <div className="relative">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+          <div>
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-mono font-bold text-ivory-light">
+              intel dashboard
+            </h1>
+            <p className="text-sm sm:text-base font-mono text-ivory-light/50 mt-2">
+              real-time risk intelligence. trust no one. verify everything.
+            </p>
+          </div>
+
+          {/* Live indicator */}
+          <div className="flex items-center gap-2 px-4 py-2 border-2 border-danger-orange/50 bg-slate-dark">
+            <div className="w-2 h-2 bg-larp-green animate-pulse" />
+            <span className="text-xs font-mono text-ivory-light/70">
+              scanning {totalProjects} projects
+            </span>
+          </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          <Link
-            href="/terminal/watchlist"
-            className="flex items-center gap-2 px-4 py-2 border border-ivory-light/20 text-ivory-light/70 hover:border-danger-orange/50 hover:text-ivory-light font-mono text-sm transition-colors"
-          >
-            <Bookmark size={16} />
-            Watchlist ({MOCK_WATCHLIST.length})
-          </Link>
-          <Link
-            href="/terminal/alerts"
-            className="flex items-center gap-2 px-4 py-2 border border-ivory-light/20 text-ivory-light/70 hover:border-danger-orange/50 hover:text-ivory-light font-mono text-sm transition-colors relative"
-          >
-            <Bell size={16} />
-            Alerts
-            {unreadAlerts > 0 && (
-              <span className="absolute -top-1 -right-1 w-5 h-5 bg-danger-orange text-black text-xs font-bold flex items-center justify-center">
-                {unreadAlerts}
-              </span>
-            )}
-          </Link>
+        {/* Stats bar - dark brutalist cards */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mt-6 sm:mt-8">
+          <div className="p-4 bg-slate-dark border-2 border-ivory-light/20" style={{ boxShadow: '3px 3px 0 rgba(250,249,245,0.1)' }}>
+            <div className="flex items-center gap-2 text-ivory-light/50 mb-1">
+              <Eye size={14} />
+              <span className="text-[10px] sm:text-xs font-mono uppercase">tracked</span>
+            </div>
+            <div className="text-2xl sm:text-3xl font-mono font-bold text-ivory-light">
+              {totalProjects}
+            </div>
+            <div className="text-[10px] sm:text-xs font-mono text-ivory-light/40">projects</div>
+          </div>
+
+          <div className="p-4 bg-slate-dark border-2 border-larp-green/50" style={{ boxShadow: '3px 3px 0 var(--larp-green)' }}>
+            <div className="flex items-center gap-2 text-larp-green mb-1">
+              <Shield size={14} />
+              <span className="text-[10px] sm:text-xs font-mono uppercase">verified</span>
+            </div>
+            <div className="text-2xl sm:text-3xl font-mono font-bold text-larp-green">
+              {verifiedCount}
+            </div>
+            <div className="text-[10px] sm:text-xs font-mono text-ivory-light/40">
+              kyc teams
+            </div>
+          </div>
+
+          <div className="p-4 bg-slate-dark border-2 border-larp-green/50" style={{ boxShadow: '3px 3px 0 var(--larp-green)' }}>
+            <div className="flex items-center gap-2 text-larp-green mb-1">
+              <Zap size={14} />
+              <span className="text-[10px] sm:text-xs font-mono uppercase">safe</span>
+            </div>
+            <div className="text-2xl sm:text-3xl font-mono font-bold text-larp-green">
+              {lowRiskCount}
+            </div>
+            <div className="text-[10px] sm:text-xs font-mono text-ivory-light/40">
+              low risk
+            </div>
+          </div>
+
+          <div className="p-4 bg-slate-dark border-2 border-larp-red/50" style={{ boxShadow: '3px 3px 0 var(--larp-red)' }}>
+            <div className="flex items-center gap-2 text-larp-red mb-1">
+              <AlertTriangle size={14} />
+              <span className="text-[10px] sm:text-xs font-mono uppercase">critical</span>
+            </div>
+            <div className="text-2xl sm:text-3xl font-mono font-bold text-larp-red">
+              {criticalCount}
+            </div>
+            <div className="text-[10px] sm:text-xs font-mono text-ivory-light/40">
+              high risk
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Risk Spikes */}
-      <section>
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <TrendingUp size={20} className="text-larp-red" />
-            <h2 className="font-mono font-bold text-ivory-light text-lg">Risk Spikes (24h)</h2>
-          </div>
-          <span className="text-xs font-mono text-ivory-light/40">
-            Projects with biggest score increase
-          </span>
-        </div>
+      {/* Verified Projects Carousel */}
+      {verifiedProjects.length > 0 && (
+        <section>
+          <IntelCarousel
+            title="verified projects"
+            subtitle="kyc verified teams. still dyor."
+            icon={<Shield size={24} />}
+            variant="safe"
+          >
+            {verifiedProjects.map(({ project, score }) => (
+              <IntelCard key={project.id} project={project} score={score} />
+            ))}
+          </IntelCarousel>
+        </section>
+      )}
 
-        {riskSpikes.length > 0 ? (
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      {/* Risk Spikes Carousel */}
+      {riskSpikes.length > 0 && (
+        <section>
+          <IntelCarousel
+            title="risk spikes (24h)"
+            subtitle="biggest score increases. something changed."
+            icon={<TrendingUp size={24} />}
+            variant="danger"
+            autoScroll
+            autoScrollInterval={6000}
+          >
             {riskSpikes.map(({ project, score, delta }) => (
-              <ProjectCard
+              <IntelCard
                 key={project.id}
                 project={project}
                 score={score}
                 scoreDelta24h={delta}
-                compact
               />
             ))}
-          </div>
-        ) : (
-          <div className="p-6 border border-ivory-light/10 text-center">
-            <p className="text-ivory-light/50 font-mono text-sm">
-              No significant risk spikes detected
+          </IntelCarousel>
+        </section>
+      )}
+
+      {/* High Risk Carousel */}
+      {trendingRisky.length > 0 && (
+        <section>
+          <IntelCarousel
+            title="high risk projects"
+            subtitle="trending + red flags. proceed with caution (or don't proceed)."
+            icon={<AlertTriangle size={24} />}
+            variant="danger"
+          >
+            {trendingRisky.map(({ project, score }) => (
+              <IntelCard key={project.id} project={project} score={score} />
+            ))}
+          </IntelCarousel>
+        </section>
+      )}
+
+      {/* Low Risk Carousel */}
+      {trustedProjects.length > 0 && (
+        <section>
+          <IntelCarousel
+            title="low risk projects"
+            subtitle="appears legitimate. but we've been wrong before."
+            icon={<Shield size={24} />}
+            variant="safe"
+          >
+            {trustedProjects.map(({ project, score }) => (
+              <IntelCard key={project.id} project={project} score={score} />
+            ))}
+          </IntelCarousel>
+        </section>
+      )}
+
+      {/* Activity Feed - dark brutalist */}
+      <section>
+        <div className="flex items-center gap-3 mb-6">
+          <Activity size={24} className="text-danger-orange" />
+          <div>
+            <h2 className="text-lg sm:text-xl font-mono font-bold text-ivory-light">
+              recent activity
+            </h2>
+            <p className="text-xs font-mono text-ivory-light/50">
+              latest intel across all projects
             </p>
           </div>
-        )}
-      </section>
-
-      {/* Trending + Risky */}
-      <section>
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <AlertTriangle size={20} className="text-danger-orange" />
-            <h2 className="font-mono font-bold text-ivory-light text-lg">Trending + Risky</h2>
-          </div>
-          <span className="text-xs font-mono text-ivory-light/40">
-            High mention velocity + red flags
-          </span>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {trendingRisky.map(({ project, score }) => (
-            <ProjectCard
-              key={project.id}
-              project={project}
-              score={score}
-              compact
-            />
+        <div className="bg-slate-dark border-2 border-ivory-light/20 overflow-hidden" style={{ boxShadow: '4px 4px 0 rgba(250,249,245,0.1)' }}>
+          {[
+            {
+              time: '2m ago',
+              event: 'score increased',
+              project: 'TROVE',
+              delta: '+8',
+              type: 'warning' as const,
+            },
+            {
+              time: '15m ago',
+              event: 'new shill cluster detected',
+              project: 'Hype Machine',
+              delta: null,
+              type: 'critical' as const,
+            },
+            {
+              time: '1h ago',
+              event: 'lp lock extended',
+              project: 'Shadow Protocol',
+              delta: null,
+              type: 'positive' as const,
+            },
+            {
+              time: '2h ago',
+              event: 'team wallet → cex',
+              project: 'CyberYield',
+              delta: null,
+              type: 'critical' as const,
+            },
+            {
+              time: '4h ago',
+              event: 'verification approved',
+              project: 'DeFi Pulse',
+              delta: null,
+              type: 'positive' as const,
+            },
+            {
+              time: '6h ago',
+              event: 'suspicious flow detected',
+              project: 'Neural Net Token',
+              delta: null,
+              type: 'critical' as const,
+            },
+          ].map((item, i) => (
+            <div
+              key={i}
+              className={`flex items-center justify-between p-4 hover:bg-ivory-light/5 transition-colors ${
+                i !== 5 ? 'border-b border-ivory-light/10' : ''
+              }`}
+            >
+              <div className="flex items-center gap-4">
+                <span className="text-xs font-mono text-ivory-light/40 w-16 shrink-0">
+                  {item.time}
+                </span>
+                <span className="font-mono text-sm text-ivory-light">{item.event}</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="font-mono text-sm text-danger-orange">{item.project}</span>
+                {item.delta && (
+                  <span className="text-xs font-mono text-larp-red">{item.delta}</span>
+                )}
+                <span
+                  className={`w-3 h-3 ${
+                    item.type === 'critical'
+                      ? 'bg-larp-red'
+                      : item.type === 'warning'
+                      ? 'bg-danger-orange'
+                      : 'bg-larp-green'
+                  }`}
+                />
+              </div>
+            </div>
           ))}
         </div>
-      </section>
 
-      {/* Watchlist Summary */}
-      {MOCK_WATCHLIST.length > 0 && (
-        <section>
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <Bookmark size={20} className="text-larp-yellow" />
-              <h2 className="font-mono font-bold text-ivory-light text-lg">Your Watchlist</h2>
-            </div>
-            <Link
-              href="/terminal/watchlist"
-              className="text-xs font-mono text-danger-orange hover:text-danger-orange/80 flex items-center gap-1"
-            >
-              View all <ChevronRight size={14} />
-            </Link>
-          </div>
-
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {MOCK_WATCHLIST.slice(0, 3).map(({ project, score, scoreDelta24h }) => (
-              <ProjectCard
-                key={project.id}
-                project={project}
-                score={score}
-                scoreDelta24h={scoreDelta24h}
-                compact
-              />
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* Recent Alerts */}
-      {MOCK_ALERTS.length > 0 && (
-        <section>
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <Activity size={20} className="text-larp-purple" />
-              <h2 className="font-mono font-bold text-ivory-light text-lg">Recent Alerts</h2>
-            </div>
-            <Link
-              href="/terminal/alerts"
-              className="text-xs font-mono text-danger-orange hover:text-danger-orange/80 flex items-center gap-1"
-            >
-              View all <ChevronRight size={14} />
-            </Link>
-          </div>
-
-          <div className="space-y-2">
-            {MOCK_ALERTS.slice(0, 3).map((alert) => {
-              const project = MOCK_PROJECTS.find(p => p.id === alert.projectId);
-              return (
-                <Link
-                  key={alert.id}
-                  href={`/terminal/project/${alert.projectId}`}
-                  className={`block p-4 border transition-colors ${
-                    alert.read
-                      ? 'border-ivory-light/10 hover:border-ivory-light/20'
-                      : 'border-danger-orange/30 bg-danger-orange/5 hover:border-danger-orange/50'
-                  }`}
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2">
-                        {!alert.read && (
-                          <span className="w-2 h-2 bg-danger-orange shrink-0" />
-                        )}
-                        <span className="font-mono font-bold text-ivory-light">
-                          {project?.name || 'Unknown'}
-                        </span>
-                        <span className="text-xs font-mono px-2 py-0.5 bg-ivory-light/10 text-ivory-light/60">
-                          {alert.type.replace('_', ' ')}
-                        </span>
-                      </div>
-                      <p className="text-sm text-ivory-light/60 mt-1 font-mono">
-                        {alert.type === 'score_change'
-                          ? `Score changed from ${alert.payload.before} to ${alert.payload.after}`
-                          : alert.type === 'wallet_cex'
-                          ? 'Team wallet deposited to CEX'
-                          : 'Alert triggered'}
-                      </p>
-                    </div>
-                    <span className="text-xs font-mono text-ivory-light/40 shrink-0">
-                      {new Date(alert.createdAt).toLocaleDateString()}
-                    </span>
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        </section>
-      )}
-
-      {/* Quick stats */}
-      <section className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="p-4 border border-ivory-light/10 bg-ivory-light/5">
-          <span className="text-xs font-mono text-ivory-light/40">Projects Scanned</span>
-          <p className="text-2xl font-mono font-bold text-ivory-light mt-1">
-            {MOCK_PROJECTS.length}
-          </p>
-        </div>
-        <div className="p-4 border border-ivory-light/10 bg-ivory-light/5">
-          <span className="text-xs font-mono text-ivory-light/40">High Risk</span>
-          <p className="text-2xl font-mono font-bold text-larp-red mt-1">
-            {MOCK_PROJECTS.filter(p => getMockScore(p.id).riskLevel === 'critical').length}
-          </p>
-        </div>
-        <div className="p-4 border border-ivory-light/10 bg-ivory-light/5">
-          <span className="text-xs font-mono text-ivory-light/40">Watching</span>
-          <p className="text-2xl font-mono font-bold text-larp-yellow mt-1">
-            {MOCK_WATCHLIST.length}
-          </p>
-        </div>
-        <div className="p-4 border border-ivory-light/10 bg-ivory-light/5">
-          <span className="text-xs font-mono text-ivory-light/40">Active Alerts</span>
-          <p className="text-2xl font-mono font-bold text-larp-purple mt-1">
-            {unreadAlerts}
-          </p>
-        </div>
+        <p className="text-[10px] font-mono text-ivory-light/30 mt-3 text-center">
+          showing last 6 events. click a project to see full history. (jk, that doesn't work yet)
+        </p>
       </section>
     </div>
   );

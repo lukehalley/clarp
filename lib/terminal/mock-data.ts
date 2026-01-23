@@ -622,3 +622,32 @@ export function getTrendingRisky(): { project: Project; score: LarpScore }[] {
     .sort((a, b) => b.score.score - a.score.score)
     .slice(0, 6);
 }
+
+export function getTrustedProjects(): { project: Project; score: LarpScore }[] {
+  return MOCK_PROJECTS
+    .map(p => ({
+      project: p,
+      score: getMockScore(p.id),
+    }))
+    .filter(item => item.score.score < 30 || item.project.verified)
+    .sort((a, b) => a.score.score - b.score.score)
+    .slice(0, 4);
+}
+
+export function getRecentlyVerified(): { project: Project; score: LarpScore }[] {
+  return MOCK_PROJECTS
+    .filter(p => p.verified)
+    .map(p => ({
+      project: p,
+      score: getMockScore(p.id),
+    }))
+    .sort((a, b) => b.project.updatedAt.getTime() - a.project.updatedAt.getTime())
+    .slice(0, 4);
+}
+
+export function getAllProjectsWithScores(): { project: Project; score: LarpScore }[] {
+  return MOCK_PROJECTS.map(p => ({
+    project: p,
+    score: getMockScore(p.id),
+  }));
+}

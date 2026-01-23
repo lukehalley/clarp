@@ -7,13 +7,14 @@ import SearchInput from './SearchInput';
 import TerminalLoader from './TerminalLoader';
 import {
   LayoutDashboard,
-  FolderSearch,
   Bookmark,
   Bell,
   Menu,
   X,
   ChevronRight,
   ArrowLeft,
+  Radar,
+  Settings,
 } from 'lucide-react';
 
 interface NavItem {
@@ -24,9 +25,7 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { href: '/terminal', label: 'Dashboard', icon: <LayoutDashboard size={18} /> },
-  { href: '/terminal/search', label: 'Search', icon: <FolderSearch size={18} /> },
-  { href: '/terminal/watchlist', label: 'Watchlist', icon: <Bookmark size={18} /> },
-  { href: '/terminal/alerts', label: 'Alerts', icon: <Bell size={18} /> },
+  { href: '/terminal/xintel', label: 'X Intel', icon: <Radar size={18} /> },
 ];
 
 interface TerminalLayoutProps {
@@ -36,6 +35,7 @@ interface TerminalLayoutProps {
 export default function TerminalLayout({ children }: TerminalLayoutProps) {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [alertsOpen, setAlertsOpen] = useState(false);
   const [showLoader, setShowLoader] = useState(true);
   const [booted, setBooted] = useState(false);
 
@@ -85,6 +85,12 @@ export default function TerminalLayout({ children }: TerminalLayoutProps) {
               <span className="text-danger-orange">CLARP</span>
               <span className="text-ivory-light/60">TERMINAL</span>
             </Link>
+            {/* Demo Badge */}
+            <div className="hidden sm:flex items-center">
+              <span className="px-2 py-0.5 bg-larp-yellow/20 border border-larp-yellow/50 text-larp-yellow font-mono text-[10px] font-bold tracking-wider animate-pulse">
+                DEMO
+              </span>
+            </div>
           </div>
 
           {/* Desktop Nav */}
@@ -105,9 +111,104 @@ export default function TerminalLayout({ children }: TerminalLayoutProps) {
             ))}
           </nav>
 
-          {/* Search - Desktop */}
-          <div className="hidden lg:block flex-1 max-w-md">
-            <SearchInput compact />
+          {/* Search + Actions */}
+          <div className="hidden md:flex items-center gap-3 flex-1 justify-end max-w-lg">
+            <div className="hidden lg:block flex-1">
+              <SearchInput compact />
+            </div>
+
+            {/* Watchlist Button */}
+            <Link
+              href="/terminal/watchlist"
+              className="shrink-0 w-10 h-10 flex items-center justify-center bg-larp-yellow border-2 border-black transition-all hover:translate-x-0.5 hover:translate-y-0.5"
+              style={{ boxShadow: '3px 3px 0 black' }}
+              title="Watchlist"
+            >
+              <Bookmark size={18} className="text-black" />
+            </Link>
+
+            {/* Alerts Icon */}
+            <div className="relative shrink-0">
+            <button
+              onClick={() => setAlertsOpen(!alertsOpen)}
+              className="relative w-10 h-10 flex items-center justify-center bg-danger-orange border-2 border-black transition-all hover:translate-x-0.5 hover:translate-y-0.5"
+              style={{ boxShadow: alertsOpen ? 'none' : '3px 3px 0 black' }}
+              title="Alerts"
+            >
+              <Bell size={18} className="text-black" />
+              {/* Notification dot */}
+              <span className="absolute -top-1 -right-1 w-3 h-3 bg-larp-red border border-black" />
+            </button>
+
+            {/* Alerts Dropdown */}
+            {alertsOpen && (
+              <>
+                <div
+                  className="fixed inset-0 z-40"
+                  onClick={() => setAlertsOpen(false)}
+                />
+                <div className="absolute right-0 top-full mt-2 w-80 bg-slate-dark border-2 border-danger-orange/50 z-50 shadow-lg">
+                  <div className="p-4 border-b border-ivory-light/10">
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono font-bold text-ivory-light">ALERTS</span>
+                      <span className="px-2 py-0.5 bg-larp-red/20 text-larp-red font-mono text-xs">
+                        3 NEW
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Alert Items */}
+                  <div className="max-h-64 overflow-y-auto">
+                    <div className="p-3 border-b border-ivory-light/5 hover:bg-ivory-light/5">
+                      <div className="flex items-start gap-2">
+                        <span className="w-2 h-2 mt-1.5 bg-larp-red shrink-0" />
+                        <div>
+                          <p className="font-mono text-xs text-ivory-light">
+                            @cryptokol_alpha score dropped to 28
+                          </p>
+                          <p className="font-mono text-[10px] text-ivory-light/40 mt-1">2m ago</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="p-3 border-b border-ivory-light/5 hover:bg-ivory-light/5">
+                      <div className="flex items-start gap-2">
+                        <span className="w-2 h-2 mt-1.5 bg-larp-yellow shrink-0" />
+                        <div>
+                          <p className="font-mono text-xs text-ivory-light">
+                            New backlash event for @degen_trader
+                          </p>
+                          <p className="font-mono text-[10px] text-ivory-light/40 mt-1">15m ago</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="p-3 border-b border-ivory-light/5 hover:bg-ivory-light/5">
+                      <div className="flex items-start gap-2">
+                        <span className="w-2 h-2 mt-1.5 bg-larp-green shrink-0" />
+                        <div>
+                          <p className="font-mono text-xs text-ivory-light">
+                            @legit_builder passed all checks
+                          </p>
+                          <p className="font-mono text-[10px] text-ivory-light/40 mt-1">1h ago</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Configure Button */}
+                  <div className="p-3 border-t border-ivory-light/10">
+                    <Link
+                      href="/terminal/alerts"
+                      onClick={() => setAlertsOpen(false)}
+                      className="flex items-center justify-center gap-2 w-full py-2 border border-ivory-light/20 text-ivory-light/70 font-mono text-xs hover:border-danger-orange hover:text-danger-orange transition-colors"
+                    >
+                      <Settings size={14} />
+                      CONFIGURE RULES
+                    </Link>
+                  </div>
+                </div>
+              </>
+            )}
+            </div>
           </div>
 
           {/* Mobile Menu Button */}
@@ -144,6 +245,27 @@ export default function TerminalLayout({ children }: TerminalLayoutProps) {
                   <ChevronRight size={16} className="text-ivory-light/30" />
                 </Link>
               ))}
+              {/* Mobile Action Buttons */}
+              <div className="flex gap-3 px-4 py-3">
+                <Link
+                  href="/terminal/watchlist"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex-1 flex items-center justify-center gap-2 py-3 bg-larp-yellow border-2 border-black font-mono text-sm text-black font-bold"
+                  style={{ boxShadow: '3px 3px 0 black' }}
+                >
+                  <Bookmark size={16} />
+                  WATCHLIST
+                </Link>
+                <Link
+                  href="/terminal/alerts"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex-1 flex items-center justify-center gap-2 py-3 bg-danger-orange border-2 border-black font-mono text-sm text-black font-bold"
+                  style={{ boxShadow: '3px 3px 0 black' }}
+                >
+                  <Bell size={16} />
+                  ALERTS
+                </Link>
+              </div>
               <div className="border-t border-ivory-light/10 mt-2 pt-2">
                 <Link
                   href="/"

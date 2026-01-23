@@ -8,7 +8,7 @@ import {
   getScoreColor,
   getRiskLevelColor,
 } from '@/types/terminal';
-import { ExternalLink, Copy, Check } from 'lucide-react';
+import { ExternalLink, Copy, Check, Shield, AlertTriangle } from 'lucide-react';
 import { useState } from 'react';
 
 interface ProjectCardProps {
@@ -34,6 +34,9 @@ export default function ProjectCard({
   const scoreColor = score ? getScoreColor(score.score) : undefined;
   const riskColor = score ? getRiskLevelColor(score.riskLevel) : undefined;
 
+  // Determine if this is a "safe" project (low risk or verified with good score)
+  const isTrusted = score && (score.score < 30 || (project.verified && score.score < 50));
+
   const handleCopyContract = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -49,30 +52,48 @@ export default function ProjectCard({
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
   };
 
+  // Get border color based on risk level
+  const getBorderColor = () => {
+    if (!score) return 'border-ivory-light/20';
+    if (score.score >= 70) return 'border-larp-red/40';
+    if (score.score >= 50) return 'border-danger-orange/40';
+    if (score.score >= 30) return 'border-larp-yellow/40';
+    return 'border-larp-green/40';
+  };
+
+  const getHoverBorderColor = () => {
+    if (!score) return 'hover:border-ivory-light/40';
+    if (score.score >= 70) return 'hover:border-larp-red/60';
+    if (score.score >= 50) return 'hover:border-danger-orange/60';
+    if (score.score >= 30) return 'hover:border-larp-yellow/60';
+    return 'hover:border-larp-green/60';
+  };
+
   return (
     <Link
       href={`/terminal/project/${project.id}`}
-      className={`block border-2 border-ivory-light/20 bg-ivory-light/5 hover:border-danger-orange/50 transition-colors ${
-        compact ? 'p-3' : 'p-4 sm:p-5'
+      className={`block border-2 ${getBorderColor()} ${getHoverBorderColor()} bg-slate-dark/50 transition-all duration-200 ${
+        compact ? 'p-4' : 'p-5'
       }`}
     >
-      <div className="flex items-start justify-between gap-4">
+      {/* Main content - fixed height for alignment */}
+      <div className="flex items-start justify-between gap-3 min-h-[72px]">
         {/* Left: Project info */}
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0 flex-1 flex flex-col">
+          {/* Name row */}
           <div className="flex items-center gap-2 flex-wrap">
-            {/* Name */}
-            <h3 className={`font-mono font-bold text-ivory-light ${compact ? 'text-sm' : 'text-base'}`}>
+            <h3 className="font-mono font-bold text-ivory-light text-base leading-tight">
               {project.name}
             </h3>
-
-            {/* Ticker */}
             {project.ticker && (
-              <span className="font-mono text-danger-orange text-sm">
+              <span className="font-mono text-clay text-sm">
                 ${project.ticker}
               </span>
             )}
+          </div>
 
-            {/* Chain badge */}
+          {/* Chain badge row */}
+          <div className="flex items-center gap-2 mt-2">
             <span
               className="text-xs font-mono px-2 py-0.5 border"
               style={{
@@ -83,41 +104,37 @@ export default function ProjectCard({
               {chainInfo.shortName}
             </span>
 
-            {/* Verified badge */}
             {project.verified && (
-              <span className="text-xs font-mono px-2 py-0.5 bg-larp-green/20 text-larp-green border border-larp-green/30">
+              <span className="text-xs font-mono px-2 py-0.5 bg-larp-green/20 text-larp-green border border-larp-green/30 flex items-center gap-1">
+                <Shield size={10} />
                 Verified
               </span>
             )}
           </div>
 
-          {/* Contract */}
-          {project.contract && !compact && (
-            <button
-              onClick={handleCopyContract}
-              className="flex items-center gap-1 text-xs font-mono text-ivory-light/40 hover:text-ivory-light/60 mt-2"
-            >
-              {truncateContract(project.contract)}
-              {copied ? <Check size={12} className="text-larp-green" /> : <Copy size={12} />}
-            </button>
-          )}
-
-          {/* Top risk tag */}
-          {score && score.topTags.length > 0 && (
-            <div className="mt-2">
-              <span className="text-xs font-mono px-2 py-0.5 bg-danger-orange/10 text-danger-orange border border-danger-orange/30">
+          {/* Top risk tag - consistent placement */}
+          <div className="mt-auto pt-2">
+            {score && score.topTags.length > 0 && (
+              <span
+                className={`inline-flex items-center gap-1 text-xs font-mono px-2 py-0.5 border ${
+                  isTrusted
+                    ? 'bg-larp-green/10 text-larp-green border-larp-green/30'
+                    : 'bg-danger-orange/10 text-danger-orange border-danger-orange/30'
+                }`}
+              >
+                {!isTrusted && <AlertTriangle size={10} />}
                 {score.topTags[0]}
               </span>
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
-        {/* Right: Score */}
+        {/* Right: Score - fixed width for alignment */}
         {score && (
-          <div className="text-right shrink-0">
-            <div className="flex items-baseline gap-1">
+          <div className="text-right shrink-0 w-16 flex flex-col items-end">
+            <div className="flex items-baseline gap-0.5">
               <span
-                className={`font-mono font-bold ${compact ? 'text-2xl' : 'text-3xl'}`}
+                className="font-mono font-bold text-2xl tabular-nums"
                 style={{ color: scoreColor }}
               >
                 {score.score}
@@ -135,7 +152,7 @@ export default function ProjectCard({
 
             {/* Risk level */}
             <span
-              className="text-xs font-mono uppercase"
+              className="text-xs font-mono uppercase mt-0.5"
               style={{ color: riskColor }}
             >
               {score.riskLevel}
@@ -143,6 +160,17 @@ export default function ProjectCard({
           </div>
         )}
       </div>
+
+      {/* Contract - only on non-compact */}
+      {project.contract && !compact && (
+        <button
+          onClick={handleCopyContract}
+          className="flex items-center gap-1 text-xs font-mono text-ivory-light/40 hover:text-ivory-light/60 mt-3"
+        >
+          {truncateContract(project.contract)}
+          {copied ? <Check size={12} className="text-larp-green" /> : <Copy size={12} />}
+        </button>
+      )}
 
       {/* Actions */}
       {showActions && (
@@ -169,7 +197,7 @@ export default function ProjectCard({
                   e.stopPropagation();
                   onWatch();
                 }}
-                className="text-xs font-mono px-3 py-1 border border-danger-orange/50 text-danger-orange hover:bg-danger-orange/10"
+                className="text-xs font-mono px-3 py-1 border border-clay/50 text-clay hover:bg-clay/10"
               >
                 Watch
               </button>
