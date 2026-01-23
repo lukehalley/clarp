@@ -164,7 +164,7 @@ export default function ProjectPage({ params }: PageProps) {
           </div>
 
           {/* Right: Score */}
-          <div>
+          <div className="lg:ml-auto">
             <ScoreDisplay score={score} size="lg" align="right" />
           </div>
         </div>

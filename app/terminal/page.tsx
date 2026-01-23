@@ -317,7 +317,7 @@ export default function TerminalDashboard() {
       </div>
 
       {/* Projects */}
-      <div className="flex-1 min-w-0">
+      <div className="flex-1 min-w-0 pb-20 lg:pb-0">
         {filteredProjects.length > 0 ? (
           <div className="space-y-4">
             {filteredProjects.map(({ project, score, delta }) => (
