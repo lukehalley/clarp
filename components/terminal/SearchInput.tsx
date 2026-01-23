@@ -22,13 +22,52 @@ const ENTITY_ICONS: Record<EntityType, React.ReactNode> = {
 const RECENT_SEARCHES_KEY = 'clarp-recent-searches';
 const MAX_RECENT_SEARCHES = 5;
 
+const PLACEHOLDER_OPTIONS = [
+  'Search ticker...',
+  'Search contract...',
+  'Search @handle...',
+  'Search domain...',
+  'Search ENS...',
+];
+
 export default function SearchInput({ compact, initialValue = '', onSearch }: SearchInputProps) {
   const router = useRouter();
   const [query, setQuery] = useState(initialValue);
   const [isFocused, setIsFocused] = useState(false);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const [placeholderIndex, setPlaceholderIndex] = useState(0);
+  const [displayedPlaceholder, setDisplayedPlaceholder] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Typewriter effect for placeholder
+  useEffect(() => {
+    const currentText = PLACEHOLDER_OPTIONS[placeholderIndex];
+
+    const timeout = setTimeout(() => {
+      if (!isDeleting) {
+        // Typing
+        if (displayedPlaceholder.length < currentText.length) {
+          setDisplayedPlaceholder(currentText.slice(0, displayedPlaceholder.length + 1));
+        } else {
+          // Pause at end, then start deleting
+          setTimeout(() => setIsDeleting(true), 2000);
+        }
+      } else {
+        // Deleting
+        if (displayedPlaceholder.length > 0) {
+          setDisplayedPlaceholder(displayedPlaceholder.slice(0, -1));
+        } else {
+          // Move to next placeholder
+          setIsDeleting(false);
+          setPlaceholderIndex((prev) => (prev + 1) % PLACEHOLDER_OPTIONS.length);
+        }
+      }
+    }, isDeleting ? 30 : 80); // Faster deletion, slower typing
+
+    return () => clearTimeout(timeout);
+  }, [displayedPlaceholder, isDeleting, placeholderIndex]);
 
   // Load recent searches from localStorage
   useEffect(() => {
@@ -131,17 +170,30 @@ export default function SearchInput({ compact, initialValue = '', onSearch }: Se
             </span>
           )}
 
-          <input
-            ref={inputRef}
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onFocus={() => setIsFocused(true)}
-            placeholder="Search ticker, contract, @handle, domain, or ENS..."
-            className={`flex-1 bg-transparent text-ivory-light placeholder:text-ivory-light/40 font-mono outline-none ${
-              compact ? 'text-sm' : 'text-base'
-            }`}
-          />
+          <div className="relative flex-1">
+            <input
+              ref={inputRef}
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onFocus={() => setIsFocused(true)}
+              placeholder=""
+              className={`w-full bg-transparent text-ivory-light font-mono outline-none ${
+                compact ? 'text-sm' : 'text-base'
+              }`}
+            />
+            {/* Typewriter placeholder with blinking cursor */}
+            {!query && (
+              <div
+                className={`absolute inset-0 flex items-center pointer-events-none text-ivory-light/40 font-mono ${
+                  compact ? 'text-sm' : 'text-base'
+                }`}
+              >
+                <span>{displayedPlaceholder}</span>
+                <span className="animate-blink">|</span>
+              </div>
+            )}
+          </div>
 
           {query && (
             <button

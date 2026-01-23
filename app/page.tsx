@@ -375,8 +375,9 @@ export default function Home() {
                   href="https://dexscreener.com/solana/6c71mun334bafcuvn3cwajfqnk6skztzk9vfzrthstwj"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="btn-secondary hover:opacity-100 transition-opacity"
+                  className="btn-secondary hover:opacity-100 transition-opacity inline-flex items-center gap-2"
                 >
+                  <img src="/dexscreener-icon.svg" alt="" className="w-5 h-5" />
                   dexscreener
                 </a>
               </div>

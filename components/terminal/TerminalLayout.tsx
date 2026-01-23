@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import SearchInput from './SearchInput';
+import TerminalLoader from './TerminalLoader';
 import {
   LayoutDashboard,
   FolderSearch,
@@ -12,6 +13,7 @@ import {
   Menu,
   X,
   ChevronRight,
+  ArrowLeft,
 } from 'lucide-react';
 
 interface NavItem {
@@ -34,25 +36,56 @@ interface TerminalLayoutProps {
 export default function TerminalLayout({ children }: TerminalLayoutProps) {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showLoader, setShowLoader] = useState(true);
+  const [booted, setBooted] = useState(false);
+
+  // Check if we've already booted this session
+  useEffect(() => {
+    const hasBooted = sessionStorage.getItem('clarp-terminal-booted');
+    if (hasBooted) {
+      setShowLoader(false);
+      setBooted(true);
+    }
+  }, []);
+
+  const handleBootComplete = () => {
+    sessionStorage.setItem('clarp-terminal-booted', 'true');
+    setShowLoader(false);
+    setBooted(true);
+  };
 
   const isActive = (href: string) => {
     if (href === '/terminal') return pathname === '/terminal';
     return pathname.startsWith(href);
   };
 
+  // Show loader on first visit
+  if (showLoader && !booted) {
+    return <TerminalLoader onComplete={handleBootComplete} />;
+  }
+
   return (
-    <div className="min-h-screen bg-slate-dark">
+    <div className="h-screen bg-slate-dark flex flex-col overflow-hidden">
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b-2 border-ivory-light/10 bg-slate-dark/95 backdrop-blur-sm">
+      <header className="shrink-0 border-b-2 border-ivory-light/10 bg-slate-dark">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
-          {/* Logo */}
-          <Link
-            href="/terminal"
-            className="flex items-center gap-2 text-ivory-light font-mono font-bold text-lg shrink-0"
-          >
-            <span className="text-danger-orange">CLARP</span>
-            <span className="text-ivory-light/60">TERMINAL</span>
-          </Link>
+          {/* Back + Logo */}
+          <div className="flex items-center gap-3 shrink-0">
+            <Link
+              href="/"
+              className="flex items-center justify-center w-8 h-8 border border-ivory-light/20 text-ivory-light/50 hover:text-ivory-light hover:border-danger-orange hover:bg-danger-orange/10 transition-all"
+              title="Back to home"
+            >
+              <ArrowLeft size={16} />
+            </Link>
+            <Link
+              href="/terminal"
+              className="flex items-center gap-2 text-ivory-light font-mono font-bold text-lg"
+            >
+              <span className="text-danger-orange">CLARP</span>
+              <span className="text-ivory-light/60">TERMINAL</span>
+            </Link>
+          </div>
 
           {/* Desktop Nav */}
           <nav className="hidden md:flex items-center gap-1">
@@ -111,23 +144,39 @@ export default function TerminalLayout({ children }: TerminalLayoutProps) {
                   <ChevronRight size={16} className="text-ivory-light/30" />
                 </Link>
               ))}
+              <div className="border-t border-ivory-light/10 mt-2 pt-2">
+                <Link
+                  href="/"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center justify-between px-4 py-3 font-mono text-sm text-ivory-light/50 hover:text-ivory-light"
+                >
+                  <span className="flex items-center gap-3">
+                    <ArrowLeft size={18} />
+                    Back to Home
+                  </span>
+                  <ChevronRight size={16} className="text-ivory-light/30" />
+                </Link>
+              </div>
             </nav>
           </div>
         )}
       </header>
 
-      {/* Search Bar - Mobile (below header) */}
-      <div className="lg:hidden sticky top-16 z-40 bg-slate-dark border-b border-ivory-light/10 p-4">
-        <SearchInput />
+      {/* Scrollable content area */}
+      <div className="flex-1 overflow-y-auto">
+        {/* Search Bar - Mobile (below header) */}
+        <div className="lg:hidden bg-slate-dark border-b border-ivory-light/10 p-4">
+          <SearchInput />
+        </div>
+
+        {/* Main Content */}
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 w-full">
+          {children}
+        </main>
       </div>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
-        {children}
-      </main>
-
       {/* Footer */}
-      <footer className="border-t border-ivory-light/10 py-6 px-4 sm:px-6">
+      <footer className="shrink-0 border-t border-ivory-light/10 py-6 px-4 sm:px-6 bg-slate-dark">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-ivory-light/40">
           <div className="flex items-center gap-2">
             <span className="text-danger-orange">CLARP</span>

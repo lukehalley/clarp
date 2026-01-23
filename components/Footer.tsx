@@ -87,7 +87,7 @@ export default function Footer() {
                 className="w-10 h-10 bg-slate-medium flex items-center justify-center text-ivory-light/60 hover:text-danger-orange hover:bg-slate-light/20 transition-colors border border-slate-light/20"
                 title="dexscreener"
               >
-                <span className="text-lg">◎</span>
+                <img src="/dexscreener-icon.svg" alt="dexscreener" className="w-5 h-5" />
               </a>
             </div>
           </div>

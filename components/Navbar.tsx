@@ -75,10 +75,14 @@ export default function Navbar() {
               </a>
             </div>
             <Link
-              href="/roadmap"
-              className="btn-primary ml-2"
+              href="/terminal"
+              className="group relative ml-2 px-5 py-2.5 bg-black text-ivory-light font-mono font-bold text-sm border-2 border-danger-orange transition-all duration-150 overflow-hidden hover:border-larp-green"
+              style={{ boxShadow: '3px 3px 0 #FF6B35' }}
             >
-              roadmap
+              <span className="relative z-10 flex items-center gap-2">
+                <span className="w-1.5 h-1.5 bg-danger-orange group-hover:bg-larp-green animate-pulse" />
+                terminal
+              </span>
             </Link>
           </div>
 
@@ -143,11 +147,15 @@ export default function Navbar() {
                 </a>
               </div>
               <Link
-                href="/roadmap"
-                className="btn-primary block w-full text-center mt-2"
+                href="/terminal"
+                className="group relative block w-full text-center mt-2 px-5 py-3 bg-black text-ivory-light font-mono font-bold text-sm border-2 border-danger-orange transition-all duration-150 overflow-hidden"
+                style={{ boxShadow: '3px 3px 0 #FF6B35' }}
                 onClick={() => setMobileMenuOpen(false)}
               >
-                roadmap
+                <span className="relative z-10 flex items-center justify-center gap-2">
+                  <span className="w-1.5 h-1.5 bg-danger-orange animate-pulse" />
+                  launch terminal
+                </span>
               </Link>
             </div>
           </div>
