@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import SearchInput from './SearchInput';
 import TerminalLoader from './TerminalLoader';
+import WarningTicker from '@/components/WarningTicker';
 import {
   LayoutDashboard,
   Bookmark,
@@ -16,6 +17,16 @@ import {
   Radar,
   Settings,
 } from 'lucide-react';
+
+const TERMINAL_TICKER_MESSAGES = [
+  'CLARP TERMINAL',
+  'TRUST INTELLIGENCE',
+  'LARP DETECTION ACTIVE',
+  'POLYMARKET + ON-CHAIN',
+  'EVIDENCE-BACKED ANALYSIS',
+  'DYOR',
+  'NOT FINANCIAL ADVICE',
+];
 
 interface NavItem {
   href: string;
@@ -39,17 +50,8 @@ export default function TerminalLayout({ children }: TerminalLayoutProps) {
   const [showLoader, setShowLoader] = useState(true);
   const [booted, setBooted] = useState(false);
 
-  // Check if we've already booted this session
-  useEffect(() => {
-    const hasBooted = sessionStorage.getItem('clarp-terminal-booted');
-    if (hasBooted) {
-      setShowLoader(false);
-      setBooted(true);
-    }
-  }, []);
-
+  // Always play the boot animation for dramatic effect
   const handleBootComplete = () => {
-    sessionStorage.setItem('clarp-terminal-booted', 'true');
     setShowLoader(false);
     setBooted(true);
   };
@@ -66,8 +68,11 @@ export default function TerminalLayout({ children }: TerminalLayoutProps) {
 
   return (
     <div className="h-screen bg-slate-dark flex flex-col overflow-hidden">
+      {/* Announcement Ticker */}
+      <WarningTicker messages={TERMINAL_TICKER_MESSAGES} direction="left" />
+
       {/* Header */}
-      <header className="shrink-0 border-b-2 border-ivory-light/10 bg-slate-dark">
+      <header className="shrink-0 border-b border-ivory-light/10 bg-slate-dark">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
           {/* Back + Logo */}
           <div className="flex items-center gap-3 shrink-0">
@@ -298,29 +303,36 @@ export default function TerminalLayout({ children }: TerminalLayoutProps) {
       </div>
 
       {/* Footer */}
-      <footer className="shrink-0 border-t border-ivory-light/10 py-6 px-4 sm:px-6 bg-slate-dark">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-ivory-light/40">
-          <div className="flex items-center gap-2">
-            <span className="text-danger-orange">CLARP</span>
-            <span>Terminal v1.0</span>
+      <footer className="shrink-0 border-t border-ivory-light/10 py-4 px-4 sm:px-6 bg-slate-dark">
+        <div className="max-w-7xl mx-auto space-y-3">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-mono text-ivory-light/40">
+            <div className="flex items-center gap-2">
+              <span className="text-danger-orange">CLARP</span>
+              <span>Terminal v1.0</span>
+            </div>
+            <div className="flex items-center gap-4">
+              <Link href="/" className="hover:text-ivory-light/60 transition-colors">
+                Home
+              </Link>
+              <Link href="/roadmap" className="hover:text-ivory-light/60 transition-colors">
+                Roadmap
+              </Link>
+              <a
+                href="https://x.com/CLARPAgent"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-ivory-light/60 transition-colors"
+              >
+                @CLARPAgent
+              </a>
+            </div>
+            <span className="text-ivory-light/30">
+              <span className="text-larp-red">×</span> not financial advice. don't buy this.
+            </span>
           </div>
-          <div className="flex items-center gap-4">
-            <Link href="/" className="hover:text-ivory-light/60 transition-colors">
-              Home
-            </Link>
-            <Link href="/roadmap" className="hover:text-ivory-light/60 transition-colors">
-              Roadmap
-            </Link>
-            <a
-              href="https://x.com/CLARPAgent"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-ivory-light/60 transition-colors"
-            >
-              @CLARPAgent
-            </a>
-          </div>
-          <span className="text-ivory-light/30">Not financial advice. DYOR.</span>
+          <p className="text-[9px] text-ivory-light/30 text-center font-mono">
+            <span className="text-danger-orange">disclaimer:</span> this is a parody website for entertainment purposes only. all views expressed are my own and do not represent any employer or organization.
+          </p>
         </div>
       </footer>
     </div>
