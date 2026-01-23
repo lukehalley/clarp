@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import SearchInput from './SearchInput';
 import TerminalLoader from './TerminalLoader';
-import WarningTicker from '@/components/WarningTicker';
 import {
   LayoutDashboard,
   Bookmark,
@@ -17,16 +16,6 @@ import {
   Radar,
   Settings,
 } from 'lucide-react';
-
-const TERMINAL_TICKER_MESSAGES = [
-  'CLARP TERMINAL',
-  'TRUST INTELLIGENCE',
-  'LARP DETECTION ACTIVE',
-  'POLYMARKET + ON-CHAIN',
-  'EVIDENCE-BACKED ANALYSIS',
-  'DYOR',
-  'NOT FINANCIAL ADVICE',
-];
 
 interface NavItem {
   href: string;
@@ -68,8 +57,8 @@ export default function TerminalLayout({ children }: TerminalLayoutProps) {
 
   return (
     <div className="h-screen bg-slate-dark flex flex-col overflow-hidden">
-      {/* Announcement Ticker */}
-      <WarningTicker messages={TERMINAL_TICKER_MESSAGES} direction="left" />
+      {/* Construction stripe - matches landing page */}
+      <div className="construction-stripe h-3 shrink-0" />
 
       {/* Header */}
       <header className="shrink-0 border-b border-ivory-light/10 bg-slate-dark">
