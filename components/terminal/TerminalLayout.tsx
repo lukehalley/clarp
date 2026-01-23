@@ -73,7 +73,7 @@ export default function TerminalLayout({ children }: TerminalLayoutProps) {
       {/* Header */}
       <header className="shrink-0 border-b border-ivory-light/10 bg-slate-dark">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
-          {/* Back + Logo */}
+          {/* Back + Logo + Demo + Nav */}
           <div className="flex items-center gap-3 shrink-0">
             <button
               onClick={handleBackToHome}
@@ -95,25 +95,24 @@ export default function TerminalLayout({ children }: TerminalLayoutProps) {
                 DEMO
               </span>
             </div>
+            {/* Desktop Nav - next to demo badge */}
+            <nav className="hidden md:flex items-center gap-1 ml-2">
+              {NAV_ITEMS.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`flex items-center gap-2 px-4 py-2 font-mono text-sm transition-colors ${
+                    isActive(item.href)
+                      ? 'text-danger-orange bg-danger-orange/10 border border-danger-orange/30'
+                      : 'text-ivory-light/70 hover:text-ivory-light hover:bg-ivory-light/5'
+                  }`}
+                >
+                  {item.icon}
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
           </div>
-
-          {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center gap-1">
-            {NAV_ITEMS.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`flex items-center gap-2 px-4 py-2 font-mono text-sm transition-colors ${
-                  isActive(item.href)
-                    ? 'text-danger-orange bg-danger-orange/10 border border-danger-orange/30'
-                    : 'text-ivory-light/70 hover:text-ivory-light hover:bg-ivory-light/5'
-                }`}
-              >
-                {item.icon}
-                {item.label}
-              </Link>
-            ))}
-          </nav>
 
           {/* Search + Actions */}
           <div className="hidden md:flex items-center gap-3 flex-1 justify-end max-w-lg">
