@@ -1,13 +1,13 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
 import {
   type Project,
   type LarpScore,
   CHAIN_INFO,
+  getScoreColor,
 } from '@/types/terminal';
-import { Shield, AlertTriangle, TrendingUp, Skull, CheckCircle } from 'lucide-react';
+import { Shield, AlertTriangle, TrendingUp, ExternalLink } from 'lucide-react';
 
 interface IntelCardProps {
   project: Project;
@@ -15,246 +15,135 @@ interface IntelCardProps {
   scoreDelta24h?: number;
 }
 
-const LOADING_MESSAGES = [
-  'calculating jeet probability...',
-  'scanning for rug vectors...',
-  'analyzing shill clusters...',
-  'checking team wallet activity...',
-  'verifying hopium levels (high)...',
-  'loading cope mechanisms...',
-];
-
 export default function IntelCard({ project, score, scoreDelta24h }: IntelCardProps) {
-  const [isLoading, setIsLoading] = useState(false);
-  const [loadingText, setLoadingText] = useState('');
-  const [clickCount, setClickCount] = useState(0);
-
   const chainInfo = CHAIN_INFO[project.chain];
-  const isTrusted = score.score < 30 || (project.verified && score.score < 50);
-  const isCritical = score.score >= 70;
-  const displayProgress = Math.min(score.score, 99);
-
-  const handleClick = () => {
-    setClickCount((prev) => prev + 1);
-    setIsLoading(true);
-    setLoadingText(LOADING_MESSAGES[Math.floor(Math.random() * LOADING_MESSAGES.length)]);
-
-    const interval = setInterval(() => {
-      setLoadingText(LOADING_MESSAGES[Math.floor(Math.random() * LOADING_MESSAGES.length)]);
-    }, 1500);
-
-    setTimeout(() => {
-      clearInterval(interval);
-      setIsLoading(false);
-    }, 2000);
-  };
+  // Never display 0 - minimum score is 1
+  const displayScore = Math.max(1, score.score);
+  const isTrusted = displayScore < 30 || (project.verified && displayScore < 50);
+  const isCritical = displayScore >= 70;
+  const scoreColor = getScoreColor(displayScore);
 
   const getRiskLabel = () => {
-    if (score.score >= 90) return 'confirmed larp';
-    if (score.score >= 70) return 'highly sus';
-    if (score.score >= 50) return 'yellow flags';
-    if (score.score >= 30) return 'probably fine';
+    if (displayScore >= 90) return 'confirmed larp';
+    if (displayScore >= 70) return 'highly sus';
+    if (displayScore >= 50) return 'yellow flags';
+    if (displayScore >= 30) return 'probably fine';
     return 'appears legit';
   };
 
-  const getAccentColor = () => {
-    if (isTrusted) return 'larp-green';
-    if (isCritical) return 'larp-red';
-    if (score.score >= 50) return 'danger-orange';
-    return 'larp-yellow';
-  };
-
-  const accent = getAccentColor();
-
-  const getProgressColor = () => {
-    if (score.score >= 70) return 'bg-larp-red';
-    if (score.score >= 50) return 'bg-danger-orange';
-    if (score.score >= 30) return 'bg-larp-yellow';
-    return 'bg-larp-green';
-  };
+  // Calculate contribution bar width (out of 100)
+  const contributionPercent = Math.min(100, displayScore);
 
   return (
     <Link
       href={`/terminal/project/${project.id}`}
-      onClick={handleClick}
-      className="group relative block h-full"
+      className="group block h-full"
     >
-      {/* Main card - dark brutalist style */}
-      <div
-        className={`relative h-full flex flex-col p-5 sm:p-6 bg-slate-dark border-2 transition-all duration-200 min-h-[420px] sm:min-h-[460px] ${
-          isTrusted
-            ? 'border-larp-green/50 hover:border-larp-green'
-            : isCritical
-            ? 'border-larp-red/50 hover:border-larp-red'
-            : 'border-danger-orange/50 hover:border-danger-orange'
-        }`}
-        style={{
-          boxShadow: `4px 4px 0 var(--${accent})`,
-        }}
-      >
-        {/* Corner accent - like larp-card × but with status icon */}
-        <div
-          className={`absolute -top-3 -right-3 w-8 h-8 flex items-center justify-center text-black font-bold bg-${accent}`}
-        >
-          {isTrusted ? (
-            <CheckCircle size={16} />
-          ) : isCritical ? (
-            <Skull size={16} />
-          ) : (
-            <AlertTriangle size={16} />
-          )}
-        </div>
-
-        {/* Status badge */}
-        <div className="mb-4">
-          <span
-            className={`inline-flex items-center gap-1.5 px-3 py-1 text-xs font-mono border ${
-              isTrusted
-                ? 'bg-larp-green/20 text-larp-green border-larp-green/50'
-                : isCritical
-                ? 'bg-larp-red/20 text-larp-red border-larp-red/50'
-                : 'bg-danger-orange/20 text-danger-orange border-danger-orange/50'
-            }`}
-          >
-            {isTrusted ? (
-              <>
-                <Shield size={12} />
-                {project.verified ? 'verified' : 'low risk'}
-              </>
-            ) : (
-              <>
-                <AlertTriangle size={12} />
-                {score.riskLevel} risk
-              </>
-            )}
-          </span>
-        </div>
-
+      <div className="h-full border-2 border-ivory-light/20 bg-ivory-light/5 hover:border-danger-orange/30 transition-colors">
         {/* Header */}
-        <div className="mb-4">
-          <div className="flex items-center gap-2 flex-wrap">
-            <h3 className="text-xl sm:text-2xl font-mono font-bold text-ivory-light">
-              {project.name}
-            </h3>
-            {scoreDelta24h !== undefined && scoreDelta24h !== 0 && (
+        <div className="p-4 sm:p-5">
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0 flex-1">
+              {/* Project name and badges */}
+              <div className="flex items-center gap-2 flex-wrap mb-2">
+                <h3 className="font-mono font-bold text-ivory-light text-base sm:text-lg truncate">
+                  {project.name}
+                </h3>
+                {project.ticker && (
+                  <span className="font-mono text-sm text-danger-orange shrink-0">
+                    ${project.ticker}
+                  </span>
+                )}
+              </div>
+
+              {/* Chain and status badges */}
+              <div className="flex items-center gap-2 flex-wrap">
+                <span
+                  className="text-xs font-mono px-2 py-0.5 border"
+                  style={{ borderColor: chainInfo.color, color: chainInfo.color }}
+                >
+                  {chainInfo.shortName}
+                </span>
+                {project.verified && (
+                  <span className="text-xs font-mono px-2 py-0.5 bg-larp-green/20 text-larp-green border border-larp-green/30">
+                    Verified
+                  </span>
+                )}
+                {scoreDelta24h !== undefined && scoreDelta24h !== 0 && (
+                  <span
+                    className={`flex items-center gap-0.5 text-xs font-mono ${
+                      scoreDelta24h > 0 ? 'text-larp-red' : 'text-larp-green'
+                    }`}
+                  >
+                    <TrendingUp size={12} className={scoreDelta24h < 0 ? 'rotate-180' : ''} />
+                    {scoreDelta24h > 0 ? '+' : ''}
+                    {scoreDelta24h}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Score */}
+            <div className="text-right shrink-0">
               <span
-                className={`flex items-center gap-0.5 text-sm font-mono ${
-                  scoreDelta24h > 0 ? 'text-larp-red' : 'text-larp-green'
-                }`}
+                className="font-mono font-bold text-3xl sm:text-4xl"
+                style={{ color: scoreColor }}
               >
-                <TrendingUp size={14} className={scoreDelta24h < 0 ? 'rotate-180' : ''} />
-                {scoreDelta24h > 0 ? '+' : ''}
-                {scoreDelta24h}
+                {displayScore}
               </span>
-            )}
+            </div>
           </div>
-          <div className="flex items-center gap-2 mt-2">
-            {project.ticker && (
-              <span className="text-sm font-mono text-danger-orange">${project.ticker}</span>
+
+          {/* Risk label */}
+          <div className="mt-3 flex items-center gap-2">
+            {isTrusted ? (
+              <Shield size={14} className="text-larp-green" />
+            ) : (
+              <AlertTriangle size={14} style={{ color: scoreColor }} />
             )}
-            <span
-              className="text-xs font-mono px-2 py-0.5 border"
-              style={{ borderColor: chainInfo.color, color: chainInfo.color }}
-            >
-              {chainInfo.shortName}
-            </span>
-            {project.verified && (
-              <span className="text-xs font-mono px-2 py-0.5 bg-larp-green/20 text-larp-green border border-larp-green/50">
-                KYC
-              </span>
-            )}
-          </div>
-        </div>
-
-        {/* Big Score Display */}
-        <div className="my-6 text-center">
-          <div
-            className={`text-6xl sm:text-7xl font-mono font-bold ${
-              isTrusted
-                ? 'text-larp-green'
-                : isCritical
-                ? 'text-larp-red'
-                : 'text-danger-orange'
-            }`}
-          >
-            {score.score}
-          </div>
-          <p className="text-sm font-mono text-ivory-light/60 mt-1">{getRiskLabel()}</p>
-        </div>
-
-        {/* Top Tags */}
-        <div className="flex flex-wrap gap-1.5 mb-6 min-h-[28px]">
-          {score.topTags.slice(0, 3).map((tag, i) => (
-            <span
-              key={i}
-              className="text-xs font-mono px-2 py-0.5 bg-ivory-light/5 text-ivory-light/70 border border-ivory-light/20"
-            >
-              {tag}
-            </span>
-          ))}
-        </div>
-
-        {/* Risk Progress Bar - industrial style */}
-        <div className="mt-auto">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-mono text-ivory-light/50">risk meter</span>
-            <span className={`text-xs font-mono text-${accent}`}>
-              {displayProgress}%
-              {isCritical && <span className="ml-1 animate-pulse">(!!)</span>}
+            <span className="text-xs font-mono text-ivory-light/60">
+              {getRiskLabel()}
             </span>
           </div>
-          <div className="relative h-3 bg-ivory-light/10 overflow-hidden">
-            {/* Progress fill */}
-            <div
-              className={`absolute inset-y-0 left-0 ${getProgressColor()} ${
-                isCritical ? 'animate-pulse' : ''
-              }`}
-              style={{ width: `${displayProgress}%` }}
-            />
-            {/* Danger stripes overlay for critical */}
-            {isCritical && (
+
+          {/* Risk meter */}
+          <div className="mt-4">
+            <div className="flex items-center justify-between text-xs font-mono mb-1">
+              <span className="text-ivory-light/40">risk score</span>
+              <span className="text-ivory-light/60">{displayScore}/100</span>
+            </div>
+            <div className="h-1.5 bg-slate-dark/50 overflow-hidden">
               <div
-                className="absolute inset-0 opacity-30"
+                className={`h-full transition-all duration-300 ${isCritical ? 'animate-pulse' : ''}`}
                 style={{
-                  backgroundImage: `repeating-linear-gradient(
-                    45deg,
-                    transparent,
-                    transparent 4px,
-                    rgba(0,0,0,0.3) 4px,
-                    rgba(0,0,0,0.3) 8px
-                  )`,
+                  width: `${contributionPercent}%`,
+                  backgroundColor: scoreColor,
                 }}
               />
-            )}
+            </div>
           </div>
-        </div>
 
-        {/* CTA - brutalist button */}
-        <div className="mt-6 pt-6 border-t border-ivory-light/10">
-          <div
-            className={`w-full h-11 text-sm font-mono font-bold flex items-center justify-center border-2 transition-all ${
-              isLoading
-                ? `bg-${accent} text-black border-${accent}`
-                : `bg-transparent text-${accent} border-${accent} group-hover:bg-${accent} group-hover:text-black`
-            }`}
-            style={{
-              boxShadow: isLoading ? 'none' : `3px 3px 0 var(--${accent})`,
-            }}
-          >
-            {isLoading ? (
-              <>
-                <span className="inline-block w-3 h-3 border-2 border-black border-t-transparent rounded-full animate-spin mr-2" />
-                <span className="truncate">{loadingText}</span>
-              </>
-            ) : (
-              'view intel →'
-            )}
-          </div>
-          {clickCount >= 2 && !isLoading && (
-            <p className="text-[10px] text-ivory-light/30 mt-2 text-center font-mono">
-              clicked {clickCount}x. patience isn't your strength.
-            </p>
+          {/* Top tags */}
+          {score.topTags.length > 0 && (
+            <div className="mt-4 flex flex-wrap gap-1.5">
+              {score.topTags.slice(0, 3).map((tag, i) => (
+                <span
+                  key={i}
+                  className="text-[10px] font-mono px-2 py-0.5 bg-slate-dark/50 text-ivory-light/50 border border-ivory-light/10"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
           )}
+
+          {/* View link */}
+          <div className="mt-4 pt-4 border-t border-ivory-light/10">
+            <span className="flex items-center gap-2 text-xs font-mono text-ivory-light/40 group-hover:text-danger-orange transition-colors">
+              View full analysis
+              <ExternalLink size={12} />
+            </span>
+          </div>
         </div>
       </div>
     </Link>

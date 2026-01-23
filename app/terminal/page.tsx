@@ -2,18 +2,45 @@
 
 import { useState, useEffect } from 'react';
 import IntelCard from '@/components/terminal/IntelCard';
-import IntelCarousel from '@/components/terminal/IntelCarousel';
 import {
-  MOCK_PROJECTS,
   getRiskSpikes,
   getTrendingRisky,
   getTrustedProjects,
   getRecentlyVerified,
 } from '@/lib/terminal/mock-data';
-import { Shield, AlertTriangle, TrendingUp, Activity, Zap, Eye } from 'lucide-react';
+import { CHAIN_INFO } from '@/types/terminal';
+import {
+  Shield,
+  AlertTriangle,
+  TrendingUp,
+  CheckCircle,
+  Filter,
+  RotateCcw,
+} from 'lucide-react';
+
+type CategoryFilter = 'all' | 'verified' | 'risk-spikes' | 'high-risk' | 'low-risk';
+
+const CATEGORY_FILTERS: { id: CategoryFilter; label: string; icon: React.ReactNode }[] = [
+  { id: 'all', label: 'All Projects', icon: <Filter size={14} /> },
+  { id: 'verified', label: 'Verified', icon: <CheckCircle size={14} /> },
+  { id: 'risk-spikes', label: 'Risk Spikes', icon: <TrendingUp size={14} /> },
+  { id: 'high-risk', label: 'High Risk', icon: <AlertTriangle size={14} /> },
+  { id: 'low-risk', label: 'Low Risk', icon: <Shield size={14} /> },
+];
+
+const CHAINS = Object.entries(CHAIN_INFO).map(([id, info]) => ({
+  id,
+  name: info.shortName,
+  color: info.color,
+}));
 
 export default function TerminalDashboard() {
   const [mounted, setMounted] = useState(false);
+  const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all');
+  const [selectedChains, setSelectedChains] = useState<string[]>([]);
+  const [scoreRange, setScoreRange] = useState<[number, number]>([0, 100]);
+  const [verifiedOnly, setVerifiedOnly] = useState(false);
+
   const [riskSpikes, setRiskSpikes] = useState<ReturnType<typeof getRiskSpikes>>([]);
   const [trendingRisky, setTrendingRisky] = useState<ReturnType<typeof getTrendingRisky>>([]);
   const [trustedProjects, setTrustedProjects] = useState<ReturnType<typeof getTrustedProjects>>([]);
@@ -29,117 +56,216 @@ export default function TerminalDashboard() {
 
   if (!mounted) return null;
 
-  // Stats
-  const totalProjects = MOCK_PROJECTS.length;
-  const verifiedCount = MOCK_PROJECTS.filter((p) => p.verified).length;
-  const criticalCount = trendingRisky.filter((p) => p.score.score >= 70).length;
-  const lowRiskCount = trustedProjects.length;
+  const toggleChain = (chainId: string) => {
+    setSelectedChains((prev) =>
+      prev.includes(chainId) ? prev.filter((c) => c !== chainId) : [...prev, chainId]
+    );
+  };
+
+  const resetFilters = () => {
+    setCategoryFilter('all');
+    setSelectedChains([]);
+    setScoreRange([0, 100]);
+    setVerifiedOnly(false);
+  };
+
+  const getBaseProjects = () => {
+    switch (categoryFilter) {
+      case 'verified':
+        return verifiedProjects;
+      case 'risk-spikes':
+        return riskSpikes.map(({ project, score, delta }) => ({ project, score, delta }));
+      case 'high-risk':
+        return trendingRisky;
+      case 'low-risk':
+        return trustedProjects;
+      case 'all':
+      default:
+        // Combine all unique projects
+        const allProjects = new Map();
+        [...verifiedProjects, ...trendingRisky, ...trustedProjects].forEach(({ project, score }) => {
+          if (!allProjects.has(project.id)) {
+            allProjects.set(project.id, { project, score });
+          }
+        });
+        return Array.from(allProjects.values());
+    }
+  };
+
+  const filteredProjects = getBaseProjects().filter(({ project, score }) => {
+    // Chain filter
+    if (selectedChains.length > 0 && !selectedChains.includes(project.chain)) {
+      return false;
+    }
+    // Score range filter
+    if (score.score < scoreRange[0] || score.score > scoreRange[1]) {
+      return false;
+    }
+    // Verified filter
+    if (verifiedOnly && !project.verified) {
+      return false;
+    }
+    return true;
+  });
+
+  const hasActiveFilters =
+    categoryFilter !== 'all' ||
+    selectedChains.length > 0 ||
+    scoreRange[0] !== 0 ||
+    scoreRange[1] !== 100 ||
+    verifiedOnly;
 
   return (
-    <div className="space-y-12 sm:space-y-16">
-      {/* Hero Header */}
-      <div className="relative">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-          <div>
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-mono font-bold text-ivory-light">
-              intel dashboard
-            </h1>
-            <p className="text-sm sm:text-base font-mono text-ivory-light/50 mt-2">
-              real-time risk intelligence. trust no one. verify everything.
-            </p>
+    <div className="flex gap-6">
+      {/* Sticky Sidebar */}
+      <aside className="hidden lg:block w-64 shrink-0">
+        <div className="sticky top-6 space-y-6">
+          {/* Category */}
+          <div className="border-2 border-ivory-light/20 bg-ivory-light/5">
+            <div className="px-4 py-3 border-b border-ivory-light/10">
+              <span className="font-mono font-bold text-ivory-light text-sm">Category</span>
+            </div>
+            <div className="p-2">
+              {CATEGORY_FILTERS.map((filter) => (
+                <button
+                  key={filter.id}
+                  onClick={() => setCategoryFilter(filter.id)}
+                  className={`w-full flex items-center gap-2 px-3 py-2 font-mono text-xs transition-colors ${
+                    categoryFilter === filter.id
+                      ? 'bg-danger-orange text-black font-bold'
+                      : 'text-ivory-light/70 hover:text-ivory-light hover:bg-ivory-light/5'
+                  }`}
+                >
+                  {filter.icon}
+                  {filter.label}
+                </button>
+              ))}
+            </div>
           </div>
 
-          {/* Live indicator */}
-          <div className="flex items-center gap-2 px-4 py-2 border-2 border-danger-orange/50 bg-slate-dark">
-            <div className="w-2 h-2 bg-larp-green animate-pulse" />
-            <span className="text-xs font-mono text-ivory-light/70">
-              scanning {totalProjects} projects
-            </span>
+          {/* Chains */}
+          <div className="border-2 border-ivory-light/20 bg-ivory-light/5">
+            <div className="px-4 py-3 border-b border-ivory-light/10">
+              <span className="font-mono font-bold text-ivory-light text-sm">Chain</span>
+            </div>
+            <div className="p-2 space-y-1">
+              {CHAINS.map((chain) => (
+                <button
+                  key={chain.id}
+                  onClick={() => toggleChain(chain.id)}
+                  className={`w-full flex items-center gap-2 px-3 py-2 font-mono text-xs transition-colors ${
+                    selectedChains.includes(chain.id)
+                      ? 'bg-ivory-light/10 text-ivory-light'
+                      : 'text-ivory-light/50 hover:text-ivory-light hover:bg-ivory-light/5'
+                  }`}
+                >
+                  <span
+                    className={`w-2 h-2 ${selectedChains.includes(chain.id) ? '' : 'opacity-50'}`}
+                    style={{ backgroundColor: chain.color }}
+                  />
+                  {chain.name}
+                  {selectedChains.includes(chain.id) && (
+                    <CheckCircle size={12} className="ml-auto text-larp-green" />
+                  )}
+                </button>
+              ))}
+            </div>
           </div>
+
+          {/* Score Range */}
+          <div className="border-2 border-ivory-light/20 bg-ivory-light/5">
+            <div className="px-4 py-3 border-b border-ivory-light/10">
+              <span className="font-mono font-bold text-ivory-light text-sm">Risk Score</span>
+            </div>
+            <div className="p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="font-mono text-xs text-ivory-light/50">Min</span>
+                <span className="font-mono text-xs text-danger-orange">{scoreRange[0]}</span>
+              </div>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={scoreRange[0]}
+                onChange={(e) => setScoreRange([parseInt(e.target.value), scoreRange[1]])}
+                className="w-full accent-danger-orange"
+              />
+              <div className="flex items-center justify-between">
+                <span className="font-mono text-xs text-ivory-light/50">Max</span>
+                <span className="font-mono text-xs text-danger-orange">{scoreRange[1]}</span>
+              </div>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={scoreRange[1]}
+                onChange={(e) => setScoreRange([scoreRange[0], parseInt(e.target.value)])}
+                className="w-full accent-danger-orange"
+              />
+            </div>
+          </div>
+
+          {/* Verified Toggle */}
+          <div className="border-2 border-ivory-light/20 bg-ivory-light/5">
+            <button
+              onClick={() => setVerifiedOnly(!verifiedOnly)}
+              className="w-full flex items-center justify-between px-4 py-3"
+            >
+              <span className="font-mono text-sm text-ivory-light">Verified Only</span>
+              <div
+                className={`w-10 h-5 border-2 transition-colors relative shrink-0 ${
+                  verifiedOnly ? 'bg-larp-green border-larp-green' : 'bg-transparent border-ivory-light/30'
+                }`}
+              >
+                <div
+                  className="absolute top-0.5 w-3 h-3 transition-all"
+                  style={{
+                    left: verifiedOnly ? '22px' : '2px',
+                    backgroundColor: verifiedOnly ? 'black' : 'rgba(250,249,245,0.5)',
+                  }}
+                />
+              </div>
+            </button>
+          </div>
+
+          {/* Reset */}
+          {hasActiveFilters && (
+            <button
+              onClick={resetFilters}
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 border-2 border-ivory-light/20 text-ivory-light/70 hover:text-ivory-light hover:border-danger-orange/50 font-mono text-xs transition-colors"
+            >
+              <RotateCcw size={14} />
+              Reset Filters
+            </button>
+          )}
         </div>
+      </aside>
 
-        {/* Stats bar - dark brutalist cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mt-6 sm:mt-8">
-          <div className="p-4 bg-slate-dark border-2 border-ivory-light/20" style={{ boxShadow: '3px 3px 0 rgba(250,249,245,0.1)' }}>
-            <div className="flex items-center gap-2 text-ivory-light/50 mb-1">
-              <Eye size={14} />
-              <span className="text-[10px] sm:text-xs font-mono uppercase">tracked</span>
-            </div>
-            <div className="text-2xl sm:text-3xl font-mono font-bold text-ivory-light">
-              {totalProjects}
-            </div>
-            <div className="text-[10px] sm:text-xs font-mono text-ivory-light/40">projects</div>
-          </div>
-
-          <div className="p-4 bg-slate-dark border-2 border-larp-green/50" style={{ boxShadow: '3px 3px 0 var(--larp-green)' }}>
-            <div className="flex items-center gap-2 text-larp-green mb-1">
-              <Shield size={14} />
-              <span className="text-[10px] sm:text-xs font-mono uppercase">verified</span>
-            </div>
-            <div className="text-2xl sm:text-3xl font-mono font-bold text-larp-green">
-              {verifiedCount}
-            </div>
-            <div className="text-[10px] sm:text-xs font-mono text-ivory-light/40">
-              kyc teams
-            </div>
-          </div>
-
-          <div className="p-4 bg-slate-dark border-2 border-larp-green/50" style={{ boxShadow: '3px 3px 0 var(--larp-green)' }}>
-            <div className="flex items-center gap-2 text-larp-green mb-1">
-              <Zap size={14} />
-              <span className="text-[10px] sm:text-xs font-mono uppercase">safe</span>
-            </div>
-            <div className="text-2xl sm:text-3xl font-mono font-bold text-larp-green">
-              {lowRiskCount}
-            </div>
-            <div className="text-[10px] sm:text-xs font-mono text-ivory-light/40">
-              low risk
-            </div>
-          </div>
-
-          <div className="p-4 bg-slate-dark border-2 border-larp-red/50" style={{ boxShadow: '3px 3px 0 var(--larp-red)' }}>
-            <div className="flex items-center gap-2 text-larp-red mb-1">
-              <AlertTriangle size={14} />
-              <span className="text-[10px] sm:text-xs font-mono uppercase">critical</span>
-            </div>
-            <div className="text-2xl sm:text-3xl font-mono font-bold text-larp-red">
-              {criticalCount}
-            </div>
-            <div className="text-[10px] sm:text-xs font-mono text-ivory-light/40">
-              high risk
-            </div>
-          </div>
+      {/* Mobile Filter Bar */}
+      <div className="lg:hidden fixed bottom-4 left-4 right-4 z-40">
+        <div className="flex gap-2 overflow-x-auto pb-2 -mb-2">
+          {CATEGORY_FILTERS.map((filter) => (
+            <button
+              key={filter.id}
+              onClick={() => setCategoryFilter(filter.id)}
+              className={`flex items-center gap-2 px-4 py-2 font-mono text-xs whitespace-nowrap transition-colors ${
+                categoryFilter === filter.id
+                  ? 'bg-danger-orange text-black font-bold'
+                  : 'bg-slate-dark border border-ivory-light/20 text-ivory-light/70'
+              }`}
+            >
+              {filter.icon}
+              {filter.label}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Verified Projects Carousel */}
-      {verifiedProjects.length > 0 && (
-        <section>
-          <IntelCarousel
-            title="verified projects"
-            subtitle="kyc verified teams. still dyor."
-            icon={<Shield size={24} />}
-            variant="safe"
-          >
-            {verifiedProjects.map(({ project, score }) => (
-              <IntelCard key={project.id} project={project} score={score} />
-            ))}
-          </IntelCarousel>
-        </section>
-      )}
-
-      {/* Risk Spikes Carousel */}
-      {riskSpikes.length > 0 && (
-        <section>
-          <IntelCarousel
-            title="risk spikes (24h)"
-            subtitle="biggest score increases. something changed."
-            icon={<TrendingUp size={24} />}
-            variant="danger"
-            autoScroll
-            autoScrollInterval={6000}
-          >
-            {riskSpikes.map(({ project, score, delta }) => (
+      {/* Projects */}
+      <div className="flex-1 min-w-0">
+        {filteredProjects.length > 0 ? (
+          <div className="space-y-4">
+            {filteredProjects.map(({ project, score, delta }) => (
               <IntelCard
                 key={project.id}
                 project={project}
@@ -147,136 +273,19 @@ export default function TerminalDashboard() {
                 scoreDelta24h={delta}
               />
             ))}
-          </IntelCarousel>
-        </section>
-      )}
-
-      {/* High Risk Carousel */}
-      {trendingRisky.length > 0 && (
-        <section>
-          <IntelCarousel
-            title="high risk projects"
-            subtitle="trending + red flags. proceed with caution (or don't proceed)."
-            icon={<AlertTriangle size={24} />}
-            variant="danger"
-          >
-            {trendingRisky.map(({ project, score }) => (
-              <IntelCard key={project.id} project={project} score={score} />
-            ))}
-          </IntelCarousel>
-        </section>
-      )}
-
-      {/* Low Risk Carousel */}
-      {trustedProjects.length > 0 && (
-        <section>
-          <IntelCarousel
-            title="low risk projects"
-            subtitle="appears legitimate. but we've been wrong before."
-            icon={<Shield size={24} />}
-            variant="safe"
-          >
-            {trustedProjects.map(({ project, score }) => (
-              <IntelCard key={project.id} project={project} score={score} />
-            ))}
-          </IntelCarousel>
-        </section>
-      )}
-
-      {/* Activity Feed - dark brutalist */}
-      <section>
-        <div className="flex items-center gap-3 mb-6">
-          <Activity size={24} className="text-danger-orange" />
-          <div>
-            <h2 className="text-lg sm:text-xl font-mono font-bold text-ivory-light">
-              recent activity
-            </h2>
-            <p className="text-xs font-mono text-ivory-light/50">
-              latest intel across all projects
-            </p>
           </div>
-        </div>
-
-        <div className="bg-slate-dark border-2 border-ivory-light/20 overflow-hidden" style={{ boxShadow: '4px 4px 0 rgba(250,249,245,0.1)' }}>
-          {[
-            {
-              time: '2m ago',
-              event: 'score increased',
-              project: 'TROVE',
-              delta: '+8',
-              type: 'warning' as const,
-            },
-            {
-              time: '15m ago',
-              event: 'new shill cluster detected',
-              project: 'Hype Machine',
-              delta: null,
-              type: 'critical' as const,
-            },
-            {
-              time: '1h ago',
-              event: 'lp lock extended',
-              project: 'Shadow Protocol',
-              delta: null,
-              type: 'positive' as const,
-            },
-            {
-              time: '2h ago',
-              event: 'team wallet → cex',
-              project: 'CyberYield',
-              delta: null,
-              type: 'critical' as const,
-            },
-            {
-              time: '4h ago',
-              event: 'verification approved',
-              project: 'DeFi Pulse',
-              delta: null,
-              type: 'positive' as const,
-            },
-            {
-              time: '6h ago',
-              event: 'suspicious flow detected',
-              project: 'Neural Net Token',
-              delta: null,
-              type: 'critical' as const,
-            },
-          ].map((item, i) => (
-            <div
-              key={i}
-              className={`flex items-center justify-between p-4 hover:bg-ivory-light/5 transition-colors ${
-                i !== 5 ? 'border-b border-ivory-light/10' : ''
-              }`}
+        ) : (
+          <div className="border-2 border-ivory-light/20 bg-ivory-light/5 p-8 text-center">
+            <p className="text-ivory-light/50 font-mono">No projects match your filters</p>
+            <button
+              onClick={resetFilters}
+              className="mt-4 text-danger-orange font-mono text-sm hover:underline"
             >
-              <div className="flex items-center gap-4">
-                <span className="text-xs font-mono text-ivory-light/40 w-16 shrink-0">
-                  {item.time}
-                </span>
-                <span className="font-mono text-sm text-ivory-light">{item.event}</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <span className="font-mono text-sm text-danger-orange">{item.project}</span>
-                {item.delta && (
-                  <span className="text-xs font-mono text-larp-red">{item.delta}</span>
-                )}
-                <span
-                  className={`w-3 h-3 ${
-                    item.type === 'critical'
-                      ? 'bg-larp-red'
-                      : item.type === 'warning'
-                      ? 'bg-danger-orange'
-                      : 'bg-larp-green'
-                  }`}
-                />
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <p className="text-[10px] font-mono text-ivory-light/30 mt-3 text-center">
-          showing last 6 events. click a project to see full history. (jk, that doesn't work yet)
-        </p>
-      </section>
+              Reset filters
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
