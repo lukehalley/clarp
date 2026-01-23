@@ -2,21 +2,18 @@
 
 # $CLARP
 
-**vaporware-as-a-service**
+**first autonomous trust pilot**
 
 <br>
 
-![Status](https://img.shields.io/badge/status-perpetually%20q2-red?style=flat-square)
-![TVL](https://img.shields.io/badge/TVL-$0-orange?style=flat-square)
-![Audit](https://img.shields.io/badge/audit-gpt%20said%20it's%20fine-yellow?style=flat-square)
-![Roadmap](https://img.shields.io/badge/roadmap-vibes%20only-purple?style=flat-square)
-![License](https://img.shields.io/badge/license-ngmi-black?style=flat-square)
+![Status](https://img.shields.io/badge/status-shipping-brightgreen?style=flat-square)
+![Charity](https://img.shields.io/badge/fees-100%25%20to%20charity-blue?style=flat-square)
+![Chain](https://img.shields.io/badge/chain-solana-purple?style=flat-square)
+![License](https://img.shields.io/badge/license-MIT-black?style=flat-square)
 
 <br>
 
-[Website](https://clarp.lol) · [Docs](#documentation) · [Whitepaper](#whitepaper) · [Discord](#community)
-
-<sub>none of those links work btw</sub>
+[Website](https://clarp.lukehalley.com) · [Terminal](https://clarp.lukehalley.com/terminal) · [Dexscreener](https://dexscreener.com/solana/6c71mun334bafcuvn3cwajfqnk6skztzk9vfzrthstwj)
 
 ---
 
@@ -24,176 +21,108 @@
 
 ## wtf is this
 
-they raised $400m. shipped a landing page. we did the same thing for free.
+they raised $400m and shipped a landing page. we shipped a rug detector.
 
-$CLARP is self-aware vaporware. no product. no roadmap. just vibes and a token.
-
-## features
-
-| what we promised | what we shipped |
-|------------------|-----------------|
-| autonomous ai agents | this readme |
-| cross-chain interoperability | a landing page |
-| modular execution layer | vibes |
-| zero-knowledge proofs | |
-| restaking primitive | |
-| intent-based architecture | |
-| real yield (lol) | |
+$CLARP spots LARPs. polymarket odds + on-chain receipts. know who to trust before you ape.
 
 <br>
 
-## tokenomics
+## the product
+
+### CLARP Terminal
+
+| feature | what it does |
+|---------|--------------|
+| project scanner | risk scores for any crypto project |
+| x intel | reputation reports for any twitter/x account |
+| evidence-first | every flag links to proof |
+| on-chain verification | all claims are verifiable |
+
+```bash
+$ clarp scan @crypto_kol_47
+
+CLARP SCORE: 23/100  ████░░░░░░░░  HIGH RISK
+
+▸ serial shill: 14 unrelated tokens in 30 days
+▸ backlash density: 47 callout posts detected
+▸ hype merchant: 89% posts contain "100x" language
+
+evidence: 127 posts analyzed
+```
+
+<br>
+
+## the plot twist
 
 ```
 ╔═══════════════════════════════════════════════════════════════╗
-║                    $CLARP DISTRIBUTION                        ║
-╠═══════════════════════════════════════════════════════════════╣
 ║                                                               ║
-║   ████████████████████░░░░░░░░░░░░░░░░░░░░  team (20%)        ║
-║   vested until rug                                            ║
+║   100% of protocol fees go to charity.                        ║
 ║                                                               ║
-║   ██████████████████████████████░░░░░░░░░░  kols (30%)        ║
-║   instant unlock (already dumped)                             ║
+║   rug detection that funds AI safety research.                ║
+║   full circle.                                                ║
 ║                                                               ║
-║   █████████████████████████░░░░░░░░░░░░░░░  treasury (25%)    ║
-║   "ecosystem growth"                                          ║
-║                                                               ║
-║   ███████████████░░░░░░░░░░░░░░░░░░░░░░░░░  liquidity (15%)   ║
-║   locked 7 days lol                                           ║
-║                                                               ║
-║   ██████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  community (10%)   ║
-║   you are here ←                                              ║
+║   every transaction. public proof. no trust required.         ║
 ║                                                               ║
 ╚═══════════════════════════════════════════════════════════════╝
-
-        you are the 10%. they are the 90%. math checks out.
 ```
 
 <br>
 
-## roadmap
+## tech stack
 
-| quarter | milestone | status |
-|---------|-----------|--------|
-| Q1 2025 | announce project | ✓ shipped |
-| Q2 2025 | landing page | ✓ shipped |
-| Q2 2025 | product | ⏳ coming soon |
-| Q2 2025 | still product | ⏳ coming soon |
-| Q2 2026 | product (for real) | ⏳ coming soon |
-| Q2 2027 | pivoting | ⏳ scheduled |
-| Q2 ∞ | heat death of universe | ⏳ on track |
-
-<sub>* all dates are estimates. all estimates are lies. all lies are roadmaps.</sub>
-
-<br>
-
-## documentation
-
-<br>
-<br>
-<br>
-
-*you're looking at it*
-
-<br>
-<br>
-<br>
-
-## whitepaper
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                                                             │
-│                                                             │
-│                        [ blank ]                            │
-│                                                             │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
-
-          pages: 0  |  math: none  |  citations: trust me
-```
-
-<br>
-
-## security
-
-### audits
-
-| auditor | findings | resolved |
-|---------|----------|----------|
-| certik | 47 critical | ignored |
-| trail of bits | "don't deploy this" | deployed anyway |
-| chatgpt | "looks good to me" | ✓ shipped |
-
-### bug bounty
-
-found a bug? keep it. we're not paying you. this is vaporware.
-
-<br>
-
-## community
-
-| platform | members | activity |
-|----------|---------|----------|
-| discord | 1 (you, refreshing) | dead |
-| telegram | banned | n/a |
-| twitter/x | shadow banned | cope |
+| layer | tech |
+|-------|------|
+| framework | Next.js 16 |
+| frontend | React 19, TailwindCSS |
+| language | TypeScript |
+| chain | Solana |
+| AI | Anthropic SDK |
 
 <br>
 
 ## getting started
 
 ```bash
-$ clarp status
+# install dependencies
+npm install
 
-products: 0
-shipping: q2
+# run development server
+npm run dev
 
-$CLARP
+# run tests
+npm test
+
+# build for production
+npm run build
+```
+
+<br>
+
+## roadmap
+
+| milestone | status |
+|-----------|--------|
+| landing page | ✓ shipped |
+| CLARP Terminal v1 | ✓ shipped |
+| project risk scanner | ✓ shipped |
+| X profile intel | in progress |
+| polymarket integration | planned |
+| watchlist alerts | planned |
+
+<br>
+
+## contract
+
+```
+CA: GtwMkjRY8Vi5oGaLaEsd1xnsr3AkZ6ZYBqsG5ipTBAGS
 ```
 
 <br>
 
 ## contributing
 
-contributions are not accepted. this is vaporware. there's nothing to contribute to.
-
-if you want to help:<br>
-1. don't<br>
-2. go outside<br>
-3. touch grass<br>
-4. reconsider your life choices
-
-<br>
-
-## team
-
-| role | name | status |
-|------|------|--------|
-| ceo | anon | exit liquidity |
-| cto | anon | "building" |
-| cmo | kol #47 | dumped |
-| advisor | your money | gone |
-
-<sub>team is anonymous for legal reasons (the legal reason is this is vaporware)</sub>
-
-<br>
-
-## investors
-
-we raised **$0** from:
-
-not a16z · not paradigm · not polychain · not your money (yet)
-
-<br>
-
-## acknowledgments
-
-special thanks to:<br>
-every project that raised $100m+ and shipped a landing page<br>
-the vcs who funded them anyway<br>
-the kols who shilled them<br>
-you, for reading this far
+contributions welcome. open an issue or submit a PR.
 
 <br>
 
@@ -201,12 +130,10 @@ you, for reading this far
 
 <br>
 
-**$CLARP** — *the honesty is the product.*
+**$CLARP** — *CLARP spots LARP.*
 
 <br>
 
-<sub>© 2025 clarp. no rights reserved. it's a parody.</sub>
-
-<sub>ngmi.</sub>
+<sub>© 2025 clarp. utility with a conscience.</sub>
 
 </div>
