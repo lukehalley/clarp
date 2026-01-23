@@ -297,16 +297,16 @@ export default function TerminalDashboard() {
       </aside>
 
       {/* Mobile Filter Bar */}
-      <div className="lg:hidden fixed bottom-4 left-4 right-4 z-40">
-        <div className="flex gap-2 overflow-x-auto pb-2 -mb-2">
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-slate-dark/95 backdrop-blur-sm border-t-2 border-ivory-light/20 px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+        <div className="flex gap-2 overflow-x-auto scrollbar-hide">
           {CATEGORY_FILTERS.map((filter) => (
             <button
               key={filter.id}
               onClick={() => setCategoryFilter(filter.id)}
-              className={`flex items-center gap-2 px-4 py-2 font-mono text-xs whitespace-nowrap transition-colors ${
+              className={`flex items-center gap-2 px-4 py-2 font-mono text-xs whitespace-nowrap transition-colors border-2 ${
                 categoryFilter === filter.id
-                  ? 'bg-danger-orange text-black font-bold'
-                  : 'bg-slate-dark border border-ivory-light/20 text-ivory-light/70'
+                  ? 'bg-danger-orange text-black font-bold border-danger-orange'
+                  : 'bg-slate-dark border-ivory-light/30 text-ivory-light/70'
               }`}
             >
               {filter.icon}
@@ -317,7 +317,7 @@ export default function TerminalDashboard() {
       </div>
 
       {/* Projects */}
-      <div className="flex-1 min-w-0 pb-20 lg:pb-0">
+      <div className="flex-1 min-w-0 pb-24 lg:pb-0">
         {filteredProjects.length > 0 ? (
           <div className="space-y-4">
             {filteredProjects.map(({ project, score, delta }) => (
