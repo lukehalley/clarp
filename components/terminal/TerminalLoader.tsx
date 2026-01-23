@@ -21,37 +21,63 @@ interface TerminalLoaderProps {
 }
 
 export default function TerminalLoader({ onComplete, minDuration = 3400 }: TerminalLoaderProps) {
-  const [visibleLines, setVisibleLines] = useState<number>(0);
-  const [currentText, setCurrentText] = useState<string>('');
+  // Track typed characters per line (all lines exist from start)
+  const [lineProgress, setLineProgress] = useState<number[]>(BOOT_SEQUENCE.map(() => 0));
+  const [currentLineIndex, setCurrentLineIndex] = useState(0);
   const [showCursor, setShowCursor] = useState(true);
   const [scanlineY, setScanlineY] = useState(0);
   const [glitchFrame, setGlitchFrame] = useState(0);
 
-  // Boot sequence typing effect
+  // Boot sequence typing effect - type each line in sequence
   useEffect(() => {
     const timers: NodeJS.Timeout[] = [];
+    let currentLine = 0;
 
-    BOOT_SEQUENCE.forEach((line, index) => {
-      const timer = setTimeout(() => {
-        if (line.text) {
-          // Type out each character
-          let charIndex = 0;
-          const typeInterval = setInterval(() => {
-            setCurrentText(line.text.slice(0, charIndex + 1));
-            charIndex++;
-            if (charIndex >= line.text.length) {
-              clearInterval(typeInterval);
-              setVisibleLines(index + 1);
-              setCurrentText('');
-            }
-          }, 15);
-          timers.push(typeInterval as unknown as NodeJS.Timeout);
-        } else {
-          setVisibleLines(index + 1);
+    const typeNextLine = () => {
+      if (currentLine >= BOOT_SEQUENCE.length) return;
+
+      const line = BOOT_SEQUENCE[currentLine];
+      const lineIndex = currentLine;
+
+      // Schedule this line to start typing after its delay
+      const startTimer = setTimeout(() => {
+        setCurrentLineIndex(lineIndex);
+
+        if (!line.text) {
+          // Empty line, mark as complete and move on
+          setLineProgress(prev => {
+            const next = [...prev];
+            next[lineIndex] = 0;
+            return next;
+          });
+          currentLine++;
+          typeNextLine();
+          return;
         }
+
+        // Type out characters one by one
+        let charIndex = 0;
+        const typeInterval = setInterval(() => {
+          charIndex++;
+          setLineProgress(prev => {
+            const next = [...prev];
+            next[lineIndex] = charIndex;
+            return next;
+          });
+
+          if (charIndex >= line.text.length) {
+            clearInterval(typeInterval);
+            currentLine++;
+            typeNextLine();
+          }
+        }, 15);
+        timers.push(typeInterval as unknown as NodeJS.Timeout);
       }, line.delay);
-      timers.push(timer);
-    });
+
+      timers.push(startTimer);
+    };
+
+    typeNextLine();
 
     // Complete after min duration
     const completeTimer = setTimeout(() => {
@@ -59,7 +85,7 @@ export default function TerminalLoader({ onComplete, minDuration = 3400 }: Termi
     }, minDuration);
     timers.push(completeTimer);
 
-    return () => timers.forEach(clearTimeout);
+    return () => timers.forEach(t => clearTimeout(t as NodeJS.Timeout));
   }, [onComplete, minDuration]);
 
   // Cursor blink
@@ -141,31 +167,31 @@ export default function TerminalLoader({ onComplete, minDuration = 3400 }: Termi
  ╚═════╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝`}
           </pre>
 
-          {/* Boot sequence lines */}
+          {/* Boot sequence lines - all lines exist from start for stable layout */}
           <div className="space-y-1 font-mono text-xs sm:text-sm">
-            {BOOT_SEQUENCE.slice(0, visibleLines).map((line, i) => (
-              <div key={i} className={`${getLineColor(line.text)} flex items-center gap-2`}>
-                {line.text.startsWith('[OK]') && (
-                  <span className="text-larp-green">&#9632;</span>
-                )}
-                <span>{line.text}</span>
-              </div>
-            ))}
+            {BOOT_SEQUENCE.map((line, i) => {
+              const typedChars = lineProgress[i];
+              const displayText = line.text.slice(0, typedChars);
+              const isComplete = typedChars >= line.text.length;
+              const isCurrentLine = i === currentLineIndex && !isComplete && line.text.length > 0;
 
-            {/* Currently typing line */}
-            {currentText && (
-              <div className="text-ivory-light/70 flex items-center">
-                <span>{currentText}</span>
-                {showCursor && <span className="ml-0.5 w-2 h-4 bg-danger-orange inline-block" />}
-              </div>
-            )}
-
-            {/* Cursor when not typing */}
-            {!currentText && visibleLines < BOOT_SEQUENCE.length && showCursor && (
-              <div className="flex items-center">
-                <span className="w-2 h-4 bg-danger-orange inline-block" />
-              </div>
-            )}
+              return (
+                <div key={i} className="h-5 flex items-center gap-2">
+                  {/* Show icon for [OK] line only when typing starts */}
+                  {line.text.startsWith('[OK]') && typedChars > 0 && (
+                    <span className="text-larp-green">&#9632;</span>
+                  )}
+                  {/* Display typed portion */}
+                  <span className={typedChars > 0 ? getLineColor(line.text) : 'text-transparent'}>
+                    {displayText || (line.text ? '\u00A0' : '')}
+                  </span>
+                  {/* Cursor on current line */}
+                  {isCurrentLine && showCursor && (
+                    <span className="w-2 h-4 bg-danger-orange inline-block" />
+                  )}
+                </div>
+              );
+            })}
           </div>
 
           {/* Progress bar */}
@@ -174,13 +200,13 @@ export default function TerminalLoader({ onComplete, minDuration = 3400 }: Termi
               <div
                 className="h-full bg-danger-orange transition-all duration-300 ease-out"
                 style={{
-                  width: `${Math.min((visibleLines / BOOT_SEQUENCE.length) * 100, 100)}%`,
+                  width: `${Math.min(((currentLineIndex + 1) / BOOT_SEQUENCE.length) * 100, 100)}%`,
                 }}
               />
             </div>
             <div className="flex justify-between mt-2 text-[10px] sm:text-xs font-mono text-ivory-light/40">
               <span>SYSTEM BOOT</span>
-              <span>{Math.floor((visibleLines / BOOT_SEQUENCE.length) * 100)}%</span>
+              <span>{Math.floor(((currentLineIndex + 1) / BOOT_SEQUENCE.length) * 100)}%</span>
             </div>
           </div>
         </div>

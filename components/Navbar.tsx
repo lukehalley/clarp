@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Send } from 'lucide-react';
 import Clarp from '@/components/Clarp';
 import PixelGithub from '@/components/PixelGithub';
+import { usePageTransition } from '@/components/ClientLayout';
 
 // Custom X (Twitter) icon component
 function XIcon({ size = 16, className = '' }: { size?: number; className?: string }) {
@@ -23,6 +24,13 @@ function XIcon({ size = 16, className = '' }: { size?: number; className?: strin
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { navigateWithFade } = usePageTransition();
+
+  const handleTerminalClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setMobileMenuOpen(false);
+    navigateWithFade('/terminal');
+  };
 
   return (
     <header className="sticky top-0 z-50">
@@ -74,16 +82,16 @@ export default function Navbar() {
                 <PixelGithub size={16} className="group-hover:animate-[glitch_0.1s_ease-in-out_2]" />
               </a>
             </div>
-            <Link
-              href="/terminal"
-              className="group relative ml-2 px-5 py-2.5 bg-black text-ivory-light font-mono font-bold text-sm border-2 border-danger-orange transition-all duration-150 overflow-hidden hover:border-larp-green"
+            <button
+              onClick={handleTerminalClick}
+              className="group relative ml-2 px-5 py-2.5 bg-black text-ivory-light font-mono font-bold text-sm border-2 border-danger-orange transition-all duration-150 overflow-hidden hover:border-larp-green cursor-pointer"
               style={{ boxShadow: '3px 3px 0 #FF6B35' }}
             >
               <span className="relative z-10 flex items-center gap-2">
                 <span className="w-1.5 h-1.5 bg-danger-orange group-hover:bg-larp-green animate-pulse" />
                 terminal
               </span>
-            </Link>
+            </button>
           </div>
 
           {/* Mobile hamburger */}
@@ -146,17 +154,16 @@ export default function Navbar() {
                   source
                 </a>
               </div>
-              <Link
-                href="/terminal"
-                className="group relative block w-full text-center mt-2 px-5 py-3 bg-black text-ivory-light font-mono font-bold text-sm border-2 border-danger-orange transition-all duration-150 overflow-hidden"
+              <button
+                onClick={handleTerminalClick}
+                className="group relative block w-full text-center mt-2 px-5 py-3 bg-black text-ivory-light font-mono font-bold text-sm border-2 border-danger-orange transition-all duration-150 overflow-hidden cursor-pointer"
                 style={{ boxShadow: '3px 3px 0 #FF6B35' }}
-                onClick={() => setMobileMenuOpen(false)}
               >
                 <span className="relative z-10 flex items-center justify-center gap-2">
                   <span className="w-1.5 h-1.5 bg-danger-orange animate-pulse" />
                   launch terminal
                 </span>
-              </Link>
+              </button>
             </div>
           </div>
         )}
