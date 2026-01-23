@@ -3,90 +3,77 @@
 import { useState, useEffect } from 'react';
 
 const BOOT_SEQUENCE = [
-  { text: 'CLARP TERMINAL v1.0', delay: 0 },
-  { text: 'initializing neural trust engine...', delay: 200 },
-  { text: 'loading polymarket oracles...', delay: 600 },
-  { text: 'scanning 847,293 wallets...', delay: 1000 },
-  { text: 'mapping shill clusters...', delay: 1400 },
-  { text: 'calibrating larp detection...', delay: 1800 },
-  { text: 'connecting to chain indexers...', delay: 2200 },
-  { text: '[OK] all systems nominal', delay: 2600 },
-  { text: '', delay: 2900 },
-  { text: 'READY.', delay: 3000 },
+  'CLARP TERMINAL v1.0',
+  'initializing neural trust engine...',
+  'loading polymarket oracles...',
+  'scanning 847,293 wallets...',
+  'mapping shill clusters...',
+  'calibrating larp detection...',
+  'connecting to chain indexers...',
+  '[OK] all systems nominal',
+  '',
+  'READY.',
 ];
+
+const CHAR_DELAY = 18; // ms per character
+const LINE_PAUSE = 150; // ms pause between lines
 
 interface TerminalLoaderProps {
   onComplete: () => void;
-  minDuration?: number;
 }
 
-export default function TerminalLoader({ onComplete, minDuration = 3400 }: TerminalLoaderProps) {
+export default function TerminalLoader({ onComplete }: TerminalLoaderProps) {
   // Track typed characters per line (all lines exist from start)
   const [lineProgress, setLineProgress] = useState<number[]>(BOOT_SEQUENCE.map(() => 0));
   const [currentLineIndex, setCurrentLineIndex] = useState(0);
+  const [isComplete, setIsComplete] = useState(false);
   const [showCursor, setShowCursor] = useState(true);
   const [scanlineY, setScanlineY] = useState(0);
   const [glitchFrame, setGlitchFrame] = useState(0);
 
   // Boot sequence typing effect - type each line in sequence
   useEffect(() => {
-    const timers: NodeJS.Timeout[] = [];
     let currentLine = 0;
+    let charIndex = 0;
+    let timer: NodeJS.Timeout;
 
-    const typeNextLine = () => {
-      if (currentLine >= BOOT_SEQUENCE.length) return;
+    const tick = () => {
+      if (currentLine >= BOOT_SEQUENCE.length) {
+        // All done - wait a moment then complete
+        setIsComplete(true);
+        timer = setTimeout(() => {
+          onComplete();
+        }, 600);
+        return;
+      }
 
       const line = BOOT_SEQUENCE[currentLine];
-      const lineIndex = currentLine;
+      setCurrentLineIndex(currentLine);
 
-      // Schedule this line to start typing after its delay
-      const startTimer = setTimeout(() => {
-        setCurrentLineIndex(lineIndex);
+      if (!line || charIndex >= line.length) {
+        // Line complete, move to next
+        currentLine++;
+        charIndex = 0;
+        timer = setTimeout(tick, LINE_PAUSE);
+        return;
+      }
 
-        if (!line.text) {
-          // Empty line, mark as complete and move on
-          setLineProgress(prev => {
-            const next = [...prev];
-            next[lineIndex] = 0;
-            return next;
-          });
-          currentLine++;
-          typeNextLine();
-          return;
-        }
+      // Type next character
+      charIndex++;
+      setLineProgress(prev => {
+        const next = [...prev];
+        next[currentLine] = charIndex;
+        return next;
+      });
 
-        // Type out characters one by one
-        let charIndex = 0;
-        const typeInterval = setInterval(() => {
-          charIndex++;
-          setLineProgress(prev => {
-            const next = [...prev];
-            next[lineIndex] = charIndex;
-            return next;
-          });
-
-          if (charIndex >= line.text.length) {
-            clearInterval(typeInterval);
-            currentLine++;
-            typeNextLine();
-          }
-        }, 15);
-        timers.push(typeInterval as unknown as NodeJS.Timeout);
-      }, line.delay);
-
-      timers.push(startTimer);
+      timer = setTimeout(tick, CHAR_DELAY);
     };
 
-    typeNextLine();
+    // Start typing
+    timer = setTimeout(tick, 300);
 
-    // Complete after min duration
-    const completeTimer = setTimeout(() => {
-      onComplete();
-    }, minDuration);
-    timers.push(completeTimer);
-
-    return () => timers.forEach(t => clearTimeout(t as NodeJS.Timeout));
-  }, [onComplete, minDuration]);
+    return () => clearTimeout(timer);
+  }, [onComplete]);
 
   // Cursor blink
   useEffect(() => {
@@ -115,10 +102,10 @@ export default function TerminalLoader({ onComplete, minDuration = 3400 }: Termi
     return () => clearInterval(interval);
   }, []);
 
-  const getLineColor = (text: string) => {
-    if (text.startsWith('[OK]')) return 'text-larp-green';
-    if (text === 'READY.') return 'text-danger-orange font-bold';
-    if (text.startsWith('CLARP')) return 'text-danger-orange font-bold';
+  const getLineColor = (line: string) => {
+    if (line.startsWith('[OK]')) return 'text-larp-green';
+    if (line === 'READY.') return 'text-danger-orange font-bold';
+    if (line.startsWith('CLARP')) return 'text-danger-orange font-bold';
     return 'text-ivory-light/70';
   };
 
@@ -171,22 +158,22 @@ export default function TerminalLoader({ onComplete, minDuration = 3400 }: Termi
           <div className="space-y-1 font-mono text-xs sm:text-sm">
             {BOOT_SEQUENCE.map((line, i) => {
               const typedChars = lineProgress[i];
-              const displayText = line.text.slice(0, typedChars);
-              const isComplete = typedChars >= line.text.length;
-              const isCurrentLine = i === currentLineIndex && !isComplete && line.text.length > 0;
+              const displayText = line.slice(0, typedChars);
+              const lineComplete = typedChars >= line.length;
+              const isTypingLine = i === currentLineIndex && !lineComplete && line.length > 0;
 
               return (
                 <div key={i} className="h-5 flex items-center gap-2">
                   {/* Show icon for [OK] line only when typing starts */}
-                  {line.text.startsWith('[OK]') && typedChars > 0 && (
+                  {line.startsWith('[OK]') && typedChars > 0 && (
                     <span className="text-larp-green">&#9632;</span>
                   )}
                   {/* Display typed portion */}
-                  <span className={typedChars > 0 ? getLineColor(line.text) : 'text-transparent'}>
-                    {displayText || (line.text ? '\u00A0' : '')}
+                  <span className={typedChars > 0 ? getLineColor(line) : 'text-transparent'}>
+                    {displayText || (line ? '\u00A0' : '')}
                   </span>
                   {/* Cursor on current line */}
-                  {isCurrentLine && showCursor && (
+                  {isTypingLine && showCursor && !isComplete && (
                     <span className="w-2 h-4 bg-danger-orange inline-block" />
                   )}
                 </div>
@@ -198,15 +185,15 @@ export default function TerminalLoader({ onComplete, minDuration = 3400 }: Termi
           <div className="mt-8 sm:mt-12">
             <div className="h-1 bg-slate-dark/50 overflow-hidden">
               <div
-                className="h-full bg-danger-orange transition-all duration-300 ease-out"
+                className="h-full bg-danger-orange transition-all duration-200 ease-out"
                 style={{
-                  width: `${Math.min(((currentLineIndex + 1) / BOOT_SEQUENCE.length) * 100, 100)}%`,
+                  width: isComplete ? '100%' : `${Math.min(((currentLineIndex + 1) / BOOT_SEQUENCE.length) * 100, 95)}%`,
                 }}
               />
             </div>
             <div className="flex justify-between mt-2 text-[10px] sm:text-xs font-mono text-ivory-light/40">
               <span>SYSTEM BOOT</span>
-              <span>{Math.floor(((currentLineIndex + 1) / BOOT_SEQUENCE.length) * 100)}%</span>
+              <span>{isComplete ? '100' : Math.floor(((currentLineIndex + 1) / BOOT_SEQUENCE.length) * 95)}%</span>
             </div>
           </div>
         </div>
