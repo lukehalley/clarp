@@ -42,7 +42,7 @@ export default function ScoreDisplay({ score, size = 'md', showBreakdown = false
 
   const classes = sizeClasses[size];
 
-  const alignClass = align === 'right' ? 'items-end' : 'items-start';
+  const alignClass = align === 'right' ? 'items-start lg:items-end' : 'items-start';
 
   return (
     <div className={`flex flex-col ${classes.container} ${alignClass}`}>

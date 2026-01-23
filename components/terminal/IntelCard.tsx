@@ -42,7 +42,7 @@ export default function IntelCard({ project, score, scoreDelta24h }: IntelCardPr
       <div className="h-full flex border-2 border-ivory-light/20 bg-ivory-light/5 hover:border-danger-orange/30 transition-colors overflow-hidden">
         {/* Left: Full-height Contract Avatar */}
         {project.contract && (
-          <div className="shrink-0 self-stretch flex items-center justify-center bg-[#0a0a09] border-r border-ivory-light/10">
+          <div className="hidden sm:flex shrink-0 self-stretch items-center justify-center bg-[#0a0a09] border-r border-ivory-light/10">
             <ContractAvatar
               address={project.contract}
               size={100}
