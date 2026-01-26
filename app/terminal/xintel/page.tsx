@@ -114,10 +114,10 @@ function XIntelContent() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-12rem)] flex flex-col items-center justify-center">
-      <div className="w-full space-y-8">
+    <div className="min-h-[calc(100dvh-16rem)] flex flex-col items-center justify-center">
+      <div className="w-full space-y-6">
       {/* Hero Section */}
-      <div className="text-center py-8">
+      <div className="text-center py-4">
         <div className="flex items-center justify-center gap-3 mb-4">
           <Radar size={40} className="text-danger-orange" />
           <h1 className="text-3xl sm:text-4xl font-mono font-bold text-ivory-light">X Profile Intel</h1>
@@ -229,7 +229,7 @@ function XIntelContent() {
       )}
 
       {/* Disclaimer */}
-      <div className="max-w-2xl mx-auto mt-12 p-4 border border-ivory-light/10 bg-ivory-light/5">
+      <div className="max-w-2xl mx-auto mt-6 p-4 border border-ivory-light/10 bg-ivory-light/5">
         <p className="font-mono text-xs text-ivory-light/40 text-center">
           <strong className="text-ivory-light/60">Disclaimer:</strong> Automated analysis may be incorrect.
           Results show signals and indicators, not definitive judgments. Always verify sources and
@@ -244,7 +244,7 @@ function XIntelContent() {
 export default function XIntelPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-[calc(100vh-12rem)] flex items-center justify-center">
+      <div className="min-h-[calc(100dvh-16rem)] flex items-center justify-center">
         <div className="text-ivory-light/40 font-mono">Loading...</div>
       </div>
     }>

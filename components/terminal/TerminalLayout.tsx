@@ -37,9 +37,9 @@ export default function TerminalLayout({ children }: TerminalLayoutProps) {
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [alertsOpen, setAlertsOpen] = useState(false);
-  const [showLoader, setShowLoader] = useState(true);
-  const [booted, setBooted] = useState(false);
-  const [isFadingIn, setIsFadingIn] = useState(true);
+  const [showLoader, setShowLoader] = useState(false);
+  const [booted, setBooted] = useState(true);
+  const [isFadingIn, setIsFadingIn] = useState(false);
   const [isFadingOut, setIsFadingOut] = useState(false);
 
   // Always play the boot animation for dramatic effect

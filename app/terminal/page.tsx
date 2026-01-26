@@ -19,6 +19,7 @@ import {
   ArrowUpDown,
 } from 'lucide-react';
 import ChainIcon from '@/components/terminal/ChainIcon';
+import DualRangeSlider from '@/components/ui/DualRangeSlider';
 
 type CategoryFilter = 'all' | 'verified' | 'risk-spikes' | 'high-risk' | 'low-risk';
 type SortOption = 'score-high' | 'score-low' | 'name-asc' | 'name-desc';
@@ -229,33 +230,18 @@ export default function TerminalDashboard() {
 
           {/* Score Range */}
           <div className="border-2 border-ivory-light/20 bg-ivory-light/5">
-            <div className="px-3 py-2 border-b border-ivory-light/10">
+            <div className="px-3 py-2 border-b border-ivory-light/10 flex items-center justify-between">
               <span className="font-mono font-bold text-ivory-light text-xs">Risk Score</span>
+              <span className="font-mono text-[10px] text-danger-orange">
+                {scoreRange[0]} - {scoreRange[1]}
+              </span>
             </div>
-            <div className="p-3 space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-[10px] text-ivory-light/50">Min</span>
-                <span className="font-mono text-[10px] text-danger-orange">{scoreRange[0]}</span>
-              </div>
-              <input
-                type="range"
-                min="0"
-                max="100"
-                value={scoreRange[0]}
-                onChange={(e) => setScoreRange([parseInt(e.target.value), scoreRange[1]])}
-                className="w-full accent-danger-orange h-1"
-              />
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-[10px] text-ivory-light/50">Max</span>
-                <span className="font-mono text-[10px] text-danger-orange">{scoreRange[1]}</span>
-              </div>
-              <input
-                type="range"
-                min="0"
-                max="100"
-                value={scoreRange[1]}
-                onChange={(e) => setScoreRange([scoreRange[0], parseInt(e.target.value)])}
-                className="w-full accent-danger-orange h-1"
+            <div className="p-3 pt-4 pb-4">
+              <DualRangeSlider
+                min={0}
+                max={100}
+                value={scoreRange}
+                onChange={setScoreRange}
               />
             </div>
           </div>
@@ -284,15 +270,18 @@ export default function TerminalDashboard() {
           </div>
 
           {/* Reset */}
-          {hasActiveFilters && (
-            <button
-              onClick={resetFilters}
-              className="w-full flex items-center justify-center gap-2 px-4 py-3 border-2 border-ivory-light/20 text-ivory-light/70 hover:text-ivory-light hover:border-danger-orange/50 font-mono text-xs transition-colors"
-            >
-              <RotateCcw size={14} />
-              Reset Filters
-            </button>
-          )}
+          <button
+            onClick={resetFilters}
+            disabled={!hasActiveFilters}
+            className={`w-full flex items-center justify-center gap-2 px-4 py-3 border-2 font-mono text-xs transition-colors ${
+              hasActiveFilters
+                ? 'border-ivory-light/20 text-ivory-light/70 hover:text-ivory-light hover:border-danger-orange/50 cursor-pointer'
+                : 'border-ivory-light/10 text-ivory-light/30 cursor-not-allowed'
+            }`}
+          >
+            <RotateCcw size={14} />
+            Reset Filters
+          </button>
         </div>
       </aside>
 
