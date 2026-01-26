@@ -5,13 +5,13 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import ScoreDisplay from '@/components/terminal/ScoreDisplay';
 import ProjectCard from '@/components/terminal/ProjectCard';
-import {
-  getProfileByHandle,
-  getMockScore,
-  MOCK_PROJECTS,
-} from '@/lib/terminal/mock-data';
 import { calculateLarpScore } from '@/lib/terminal/scoring/calculate-score';
-import type { Profile, LarpScore, ProfileBadge, Amplifier } from '@/types/terminal';
+import type { Project, LarpScore, Profile, ProfileBadge, Amplifier } from '@/types/terminal';
+
+// Stubs - TODO: Replace with real data source
+function getProfileByHandle(_handle: string): Profile | null { return null; }
+function getMockScore(_id: string): LarpScore | undefined { return undefined; }
+const MOCK_PROJECTS: Project[] = [];
 import {
   ArrowLeft,
   ExternalLink,

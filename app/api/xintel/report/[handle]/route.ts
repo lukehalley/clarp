@@ -25,8 +25,8 @@ export async function GET(
   }
 
   // Get report (always returns data - generates random if no preset)
-  const report = getCachedReport(formattedHandle);
-  const cacheAge = getCacheAge(formattedHandle);
+  const report = await getCachedReport(formattedHandle);
+  const cacheAge = await getCacheAge(formattedHandle);
 
   return NextResponse.json({
     report,

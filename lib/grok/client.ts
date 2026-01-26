@@ -214,147 +214,212 @@ export class GrokClient {
     citations: Array<{ url: string; title?: string }>,
     usage?: GrokResponsesApiResponse['usage']
   ): GrokAnalysisResult {
-    // Extract structured data from the response text
-    // The prompt asks for specific sections that we can parse
+    // Try to parse JSON from the response
+    let parsed: Record<string, unknown> | null = null;
 
-    const result: GrokAnalysisResult = {
-      handle: '',
+    // Extract JSON from the text (might be wrapped in markdown code blocks)
+    const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/) ||
+                      text.match(/(\{[\s\S]*\})/);
+
+    if (jsonMatch) {
+      try {
+        parsed = JSON.parse(jsonMatch[1]);
+        console.log('[Grok] Successfully parsed JSON response');
+      } catch (e) {
+        console.warn('[Grok] Failed to parse JSON, falling back to text parsing:', e);
+      }
+    }
+
+    // Default structure
+    const defaultPositive = {
+      isDoxxed: false,
+      doxxedDetails: null,
+      hasActiveGithub: false,
+      githubUrl: null,
+      githubActivity: null,
+      hasRealProduct: false,
+      productDetails: null,
+      accountAgeDays: 0,
+      hasConsistentHistory: false,
+      hasOrganicEngagement: false,
+      hasCredibleBackers: false,
+      backersDetails: null,
+      teamMembers: [],
+    };
+
+    const defaultNegative = {
+      hasScamAllegations: false,
+      scamDetails: null,
+      hasRugHistory: false,
+      rugDetails: null,
+      isAnonymousTeam: true,
+      hasHypeLanguage: false,
+      hypeExamples: [],
+      hasSuspiciousFollowers: false,
+      suspiciousDetails: null,
+      hasPreviousRebrand: false,
+      rebrandDetails: null,
+      hasAggressivePromotion: false,
+      promotionDetails: null,
+    };
+
+    if (parsed) {
+      // Use parsed JSON data
+      const profile = parsed.profile as Record<string, unknown> || {};
+      const positive = parsed.positiveIndicators as Record<string, unknown> || {};
+      const negative = parsed.negativeIndicators as Record<string, unknown> || {};
+
+      return {
+        handle: String(parsed.handle || ''),
+        profile: {
+          handle: String(parsed.handle || profile.handle || ''),
+          displayName: profile.displayName as string | undefined,
+          bio: profile.bio as string | undefined,
+          verified: Boolean(profile.verified),
+          followers: typeof profile.followers === 'number' ? profile.followers : undefined,
+          following: typeof profile.following === 'number' ? profile.following : undefined,
+          createdAt: profile.createdAt as string | undefined,
+          xUrl: profile.xUrl as string | undefined,
+        },
+        positiveIndicators: {
+          isDoxxed: Boolean(positive.isDoxxed),
+          doxxedDetails: positive.doxxedDetails as string | null || null,
+          hasActiveGithub: Boolean(positive.hasActiveGithub),
+          githubUrl: positive.githubUrl as string | null || null,
+          githubActivity: positive.githubActivity as string | null || null,
+          hasRealProduct: Boolean(positive.hasRealProduct),
+          productDetails: positive.productDetails as string | null || null,
+          accountAgeDays: typeof positive.accountAgeDays === 'number' ? positive.accountAgeDays : 0,
+          hasConsistentHistory: Boolean(positive.hasConsistentHistory),
+          hasOrganicEngagement: Boolean(positive.hasOrganicEngagement),
+          hasCredibleBackers: Boolean(positive.hasCredibleBackers),
+          backersDetails: positive.backersDetails as string | null || null,
+          teamMembers: Array.isArray(positive.teamMembers) ? positive.teamMembers : [],
+        },
+        negativeIndicators: {
+          hasScamAllegations: Boolean(negative.hasScamAllegations),
+          scamDetails: negative.scamDetails as string | null || null,
+          hasRugHistory: Boolean(negative.hasRugHistory),
+          rugDetails: negative.rugDetails as string | null || null,
+          isAnonymousTeam: Boolean(negative.isAnonymousTeam),
+          hasHypeLanguage: Boolean(negative.hasHypeLanguage),
+          hypeExamples: Array.isArray(negative.hypeExamples) ? negative.hypeExamples : [],
+          hasSuspiciousFollowers: Boolean(negative.hasSuspiciousFollowers),
+          suspiciousDetails: negative.suspiciousDetails as string | null || null,
+          hasPreviousRebrand: Boolean(negative.hasPreviousRebrand),
+          rebrandDetails: negative.rebrandDetails as string | null || null,
+          hasAggressivePromotion: Boolean(negative.hasAggressivePromotion),
+          promotionDetails: negative.promotionDetails as string | null || null,
+        },
+        github: parsed.github as string | null || null,
+        website: parsed.website as string | null || null,
+        contract: parsed.contract ? {
+          address: String((parsed.contract as Record<string, unknown>).address || ''),
+          chain: String((parsed.contract as Record<string, unknown>).chain || 'unknown'),
+        } : null,
+        controversies: Array.isArray(parsed.controversies) ? parsed.controversies : [],
+        keyFindings: Array.isArray(parsed.keyFindings) ? parsed.keyFindings : [],
+        overallAssessment: parsed.overallAssessment as string | undefined,
+        riskLevel: this.normalizeRiskLevel(parsed.riskLevel as string),
+        confidence: this.normalizeConfidence(parsed.confidence as string),
+        rawAnalysis: text,
+        citations: citations.map(c => ({ url: c.url, title: c.title })),
+        tokensUsed: usage?.total_tokens,
+        searchesPerformed: usage?.server_side_tool_usage_details?.x_search_calls ?? 0,
+      };
+    }
+
+    // Fallback: parse from text (legacy behavior)
+    console.log('[Grok] Falling back to text parsing');
+    return this.parseFromText(text, citations, usage, defaultPositive, defaultNegative);
+  }
+
+  private normalizeRiskLevel(level: string | undefined): 'low' | 'medium' | 'high' {
+    const normalized = String(level || '').toLowerCase();
+    if (normalized === 'low') return 'low';
+    if (normalized === 'high') return 'high';
+    return 'medium';
+  }
+
+  private normalizeConfidence(conf: string | undefined): 'low' | 'medium' | 'high' {
+    const normalized = String(conf || '').toLowerCase();
+    if (normalized === 'low') return 'low';
+    if (normalized === 'high') return 'high';
+    return 'medium';
+  }
+
+  private parseFromText(
+    text: string,
+    citations: Array<{ url: string; title?: string }>,
+    usage: GrokResponsesApiResponse['usage'] | undefined,
+    defaultPositive: GrokAnalysisResult['positiveIndicators'],
+    defaultNegative: GrokAnalysisResult['negativeIndicators']
+  ): GrokAnalysisResult {
+    // Extract basic info from text
+    const handleMatch = text.match(/@(\w+)/);
+    const handle = handleMatch ? handleMatch[1] : '';
+
+    // Parse followers
+    const followersMatch = text.match(/(\d+(?:,\d+)*(?:\.\d+)?)\s*[kK]?\s*followers/i);
+    let followers: number | undefined;
+    if (followersMatch) {
+      let count = parseFloat(followersMatch[1].replace(/,/g, ''));
+      if (followersMatch[0].toLowerCase().includes('k')) count *= 1000;
+      followers = Math.round(count);
+    }
+
+    // Check for doxxed indicators
+    const isDoxxed = text.toLowerCase().includes('doxxed') ||
+                     text.toLowerCase().includes('known developer') ||
+                     text.toLowerCase().includes('publicly known') ||
+                     (text.toLowerCase().includes('linkedin') && !text.toLowerCase().includes('no linkedin'));
+
+    // Check for GitHub
+    const githubMatch = text.match(/github\.com\/([^\s\]]+)/i);
+    const hasGithub = !!githubMatch;
+
+    // Determine risk level
+    const hasScam = text.toLowerCase().includes('scam') && !text.toLowerCase().includes('no scam');
+    const hasRug = text.toLowerCase().includes('rug') && !text.toLowerCase().includes('no rug');
+
+    let riskLevel: 'low' | 'medium' | 'high' = 'medium';
+    if (hasScam || hasRug) {
+      riskLevel = 'high';
+    } else if (isDoxxed || hasGithub) {
+      riskLevel = 'low';
+    }
+
+    return {
+      handle,
       profile: {
-        handle: '',
-        displayName: undefined,
-        bio: undefined,
-        verified: false,
-        followers: undefined,
-        following: undefined,
-        createdAt: undefined,
-        xUrl: undefined,
+        handle,
+        verified: text.toLowerCase().includes('verified'),
+        followers,
       },
-      github: undefined,
-      website: undefined,
-      accountAge: undefined,
-      activityLevel: undefined,
-      team: [],
-      funding: undefined,
+      positiveIndicators: {
+        ...defaultPositive,
+        isDoxxed,
+        hasActiveGithub: hasGithub,
+        githubUrl: githubMatch ? `https://github.com/${githubMatch[1]}` : null,
+      },
+      negativeIndicators: {
+        ...defaultNegative,
+        hasScamAllegations: hasScam,
+        hasRugHistory: hasRug,
+        isAnonymousTeam: !isDoxxed,
+      },
+      github: githubMatch ? `https://github.com/${githubMatch[1]}` : null,
+      website: null,
+      contract: null,
       controversies: [],
-      rebrand: undefined,
-      influencers: [],
-      contract: undefined,
       keyFindings: [],
-      riskLevel: 'medium',
+      riskLevel,
       confidence: 'medium',
       rawAnalysis: text,
       citations: citations.map(c => ({ url: c.url, title: c.title })),
       tokensUsed: usage?.total_tokens,
       searchesPerformed: usage?.server_side_tool_usage_details?.x_search_calls ?? 0,
     };
-
-    // Parse handle from text
-    const handleMatch = text.match(/@(\w+)/);
-    if (handleMatch) {
-      result.handle = handleMatch[1];
-      result.profile.handle = handleMatch[1];
-    }
-
-    // Parse X URL
-    const xUrlMatch = text.match(/https:\/\/x\.com\/(\w+)/);
-    if (xUrlMatch) {
-      result.profile.xUrl = xUrlMatch[0];
-      if (!result.handle) {
-        result.handle = xUrlMatch[1];
-        result.profile.handle = xUrlMatch[1];
-      }
-    }
-
-    // Parse GitHub
-    const githubMatch = text.match(/github\.com\/([^\s\]]+)/i);
-    if (githubMatch) {
-      result.github = `https://github.com/${githubMatch[1]}`;
-    }
-
-    // Parse website
-    const websiteMatches = text.match(/(?:website|site|official):\s*\[?([^\s\]]+\.(?:org|io|com|xyz|finance|network)[^\s\]]*)/i);
-    if (websiteMatches) {
-      result.website = websiteMatches[1].replace(/[[\]()]/g, '');
-    }
-
-    // Parse followers count
-    const followersMatch = text.match(/(\d+(?:,\d+)*(?:\.\d+)?)\s*[kK]?\s*followers/i);
-    if (followersMatch) {
-      let count = parseFloat(followersMatch[1].replace(/,/g, ''));
-      if (followersMatch[0].toLowerCase().includes('k')) {
-        count *= 1000;
-      }
-      result.profile.followers = Math.round(count);
-    }
-
-    // Parse account creation
-    const createdMatch = text.match(/[Cc]reated[:\s]+(?:around\s+)?(\w+\s+\d{4}|\d{4})/);
-    if (createdMatch) {
-      result.accountAge = createdMatch[1];
-    }
-
-    // Parse activity level
-    if (text.toLowerCase().includes('highly active') || text.toLowerCase().includes('very active')) {
-      result.activityLevel = 'high';
-    } else if (text.toLowerCase().includes('moderately active') || text.toLowerCase().includes('active')) {
-      result.activityLevel = 'medium';
-    } else if (text.toLowerCase().includes('inactive') || text.toLowerCase().includes('low activity')) {
-      result.activityLevel = 'low';
-    }
-
-    // Parse contract address (Solana format)
-    const contractMatch = text.match(/\b([1-9A-HJ-NP-Za-km-z]{32,44})\b/);
-    if (contractMatch && contractMatch[1].length >= 32) {
-      result.contract = {
-        address: contractMatch[1],
-        chain: 'solana',
-        isFork: text.toLowerCase().includes('fork'),
-      };
-    }
-
-    // Parse rebrand info
-    if (text.toLowerCase().includes('rebrand')) {
-      const rebrandMatch = text.match(/rebrand(?:ed)?\s+from\s+(\w+|\$\w+|@\w+)/i);
-      result.rebrand = {
-        isRebrand: true,
-        previousName: rebrandMatch?.[1],
-      };
-    }
-
-    // Parse controversies
-    if (text.toLowerCase().includes('scam') || text.toLowerCase().includes('rug') || text.toLowerCase().includes('controversy')) {
-      const hasRealControversy = !text.toLowerCase().includes('no rug') &&
-        !text.toLowerCase().includes('no scam') &&
-        !text.toLowerCase().includes('no controversy');
-      if (hasRealControversy) {
-        result.controversies.push('Potential concerns detected - see raw analysis');
-      }
-    }
-
-    // Determine risk level based on findings
-    const redFlags = [
-      text.toLowerCase().includes('scam'),
-      text.toLowerCase().includes('rug'),
-      text.toLowerCase().includes('anonymous') && !text.toLowerCase().includes('not anonymous'),
-      text.toLowerCase().includes('no audit'),
-      result.accountAge?.includes('2025') || result.accountAge?.includes('2026'),
-    ].filter(Boolean).length;
-
-    if (redFlags >= 3) {
-      result.riskLevel = 'high';
-    } else if (redFlags >= 1) {
-      result.riskLevel = 'medium';
-    } else {
-      result.riskLevel = 'low';
-    }
-
-    // Extract key findings (numbered items)
-    const findings = text.match(/\d+\.\s+\*\*[^*]+\*\*[^0-9]*/g);
-    if (findings) {
-      result.keyFindings = findings.slice(0, 10).map(f => f.trim());
-    }
-
-    return result;
   }
 }
 

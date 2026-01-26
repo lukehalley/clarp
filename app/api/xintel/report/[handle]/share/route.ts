@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createShareLink, hasAvailableData } from '@/lib/terminal/xintel/scan-service';
+import { createShareLink } from '@/lib/terminal/xintel/scan-service';
 import { formatHandle, isValidHandle } from '@/types/xintel';
 
 export async function GET(
@@ -21,13 +21,6 @@ export async function GET(
     return NextResponse.json(
       { error: 'Invalid handle format' },
       { status: 400 }
-    );
-  }
-
-  if (!hasAvailableData(formattedHandle)) {
-    return NextResponse.json(
-      { error: 'Account not found' },
-      { status: 404 }
     );
   }
 

@@ -5,9 +5,13 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import ScoreDisplay from '@/components/terminal/ScoreDisplay';
 import RiskCard from '@/components/terminal/RiskCard';
-import { getProjectById, getMockScore } from '@/lib/terminal/mock-data';
+// Mock data removed - these features need real data integration
 import type { Project, LarpScore } from '@/types/terminal';
 import ChainIcon from '@/components/terminal/ChainIcon';
+
+// Stubs - TODO: Replace with real data source
+function getProjectById(_id: string): Project | null { return null; }
+function getMockScore(_id: string): LarpScore | null { return null; }
 import {
   Copy,
   Check,

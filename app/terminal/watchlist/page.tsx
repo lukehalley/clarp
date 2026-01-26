@@ -3,8 +3,26 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import ProjectCard from '@/components/terminal/ProjectCard';
-import { MOCK_WATCHLIST, MOCK_PROJECTS, getMockScore } from '@/lib/terminal/mock-data';
-import type { WatchlistItem, Chain } from '@/types/terminal';
+import type { WatchlistItem, Chain, Project, LarpScore } from '@/types/terminal';
+
+// Stubs - TODO: Replace with real data source
+const MOCK_PROJECTS: Project[] = [];
+const MOCK_WATCHLIST: WatchlistItem[] = [];
+function getMockScore(_id: string): LarpScore {
+  return {
+    score: 0,
+    confidence: 'low',
+    riskLevel: 'low',
+    topTags: [],
+    lastUpdated: new Date(),
+    breakdown: {
+      identity: { name: 'Identity', score: 0, weight: 0.3, evidence: [] },
+      xBehavior: { name: 'X Behavior', score: 0, weight: 0.25, evidence: [] },
+      wallet: { name: 'Wallet', score: 0, weight: 0.25, evidence: [] },
+      liquidity: { name: 'Liquidity', score: 0, weight: 0.2, evidence: [] },
+    },
+  };
+}
 import {
   Bookmark,
   Filter,

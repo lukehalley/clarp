@@ -2,13 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import IntelCard from '@/components/terminal/IntelCard';
-import {
-  getRiskSpikes,
-  getTrendingRisky,
-  getTrustedProjects,
-  getRecentlyVerified,
-} from '@/lib/terminal/mock-data';
-import { CHAIN_INFO, Chain } from '@/types/terminal';
+import { CHAIN_INFO, Chain, Project, LarpScore } from '@/types/terminal';
+
+// Empty data - TODO: Replace with real data source
+function getRiskSpikes(): { project: Project; score: LarpScore; delta: number }[] { return []; }
+function getTrendingRisky(): { project: Project; score: LarpScore }[] { return []; }
+function getTrustedProjects(): { project: Project; score: LarpScore }[] { return []; }
+function getRecentlyVerified(): { project: Project; score: LarpScore }[] { return []; }
 import {
   Shield,
   AlertTriangle,

@@ -1,26 +1,65 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getProjectById } from '@/lib/terminal/mock-data';
-import type { AlertRule, Alert } from '@/types/terminal';
+import { getUserFromRequest } from '@/lib/auth/verify-token';
+import { getServiceClient } from '@/lib/supabase/server';
 
-// In-memory storage for demo
-const alertRulesStore = new Map<string, AlertRule[]>();
-const alertsStore = new Map<string, Alert[]>();
-
+// GET /api/terminal/alerts - Get user's alerts or alert rules
 export async function GET(request: NextRequest) {
   try {
-    const userId = request.headers.get('x-user-id') || 'demo-user';
+    const user = await getUserFromRequest(request);
+
+    if (!user) {
+      // Return empty for unauthenticated users
+      return NextResponse.json({ rules: [], alerts: [], authenticated: false });
+    }
+
     const { searchParams } = new URL(request.url);
     const type = searchParams.get('type'); // 'rules' or 'history'
 
-    if (type === 'history') {
-      const alerts = alertsStore.get(userId) || [];
-      return NextResponse.json({ alerts });
+    const supabase = getServiceClient();
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database not configured' },
+        { status: 503 }
+      );
     }
 
-    const rules = alertRulesStore.get(userId) || [];
-    return NextResponse.json({ rules });
+    if (type === 'history') {
+      const { data, error } = await supabase
+        .from('user_alerts')
+        .select('*')
+        .eq('user_id', user.userId)
+        .order('triggered_at', { ascending: false })
+        .limit(50);
+
+      if (error) {
+        console.error('[Alerts] Fetch history error:', error.message);
+        return NextResponse.json(
+          { error: 'Failed to fetch alerts' },
+          { status: 500 }
+        );
+      }
+
+      return NextResponse.json({ alerts: data || [], authenticated: true });
+    }
+
+    // Default: fetch rules
+    const { data, error } = await supabase
+      .from('user_alert_rules')
+      .select('*')
+      .eq('user_id', user.userId)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('[Alerts] Fetch rules error:', error.message);
+      return NextResponse.json(
+        { error: 'Failed to fetch alert rules' },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({ rules: data || [], authenticated: true });
   } catch (error) {
-    console.error('Alerts fetch error:', error);
+    console.error('[Alerts] GET error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -28,43 +67,57 @@ export async function GET(request: NextRequest) {
   }
 }
 
+// POST /api/terminal/alerts - Create new alert rule
 export async function POST(request: NextRequest) {
   try {
-    const userId = request.headers.get('x-user-id') || 'demo-user';
-    const body = await request.json();
-    const { projectId, type, threshold, channels } = body;
+    const user = await getUserFromRequest(request);
 
-    if (!projectId || !type || !channels || !Array.isArray(channels)) {
+    if (!user) {
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        { error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+
+    const body = await request.json();
+    const { rule } = body;
+
+    if (!rule || typeof rule !== 'object') {
+      return NextResponse.json(
+        { error: 'Rule object is required' },
         { status: 400 }
       );
     }
 
-    const project = getProjectById(projectId);
-    if (!project) {
+    const supabase = getServiceClient();
+    if (!supabase) {
       return NextResponse.json(
-        { error: 'Project not found' },
-        { status: 404 }
+        { error: 'Database not configured' },
+        { status: 503 }
       );
     }
 
-    const newRule: AlertRule = {
-      id: `rule-${Date.now()}`,
-      projectId,
-      type,
-      threshold,
-      enabled: true,
-      channels,
-      createdAt: new Date(),
-    };
+    const { data, error } = await supabase
+      .from('user_alert_rules')
+      .insert({
+        user_id: user.userId,
+        rule: rule,
+        enabled: true,
+      })
+      .select()
+      .single();
 
-    const currentRules = alertRulesStore.get(userId) || [];
-    alertRulesStore.set(userId, [...currentRules, newRule]);
+    if (error) {
+      console.error('[Alerts] Create rule error:', error.message);
+      return NextResponse.json(
+        { error: 'Failed to create alert rule' },
+        { status: 500 }
+      );
+    }
 
-    return NextResponse.json({ success: true, rule: newRule });
+    return NextResponse.json({ success: true, rule: data });
   } catch (error) {
-    console.error('Alert rule create error:', error);
+    console.error('[Alerts] POST error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -72,28 +125,65 @@ export async function POST(request: NextRequest) {
   }
 }
 
+// PUT /api/terminal/alerts - Update alert rule
 export async function PUT(request: NextRequest) {
   try {
-    const userId = request.headers.get('x-user-id') || 'demo-user';
-    const body = await request.json();
-    const { ruleId, enabled } = body;
+    const user = await getUserFromRequest(request);
 
-    if (!ruleId || typeof enabled !== 'boolean') {
+    if (!user) {
       return NextResponse.json(
-        { error: 'Rule ID and enabled status required' },
+        { error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+
+    const body = await request.json();
+    const { ruleId, enabled, rule } = body;
+
+    if (!ruleId) {
+      return NextResponse.json(
+        { error: 'Rule ID is required' },
         { status: 400 }
       );
     }
 
-    const currentRules = alertRulesStore.get(userId) || [];
-    const updatedRules = currentRules.map(rule =>
-      rule.id === ruleId ? { ...rule, enabled } : rule
-    );
-    alertRulesStore.set(userId, updatedRules);
+    const supabase = getServiceClient();
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database not configured' },
+        { status: 503 }
+      );
+    }
 
-    return NextResponse.json({ success: true, ruleId, enabled });
+    const updateData: Record<string, unknown> = {
+      updated_at: new Date().toISOString(),
+    };
+
+    if (typeof enabled === 'boolean') {
+      updateData.enabled = enabled;
+    }
+
+    if (rule && typeof rule === 'object') {
+      updateData.rule = rule;
+    }
+
+    const { error } = await supabase
+      .from('user_alert_rules')
+      .update(updateData)
+      .eq('id', ruleId)
+      .eq('user_id', user.userId);
+
+    if (error) {
+      console.error('[Alerts] Update rule error:', error.message);
+      return NextResponse.json(
+        { error: 'Failed to update alert rule' },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({ success: true, ruleId });
   } catch (error) {
-    console.error('Alert rule update error:', error);
+    console.error('[Alerts] PUT error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -101,9 +191,18 @@ export async function PUT(request: NextRequest) {
   }
 }
 
+// DELETE /api/terminal/alerts - Delete alert rule
 export async function DELETE(request: NextRequest) {
   try {
-    const userId = request.headers.get('x-user-id') || 'demo-user';
+    const user = await getUserFromRequest(request);
+
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const ruleId = searchParams.get('ruleId');
 
@@ -114,13 +213,85 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    const currentRules = alertRulesStore.get(userId) || [];
-    const updatedRules = currentRules.filter(rule => rule.id !== ruleId);
-    alertRulesStore.set(userId, updatedRules);
+    const supabase = getServiceClient();
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database not configured' },
+        { status: 503 }
+      );
+    }
+
+    const { error } = await supabase
+      .from('user_alert_rules')
+      .delete()
+      .eq('id', ruleId)
+      .eq('user_id', user.userId);
+
+    if (error) {
+      console.error('[Alerts] Delete rule error:', error.message);
+      return NextResponse.json(
+        { error: 'Failed to delete alert rule' },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json({ success: true, ruleId });
   } catch (error) {
-    console.error('Alert rule delete error:', error);
+    console.error('[Alerts] DELETE error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+
+// PATCH /api/terminal/alerts - Mark alerts as read
+export async function PATCH(request: NextRequest) {
+  try {
+    const user = await getUserFromRequest(request);
+
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+
+    const body = await request.json();
+    const { alertIds } = body;
+
+    if (!alertIds || !Array.isArray(alertIds)) {
+      return NextResponse.json(
+        { error: 'Alert IDs array is required' },
+        { status: 400 }
+      );
+    }
+
+    const supabase = getServiceClient();
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database not configured' },
+        { status: 503 }
+      );
+    }
+
+    const { error } = await supabase
+      .from('user_alerts')
+      .update({ read: true })
+      .in('id', alertIds)
+      .eq('user_id', user.userId);
+
+    if (error) {
+      console.error('[Alerts] Mark read error:', error.message);
+      return NextResponse.json(
+        { error: 'Failed to mark alerts as read' },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({ success: true, markedRead: alertIds.length });
+  } catch (error) {
+    console.error('[Alerts] PATCH error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

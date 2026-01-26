@@ -5,13 +5,28 @@ import { useSearchParams } from 'next/navigation';
 import ProjectCard from '@/components/terminal/ProjectCard';
 import SearchInput from '@/components/terminal/SearchInput';
 import { resolveEntity } from '@/lib/terminal/entity-resolver';
-import {
-  MOCK_PROJECTS,
-  getMockScore,
-  getProjectByTicker,
-  getProjectByContract,
-  getProfileByHandle,
-} from '@/lib/terminal/mock-data';
+import type { Project, LarpScore, Profile } from '@/types/terminal';
+
+// Stubs - TODO: Replace with real data source
+const MOCK_PROJECTS: Project[] = [];
+function getMockScore(_id: string): LarpScore {
+  return {
+    score: 0,
+    confidence: 'low',
+    riskLevel: 'low',
+    topTags: [],
+    lastUpdated: new Date(),
+    breakdown: {
+      identity: { name: 'Identity', score: 0, weight: 0.3, evidence: [] },
+      xBehavior: { name: 'X Behavior', score: 0, weight: 0.25, evidence: [] },
+      wallet: { name: 'Wallet', score: 0, weight: 0.25, evidence: [] },
+      liquidity: { name: 'Liquidity', score: 0, weight: 0.2, evidence: [] },
+    },
+  };
+}
+function getProjectByTicker(_ticker: string): Project | undefined { return undefined; }
+function getProjectByContract(_contract: string): Project | undefined { return undefined; }
+function getProfileByHandle(_handle: string): Profile | null { return null; }
 import type { SearchResult } from '@/types/terminal';
 import { Search, Hash, Wallet, AtSign, Globe, Sparkles } from 'lucide-react';
 import Link from 'next/link';

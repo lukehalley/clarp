@@ -8,9 +8,15 @@ import {
   XIntelReport,
   SCAN_STATUS_PROGRESS,
 } from '@/types/xintel';
-import { getMockReport, getAvailableHandles } from './mock-data';
 import { getGrokClient, isGrokAvailable, GrokApiError } from '@/lib/grok/client';
 import { grokAnalysisToReport } from './transformers';
+import {
+  isSupabaseAvailable,
+  getCachedReportFromSupabase,
+  cacheReportInSupabase,
+  deleteCachedReportFromSupabase,
+  getCacheAgeFromSupabase,
+} from '@/lib/supabase/client';
 
 // ============================================================================
 // CONFIGURATION
@@ -54,7 +60,7 @@ export interface SubmitScanResult {
 /**
  * Submit a new scan job
  */
-export function submitScan(options: SubmitScanOptions): SubmitScanResult {
+export async function submitScan(options: SubmitScanOptions): Promise<SubmitScanResult> {
   const { handle, depth = 200, force = false } = options;
   const normalizedHandle = handle.toLowerCase().replace('@', '');
 
@@ -74,6 +80,26 @@ export function submitScan(options: SubmitScanOptions): SubmitScanResult {
 
   // Check cache (unless force rescan)
   if (!force) {
+    // First check Supabase cache
+    if (isSupabaseAvailable()) {
+      const supabaseCached = await getCachedReportFromSupabase(normalizedHandle);
+      if (supabaseCached) {
+        // Also populate in-memory cache for faster subsequent access
+        const report = supabaseCached.report as unknown as XIntelReport;
+        reportCache.set(normalizedHandle, {
+          report,
+          cachedAt: new Date(supabaseCached.scanned_at),
+        });
+        return {
+          jobId: `cached_${normalizedHandle}`,
+          status: 'cached',
+          cached: true,
+          useRealApi: report.disclaimer?.includes('AI-powered') ?? false,
+        };
+      }
+    }
+
+    // Fall back to in-memory cache
     const cached = reportCache.get(normalizedHandle);
     if (cached) {
       const age = Date.now() - cached.cachedAt.getTime();
@@ -123,10 +149,24 @@ export function getScanJob(jobId: string): ScanJob | null {
 /**
  * Get cached report
  */
-export function getCachedReport(handle: string): XIntelReport {
+export async function getCachedReport(handle: string): Promise<XIntelReport> {
   const normalizedHandle = handle.toLowerCase().replace('@', '');
 
-  // First check our cache
+  // First check Supabase cache
+  if (isSupabaseAvailable()) {
+    const supabaseCached = await getCachedReportFromSupabase(normalizedHandle);
+    if (supabaseCached) {
+      const report = supabaseCached.report as unknown as XIntelReport;
+      // Also populate in-memory cache
+      reportCache.set(normalizedHandle, {
+        report,
+        cachedAt: new Date(supabaseCached.scanned_at),
+      });
+      return report;
+    }
+  }
+
+  // Fall back to in-memory cache
   const cached = reportCache.get(normalizedHandle);
   if (cached) {
     const age = Date.now() - cached.cachedAt.getTime();
@@ -135,16 +175,8 @@ export function getCachedReport(handle: string): XIntelReport {
     }
   }
 
-  // Fall back to mock/generated data (always returns a report)
-  return getMockReport(normalizedHandle);
-}
-
-/**
- * Check if handle has available mock data
- */
-export function hasAvailableData(handle: string): boolean {
-  const normalizedHandle = handle.toLowerCase().replace('@', '');
-  return getAvailableHandles().includes(normalizedHandle);
+  // No cached report found - throw error
+  throw new Error(`No cached report found for @${normalizedHandle}. Please run a scan first.`);
 }
 
 /**
@@ -160,34 +192,32 @@ export function isRealApiEnabled(): boolean {
 
 /**
  * Process a scan job through the pipeline
- * Uses real X API + Grok if configured, otherwise falls back to mock data
+ * Uses Grok with live X search
  */
 async function processScanJob(jobId: string): Promise<void> {
   const job = scanJobs.get(jobId);
   if (!job) return;
 
+  // Check real API status at runtime
+  const grokAvailable = isGrokAvailable();
+  console.log(`[XIntel] Processing job ${jobId} for @${job.handle}, grokAvailable: ${grokAvailable}`);
+
+  if (!grokAvailable) {
+    job.status = 'failed';
+    job.error = 'Grok API not configured. Set XAI_API_KEY in environment.';
+    scanJobs.set(jobId, job);
+    return;
+  }
+
   try {
-    if (USE_REAL_API) {
-      await processRealScan(job);
-    } else {
-      await processMockScan(job);
-    }
+    console.log(`[XIntel] Starting scan for @${job.handle}`);
+    await processRealScan(job);
+    console.log(`[XIntel] Completed scan for @${job.handle}`);
   } catch (error) {
-    console.error(`Scan job ${jobId} failed:`, error);
+    console.error(`[XIntel] Scan job ${jobId} failed:`, error);
     job.status = 'failed';
     job.error = error instanceof Error ? error.message : 'Unknown error';
     scanJobs.set(jobId, job);
-
-    // Fall back to mock data on error
-    try {
-      const report = getMockReport(job.handle);
-      report.scanTime = new Date();
-      report.cached = false;
-      report.disclaimer = 'Scan failed, showing cached/generated data. ' + report.disclaimer;
-      reportCache.set(job.handle, { report, cachedAt: new Date() });
-    } catch {
-      // Ignore fallback errors
-    }
   }
 }
 
@@ -199,64 +229,38 @@ async function processRealScan(job: ScanJob): Promise<void> {
   const grokClient = getGrokClient();
 
   // Stage 1: Starting analysis
+  console.log(`[XIntel] Stage 1: Fetching for @${job.handle}`);
   updateJobStatus(job, 'fetching', 10);
 
   // Stage 2: Grok analyzes the profile using x_search
+  console.log(`[XIntel] Stage 2: Analyzing @${job.handle} with Grok...`);
   updateJobStatus(job, 'analyzing', 30);
   const analysis = await grokClient.analyzeProfile(job.handle);
+  console.log(`[XIntel] Grok analysis complete for @${job.handle}, risk: ${analysis.riskLevel}`);
 
   // Stage 3: Build report from Grok analysis
+  console.log(`[XIntel] Stage 3: Building report for @${job.handle}`);
   updateJobStatus(job, 'scoring', 80);
   const report = grokAnalysisToReport(analysis);
 
   // Stage 4: Complete
+  console.log(`[XIntel] Stage 4: Complete for @${job.handle}`);
   updateJobStatus(job, 'complete', 100);
   job.completedAt = new Date();
   scanJobs.set(job.id, job);
 
-  // Cache the report
-  reportCache.set(job.handle, {
-    report,
-    cachedAt: new Date(),
-  });
-}
+  // Cache the report in both Supabase and in-memory
+  const cachedAt = new Date();
+  reportCache.set(job.handle, { report, cachedAt });
 
-/**
- * Process scan using mock data (fallback mode)
- */
-async function processMockScan(job: ScanJob): Promise<void> {
-  const stages: { status: ScanStatus; delay: number }[] = [
-    { status: 'fetching', delay: 800 },
-    { status: 'extracting', delay: 600 },
-    { status: 'analyzing', delay: 700 },
-    { status: 'scoring', delay: 500 },
-    { status: 'complete', delay: 0 },
-  ];
-
-  for (const stage of stages) {
-    updateJobStatus(job, stage.status);
-
-    if (stage.delay > 0) {
-      await new Promise(resolve => setTimeout(resolve, stage.delay));
-    }
+  // Async cache to Supabase (don't block on this)
+  if (isSupabaseAvailable()) {
+    cacheReportInSupabase(
+      job.handle,
+      report as unknown as Record<string, unknown>,
+      CACHE_TTL_MS
+    ).catch(err => console.error('[XIntel] Failed to cache to Supabase:', err));
   }
-
-  // Generate report (using mock/generated data)
-  const report = getMockReport(job.handle);
-
-  // Update report with actual scan time
-  report.scanTime = new Date();
-  report.cached = false;
-  report.disclaimer = 'DEMO MODE: ' + report.disclaimer;
-
-  // Cache the report
-  reportCache.set(job.handle, {
-    report,
-    cachedAt: new Date(),
-  });
-
-  job.completedAt = new Date();
-  scanJobs.set(job.id, job);
 }
 
 /**
@@ -326,10 +330,19 @@ export function validateShareLink(shareId: string): { valid: boolean; handle?: s
 /**
  * Get cache age in seconds
  */
-export function getCacheAge(handle: string): number | null {
+export async function getCacheAge(handle: string): Promise<number | null> {
   const normalizedHandle = handle.toLowerCase().replace('@', '');
-  const cached = reportCache.get(normalizedHandle);
 
+  // First check Supabase
+  if (isSupabaseAvailable()) {
+    const supabaseAge = await getCacheAgeFromSupabase(normalizedHandle);
+    if (supabaseAge !== null) {
+      return supabaseAge;
+    }
+  }
+
+  // Fall back to in-memory cache
+  const cached = reportCache.get(normalizedHandle);
   if (!cached) return null;
 
   return Math.floor((Date.now() - cached.cachedAt.getTime()) / 1000);
@@ -338,9 +351,15 @@ export function getCacheAge(handle: string): number | null {
 /**
  * Clear cache for a handle
  */
-export function clearCache(handle: string): void {
+export async function clearCache(handle: string): Promise<void> {
   const normalizedHandle = handle.toLowerCase().replace('@', '');
+
+  // Clear from both Supabase and in-memory
   reportCache.delete(normalizedHandle);
+
+  if (isSupabaseAvailable()) {
+    await deleteCachedReportFromSupabase(normalizedHandle);
+  }
 }
 
 /**

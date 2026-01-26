@@ -1,35 +1,48 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getProjectById, getMockScore } from '@/lib/terminal/mock-data';
-import type { WatchlistItem } from '@/types/terminal';
+import { getUserFromRequest } from '@/lib/auth/verify-token';
+import { getServiceClient } from '@/lib/supabase/server';
 
-// In-memory storage for demo (would use database in production)
-const watchlistStore = new Map<string, string[]>();
-
+// GET /api/terminal/watchlist - Get user's watchlist
 export async function GET(request: NextRequest) {
   try {
-    // Get user ID from header or cookie (simplified for demo)
-    const userId = request.headers.get('x-user-id') || 'demo-user';
+    // Check authentication
+    const user = await getUserFromRequest(request);
 
-    const projectIds = watchlistStore.get(userId) || [];
+    if (!user) {
+      // Return empty for unauthenticated users (they use localStorage)
+      return NextResponse.json({ watchlist: [], authenticated: false });
+    }
 
-    const items: WatchlistItem[] = projectIds
-      .map(id => {
-        const project = getProjectById(id);
-        if (!project) return null;
-        const score = getMockScore(id);
-        return {
-          projectId: id,
-          project,
-          score,
-          addedAt: new Date(),
-          scoreDelta24h: Math.floor(Math.random() * 20) - 5,
-        };
-      })
-      .filter((item): item is WatchlistItem => item !== null);
+    const supabase = getServiceClient();
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database not configured' },
+        { status: 503 }
+      );
+    }
 
-    return NextResponse.json({ items });
+    const { data, error } = await supabase
+      .from('user_watchlist')
+      .select('project_id, added_at')
+      .eq('user_id', user.userId)
+      .order('added_at', { ascending: false });
+
+    if (error) {
+      console.error('[Watchlist] Fetch error:', error.message);
+      return NextResponse.json(
+        { error: 'Failed to fetch watchlist' },
+        { status: 500 }
+      );
+    }
+
+    const watchlist = data.map((item) => ({
+      projectId: item.project_id,
+      addedAt: item.added_at,
+    }));
+
+    return NextResponse.json({ watchlist, authenticated: true });
   } catch (error) {
-    console.error('Watchlist fetch error:', error);
+    console.error('[Watchlist] GET error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -37,41 +50,56 @@ export async function GET(request: NextRequest) {
   }
 }
 
+// POST /api/terminal/watchlist - Add project to watchlist
 export async function POST(request: NextRequest) {
   try {
-    const userId = request.headers.get('x-user-id') || 'demo-user';
+    const user = await getUserFromRequest(request);
+
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
     const { projectId } = body;
 
-    if (!projectId || typeof projectId !== 'string') {
+    if (!projectId) {
       return NextResponse.json(
         { error: 'Project ID is required' },
         { status: 400 }
       );
     }
 
-    const project = getProjectById(projectId);
-    if (!project) {
+    const supabase = getServiceClient();
+    if (!supabase) {
       return NextResponse.json(
-        { error: 'Project not found' },
-        { status: 404 }
+        { error: 'Database not configured' },
+        { status: 503 }
       );
     }
 
-    const currentList = watchlistStore.get(userId) || [];
+    const { error } = await supabase.from('user_watchlist').upsert(
+      {
+        user_id: user.userId,
+        project_id: projectId,
+        added_at: new Date().toISOString(),
+      },
+      { onConflict: 'user_id,project_id' }
+    );
 
-    if (currentList.includes(projectId)) {
+    if (error) {
+      console.error('[Watchlist] Add error:', error.message);
       return NextResponse.json(
-        { error: 'Project already in watchlist' },
-        { status: 409 }
+        { error: 'Failed to add to watchlist' },
+        { status: 500 }
       );
     }
-
-    watchlistStore.set(userId, [...currentList, projectId]);
 
     return NextResponse.json({ success: true, projectId });
   } catch (error) {
-    console.error('Watchlist add error:', error);
+    console.error('[Watchlist] POST error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -79,9 +107,18 @@ export async function POST(request: NextRequest) {
   }
 }
 
+// DELETE /api/terminal/watchlist - Remove project from watchlist
 export async function DELETE(request: NextRequest) {
   try {
-    const userId = request.headers.get('x-user-id') || 'demo-user';
+    const user = await getUserFromRequest(request);
+
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const projectId = searchParams.get('projectId');
 
@@ -92,13 +129,31 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    const currentList = watchlistStore.get(userId) || [];
-    const updatedList = currentList.filter(id => id !== projectId);
-    watchlistStore.set(userId, updatedList);
+    const supabase = getServiceClient();
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database not configured' },
+        { status: 503 }
+      );
+    }
+
+    const { error } = await supabase
+      .from('user_watchlist')
+      .delete()
+      .eq('user_id', user.userId)
+      .eq('project_id', projectId);
+
+    if (error) {
+      console.error('[Watchlist] Delete error:', error.message);
+      return NextResponse.json(
+        { error: 'Failed to remove from watchlist' },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json({ success: true, projectId });
   } catch (error) {
-    console.error('Watchlist delete error:', error);
+    console.error('[Watchlist] DELETE error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

@@ -4,17 +4,19 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import AlertRuleForm from '@/components/terminal/AlertRuleForm';
 import {
-  MOCK_ALERT_RULES,
-  MOCK_ALERTS,
-  MOCK_PROJECTS,
-  MOCK_WATCHLIST,
-} from '@/lib/terminal/mock-data';
-import {
   ALERT_RULE_TYPE_LABELS,
   ALERT_CHANNEL_LABELS,
   type AlertRule,
   type Alert,
+  type Project,
+  type WatchlistItem,
 } from '@/types/terminal';
+
+// Empty data - TODO: Replace with real data source
+const MOCK_ALERT_RULES: AlertRule[] = [];
+const MOCK_ALERTS: Alert[] = [];
+const MOCK_PROJECTS: Project[] = [];
+const MOCK_WATCHLIST: WatchlistItem[] = [];
 import {
   Bell,
   Plus,

@@ -13,41 +13,79 @@ import type { GrokTweetInput, GrokProfileInput } from './types';
  */
 export const ANALYSIS_PROMPT = `You are a crypto project researcher. Use your X search and web search capabilities to thoroughly research the X/Twitter account @{handle}.
 
-Please research and analyze the following about this account:
+Research this account and respond with a JSON object. Be fair and objective - not everyone in crypto is a scammer. Look for BOTH positive and negative indicators.
 
-1. **Account Basics**
-   - X profile URL (https://x.com/{handle})
-   - Account creation date
-   - Current follower/following counts
-   - Verified status
-   - Bio and display name
+IMPORTANT SCORING GUIDANCE:
+- Doxxed developers with real work history = TRUSTWORTHY
+- Projects with active GitHub repos = TRUSTWORTHY
+- Long-standing accounts (1+ years) with consistent activity = TRUSTWORTHY
+- Verified accounts with real engagement = TRUSTWORTHY
+- Anonymous teams promoting tokens with hype = SUSPICIOUS
+- New accounts with aggressive promotion = SUSPICIOUS
+- Accounts with scam allegations from credible sources = HIGH RISK
 
-2. **Project Information** (if this is a crypto/web3 project)
-   - Official website
-   - GitHub repository (if any)
-   - Contract address (Solana, Ethereum, etc.)
-   - Whether this is a fork of another project
+Respond with this exact JSON structure:
 
-3. **Team & Founders**
-   - Known team members and their X handles
-   - Whether the team is anonymous or doxxed
-   - Any notable backers or investors
+{
+  "handle": "the_handle",
+  "profile": {
+    "displayName": "Display Name",
+    "bio": "Bio text",
+    "verified": true/false,
+    "followers": 12345,
+    "following": 123,
+    "createdAt": "YYYY-MM-DD",
+    "xUrl": "https://x.com/handle"
+  },
+  "positiveIndicators": {
+    "isDoxxed": true/false,
+    "doxxedDetails": "Name, work history, LinkedIn, etc. or null",
+    "hasActiveGithub": true/false,
+    "githubUrl": "url or null",
+    "githubActivity": "description of repo activity or null",
+    "hasRealProduct": true/false,
+    "productDetails": "what they've built or null",
+    "accountAgeDays": 365,
+    "hasConsistentHistory": true/false,
+    "hasOrganicEngagement": true/false,
+    "hasCredibleBackers": true/false,
+    "backersDetails": "who backs them or null",
+    "teamMembers": [{"name": "Name", "role": "Role", "xHandle": "@handle", "isDoxxed": true}]
+  },
+  "negativeIndicators": {
+    "hasScamAllegations": false,
+    "scamDetails": "specific allegations or null",
+    "hasRugHistory": false,
+    "rugDetails": "details or null",
+    "isAnonymousTeam": false,
+    "hasHypeLanguage": false,
+    "hypeExamples": ["example tweets"] or [],
+    "hasSuspiciousFollowers": false,
+    "suspiciousDetails": "bought followers, bots, etc. or null",
+    "hasPreviousRebrand": false,
+    "rebrandDetails": "previous name or null",
+    "hasAggressivePromotion": false,
+    "promotionDetails": "details or null"
+  },
+  "website": "https://... or null",
+  "github": "https://github.com/... or null",
+  "contract": {
+    "address": "0x... or null",
+    "chain": "ethereum/solana/etc"
+  } or null,
+  "controversies": ["list of specific controversies with sources"] or [],
+  "keyFindings": ["important findings - both positive and negative"],
+  "overallAssessment": "Brief 1-2 sentence assessment",
+  "riskLevel": "low/medium/high",
+  "confidence": "low/medium/high"
+}
 
-4. **Activity Analysis**
-   - Recent tweet activity and posting frequency
-   - Main topics and themes
-   - Engagement levels
+CRITICAL: Base riskLevel on EVIDENCE, not assumptions:
+- "low" = Doxxed team OR established account with clean history OR active development
+- "medium" = Some concerns but no major red flags, or insufficient information
+- "high" = Credible scam allegations OR confirmed rug history OR clear fraud indicators
 
-5. **Red Flags & Controversies**
-   - Any scam allegations or rug pull accusations
-   - Community backlash or warnings
-   - Previous rebrand (was this account previously a different project?)
-   - Suspicious patterns (sudden activity spike, bought followers, etc.)
-
-6. **Notable Endorsements**
-   - Any influencers or notable figures who have promoted this project
-
-Please be thorough and cite specific tweets or sources where possible. Format your response as a detailed research report.`;
+Return ONLY valid JSON, no markdown or explanation.`;
 
 // ============================================================================
 // SYSTEM PROMPT

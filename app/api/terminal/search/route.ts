@@ -1,18 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { resolveEntity, getSuggestions } from '@/lib/terminal/entity-resolver';
-import {
-  MOCK_PROJECTS,
-  getMockScore,
-  getProjectByTicker,
-  getProjectByContract,
-  getProfileByHandle,
-} from '@/lib/terminal/mock-data';
-import type { SearchResult, SearchResponse } from '@/types/terminal';
+import type { SearchResult } from '@/types/terminal';
+
+// Extended SearchResponse with optional error
+interface SearchResponse {
+  results: SearchResult[];
+  suggestions: string[];
+  error?: string;
+  meta?: {
+    query: string;
+    entityType: string;
+    totalResults: number;
+  };
+}
 
 // Rate limit: 10 requests per minute per IP
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
 const RATE_LIMIT = 10;
-const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
+const RATE_LIMIT_WINDOW = 60 * 1000;
 
 function checkRateLimit(ip: string): boolean {
   const now = Date.now();
@@ -31,118 +36,45 @@ function checkRateLimit(ip: string): boolean {
   return true;
 }
 
-export async function POST(request: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
-    // Get IP for rate limiting
-    const ip = request.headers.get('x-forwarded-for') ||
-      request.headers.get('x-real-ip') ||
-      'unknown';
+    const ip = request.headers.get('x-forwarded-for') || 'unknown';
 
     if (!checkRateLimit(ip)) {
-      return NextResponse.json(
-        { error: 'Rate limit exceeded. Try again later.' },
+      return NextResponse.json<SearchResponse>(
+        { results: [], suggestions: [], error: 'Rate limit exceeded. Try again later.' },
         { status: 429 }
       );
     }
 
-    const body = await request.json();
-    const { query } = body;
+    const { searchParams } = new URL(request.url);
+    const query = searchParams.get('q')?.trim();
 
-    if (!query || typeof query !== 'string') {
-      return NextResponse.json(
-        { error: 'Query parameter is required' },
-        { status: 400 }
-      );
+    if (!query) {
+      return NextResponse.json<SearchResponse>({ results: [], suggestions: [] });
     }
 
-    const trimmedQuery = query.trim();
-    if (trimmedQuery.length === 0) {
-      return NextResponse.json(
-        { error: 'Query cannot be empty' },
-        { status: 400 }
-      );
-    }
+    // Get entity resolution suggestions
+    const suggestions = getSuggestions(query);
 
+    // Resolve the entity type
+    const entity = resolveEntity(query);
     const results: SearchResult[] = [];
-    const entity = resolveEntity(trimmedQuery);
 
-    if (entity) {
-      switch (entity.type) {
-        case 'ticker': {
-          const project = getProjectByTicker(entity.normalized);
-          if (project) {
-            results.push({
-              entity,
-              project,
-              score: getMockScore(project.id).score,
-            });
-          }
-          break;
-        }
-        case 'contract': {
-          const project = getProjectByContract(entity.normalized);
-          if (project) {
-            results.push({
-              entity,
-              project,
-              score: getMockScore(project.id).score,
-            });
-          }
-          break;
-        }
-        case 'x_handle': {
-          const profile = getProfileByHandle(entity.normalized);
-          if (profile) {
-            results.push({
-              entity,
-              profile,
-            });
-          }
-          const projectMatch = MOCK_PROJECTS.find(
-            p => p.xHandle?.toLowerCase() === entity.normalized
-          );
-          if (projectMatch) {
-            results.push({
-              entity,
-              project: projectMatch,
-              score: getMockScore(projectMatch.id).score,
-            });
-          }
-          break;
-        }
-        default:
-          break;
-      }
-    }
-
-    // Fuzzy matching
-    const fuzzyMatches = MOCK_PROJECTS.filter(p =>
-      p.name.toLowerCase().includes(trimmedQuery.toLowerCase()) ||
-      p.ticker?.toLowerCase().includes(trimmedQuery.toLowerCase())
-    );
-
-    for (const project of fuzzyMatches) {
-      if (!results.some(r => r.project?.id === project.id)) {
-        results.push({
-          entity: { type: 'ticker', value: trimmedQuery, normalized: trimmedQuery },
-          project,
-          score: getMockScore(project.id).score,
-        });
-      }
-    }
-
-    const suggestions = getSuggestions(trimmedQuery);
-
-    const response: SearchResponse = {
-      results: results.slice(0, 10),
+    // Return empty results - real data integration needed
+    return NextResponse.json<SearchResponse>({
+      results,
       suggestions,
-    };
-
-    return NextResponse.json(response);
+      meta: {
+        query,
+        entityType: entity?.type || 'unknown',
+        totalResults: results.length,
+      },
+    });
   } catch (error) {
-    console.error('Search error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
+    console.error('Search API error:', error);
+    return NextResponse.json<SearchResponse>(
+      { results: [], suggestions: [], error: 'Internal server error' },
       { status: 500 }
     );
   }

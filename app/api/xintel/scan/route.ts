@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const result = submitScan({
+    const result = await submitScan({
       handle: formattedHandle,
       depth: depth || 800,
       force: force || false,

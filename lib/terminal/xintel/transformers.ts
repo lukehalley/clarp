@@ -140,74 +140,122 @@ export function grokAnalysisToReport(analysis: GrokAnalysisResult): XIntelReport
 // ============================================================================
 
 function buildScoreFromAnalysis(analysis: GrokAnalysisResult): ReputationScore {
-  // Calculate overall score based on risk level and findings
-  let overall: number;
-  switch (analysis.riskLevel) {
-    case 'low':
-      overall = 75 + Math.floor(Math.random() * 20); // 75-94
-      break;
-    case 'medium':
-      overall = 40 + Math.floor(Math.random() * 30); // 40-69
-      break;
-    case 'high':
-      overall = 10 + Math.floor(Math.random() * 25); // 10-34
-      break;
-    default:
-      overall = 50;
-  }
+  const pos = analysis.positiveIndicators;
+  const neg = analysis.negativeIndicators;
 
+  // ============================================================================
+  // CALCULATE SCORE FROM EVIDENCE-BASED INDICATORS
+  // Base score: 50 (neutral starting point)
+  // ============================================================================
+
+  let score = 50;
+
+  // POSITIVE FACTORS (add points) - reward legitimate actors
+  if (pos.isDoxxed) score += 20;                    // Doxxed team is major trust signal
+  if (pos.hasActiveGithub) score += 15;             // Active development = real project
+  if (pos.hasRealProduct) score += 10;              // Shipped product = not vaporware
+  if (pos.accountAgeDays > 365) score += 10;        // 1+ year account = established
+  else if (pos.accountAgeDays > 180) score += 5;    // 6+ months = somewhat established
+  if (pos.hasConsistentHistory) score += 5;         // Consistent messaging
+  if (pos.hasOrganicEngagement) score += 5;         // Real engagement
+  if (pos.hasCredibleBackers) score += 10;          // Known backers
+  if (analysis.profile.verified) score += 5;        // Verified account
+
+  // NEGATIVE FACTORS (subtract points) - penalize red flags
+  if (neg.hasScamAllegations) score -= 30;          // Scam allegations = serious
+  if (neg.hasRugHistory) score -= 40;               // Rug history = disqualifying
+  if (neg.isAnonymousTeam && !pos.isDoxxed) score -= 10; // Anonymous = some concern
+  if (neg.hasHypeLanguage) score -= 5;              // Hype language = minor concern
+  if (neg.hasSuspiciousFollowers) score -= 10;      // Fake followers
+  if (neg.hasPreviousRebrand) score -= 5;           // Rebrand = some concern
+  if (neg.hasAggressivePromotion) score -= 10;      // Aggressive promo = concerning
+
+  // Clamp score to 0-100
+  score = Math.max(0, Math.min(100, score));
+
+  // Determine risk level from score
+  let riskLevel: 'low' | 'medium' | 'high';
+  if (score >= 70) riskLevel = 'low';
+  else if (score >= 40) riskLevel = 'medium';
+  else riskLevel = 'high';
+
+  // Build detailed factors for UI display
   const factors: ScoreFactor[] = [
     {
       type: 'serial_shill',
-      points: analysis.riskLevel === 'high' ? 15 : analysis.riskLevel === 'medium' ? 8 : 2,
+      points: neg.hasAggressivePromotion ? 15 : neg.hasHypeLanguage ? 5 : 0,
       maxPoints: 25,
-      description: analysis.keyFindings.length > 0 ? 'Based on AI analysis' : 'No promotional patterns detected',
+      description: neg.hasAggressivePromotion
+        ? 'Aggressive promotional patterns detected'
+        : neg.hasHypeLanguage
+          ? 'Some hype language in posts'
+          : 'No concerning promotional patterns',
       evidenceIds: [],
     },
     {
       type: 'backlash_density',
-      points: analysis.controversies.length * 5,
+      points: neg.hasScamAllegations ? 25 : neg.hasRugHistory ? 25 : analysis.controversies.length * 5,
       maxPoints: 25,
-      description: analysis.controversies.length > 0
-        ? `${analysis.controversies.length} potential concerns identified`
-        : 'No significant backlash detected',
+      description: neg.hasScamAllegations
+        ? `Scam allegations: ${neg.scamDetails || 'See analysis'}`
+        : neg.hasRugHistory
+          ? `Rug history: ${neg.rugDetails || 'See analysis'}`
+          : analysis.controversies.length > 0
+            ? `${analysis.controversies.length} concerns found`
+            : 'No significant backlash detected',
       evidenceIds: [],
     },
     {
       type: 'toxic_vulgar',
       points: 0,
       maxPoints: 15,
-      description: 'Behavioral analysis from AI',
+      description: pos.isDoxxed
+        ? `✓ Doxxed: ${pos.doxxedDetails || 'Identity known'}`
+        : neg.isAnonymousTeam
+          ? 'Anonymous team'
+          : 'Team status unknown',
       evidenceIds: [],
     },
     {
       type: 'hype_merchant',
-      points: analysis.riskLevel === 'high' ? 10 : 3,
+      points: neg.hasHypeLanguage ? 10 : 0,
       maxPoints: 15,
-      description: 'Promotional language analysis',
+      description: pos.hasActiveGithub
+        ? `✓ Active GitHub: ${pos.githubActivity || analysis.github}`
+        : pos.hasRealProduct
+          ? `✓ Real product: ${pos.productDetails || 'Verified'}`
+          : neg.hasHypeLanguage
+            ? 'Hype language without verified product'
+            : 'Promotional language analysis',
       evidenceIds: [],
     },
     {
       type: 'consistency',
-      points: analysis.rebrand?.isRebrand ? 8 : 0,
+      points: neg.hasPreviousRebrand ? 8 : 0,
       maxPoints: 10,
-      description: analysis.rebrand?.isRebrand
-        ? `Account may have rebranded${analysis.rebrand.previousName ? ` from ${analysis.rebrand.previousName}` : ''}`
-        : 'No rebrand detected',
+      description: neg.hasPreviousRebrand
+        ? `Rebranded: ${neg.rebrandDetails || 'Previous identity changed'}`
+        : pos.hasConsistentHistory
+          ? '✓ Consistent history'
+          : 'No rebrand detected',
       evidenceIds: [],
     },
     {
       type: 'engagement_suspicion',
-      points: analysis.activityLevel === 'low' ? 5 : 0,
+      points: neg.hasSuspiciousFollowers ? 10 : 0,
       maxPoints: 10,
-      description: `Activity level: ${analysis.activityLevel || 'unknown'}`,
+      description: neg.hasSuspiciousFollowers
+        ? `Suspicious followers: ${neg.suspiciousDetails || 'Potential bot activity'}`
+        : pos.hasOrganicEngagement
+          ? '✓ Organic engagement'
+          : `Account age: ${pos.accountAgeDays} days`,
       evidenceIds: [],
     },
   ];
 
   return {
-    overall,
-    riskLevel: analysis.riskLevel,
+    overall: score,
+    riskLevel,
     factors,
     confidence: analysis.confidence,
   };
@@ -245,17 +293,23 @@ function extractTweetIdFromUrl(url: string): string | undefined {
 }
 
 function buildDefaultBehaviorMetrics(analysis: GrokAnalysisResult): BehaviorMetrics {
+  const neg = analysis.negativeIndicators;
+
   return {
     toxicity: { score: 0, examples: [] },
     vulgarity: { score: 0, examples: [] },
     hype: {
-      score: analysis.riskLevel === 'high' ? 60 : analysis.riskLevel === 'medium' ? 30 : 10,
-      examples: [],
-      keywords: [],
+      score: neg.hasHypeLanguage ? 60 : neg.hasAggressivePromotion ? 40 : 10,
+      examples: neg.hypeExamples.map((text, i) => ({
+        excerpt: text,
+        tweetId: `hype_${i}`,
+        timestamp: new Date(),
+      })),
+      keywords: neg.hypeExamples.length > 0 ? ['promotional'] : [],
     },
     aggression: { score: 0, examples: [], targetPatterns: [] },
     consistency: {
-      score: analysis.rebrand?.isRebrand ? 40 : 80,
+      score: neg.hasPreviousRebrand ? 40 : 80,
       topicDrift: 0,
       contradictions: [],
     },
@@ -264,20 +318,33 @@ function buildDefaultBehaviorMetrics(analysis: GrokAnalysisResult): BehaviorMetr
 }
 
 function buildDefaultNetworkMetrics(analysis: GrokAnalysisResult): NetworkMetrics {
-  return {
-    topInteractions: analysis.influencers.map((handle, i) => ({
-      handle,
-      displayName: undefined,
+  const pos = analysis.positiveIndicators;
+  const neg = analysis.negativeIndicators;
+
+  // Build top interactions from team members
+  const topInteractions = pos.teamMembers
+    .filter(m => m.xHandle)
+    .map((member, i) => ({
+      handle: member.xHandle || member.name,
+      displayName: member.name,
       followers: undefined,
       interactionCount: 1,
       interactionType: 'mention' as const,
-    })),
-    mentionList: analysis.influencers,
+    }));
+
+  const suspiciousPatterns: string[] = [];
+  if (neg.hasSuspiciousFollowers) {
+    suspiciousPatterns.push(neg.suspiciousDetails || 'Suspicious follower patterns detected');
+  }
+
+  return {
+    topInteractions,
+    mentionList: pos.teamMembers.map(m => m.xHandle || m.name),
     engagementHeuristics: {
       replyRatio: 0.3,
       retweetRatio: 0.2,
-      avgEngagementRate: 0.05,
-      suspiciousPatterns: [],
+      avgEngagementRate: pos.hasOrganicEngagement ? 0.05 : 0.01,
+      suspiciousPatterns,
     },
   };
 }

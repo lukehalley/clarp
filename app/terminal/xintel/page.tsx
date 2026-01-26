@@ -5,7 +5,9 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Search, Radar, AlertTriangle, Users, Sparkles } from 'lucide-react';
 import ScanStepper from '@/components/terminal/xintel/ScanStepper';
 import { ScanStatus, formatHandle, isValidHandle } from '@/types/xintel';
-import { getAvailableHandles } from '@/lib/terminal/xintel/mock-data';
+
+// Stub - TODO: Replace with real data source
+function getAvailableHandles(): string[] { return []; }
 
 function XIntelContent() {
   const router = useRouter();

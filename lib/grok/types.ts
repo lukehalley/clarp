@@ -256,12 +256,59 @@ export interface GrokAnnotation {
 }
 
 // ============================================================================
-// SIMPLIFIED ANALYSIS RESULT (from Responses API with live X search)
+// ANALYSIS RESULT (from Responses API with live X search)
 // ============================================================================
 
 /**
- * Simplified analysis result from Grok with live X data
- * This replaces the complex multi-step analysis with Grok's native X search
+ * Team member information
+ */
+export interface TeamMember {
+  name: string;
+  role?: string;
+  xHandle?: string;
+  isDoxxed?: boolean;
+}
+
+/**
+ * Positive trust indicators - these INCREASE the score
+ */
+export interface PositiveIndicators {
+  isDoxxed: boolean;
+  doxxedDetails?: string | null;
+  hasActiveGithub: boolean;
+  githubUrl?: string | null;
+  githubActivity?: string | null;
+  hasRealProduct: boolean;
+  productDetails?: string | null;
+  accountAgeDays: number;
+  hasConsistentHistory: boolean;
+  hasOrganicEngagement: boolean;
+  hasCredibleBackers: boolean;
+  backersDetails?: string | null;
+  teamMembers: TeamMember[];
+}
+
+/**
+ * Negative risk indicators - these DECREASE the score
+ */
+export interface NegativeIndicators {
+  hasScamAllegations: boolean;
+  scamDetails?: string | null;
+  hasRugHistory: boolean;
+  rugDetails?: string | null;
+  isAnonymousTeam: boolean;
+  hasHypeLanguage: boolean;
+  hypeExamples: string[];
+  hasSuspiciousFollowers: boolean;
+  suspiciousDetails?: string | null;
+  hasPreviousRebrand: boolean;
+  rebrandDetails?: string | null;
+  hasAggressivePromotion: boolean;
+  promotionDetails?: string | null;
+}
+
+/**
+ * Analysis result from Grok with live X data
  */
 export interface GrokAnalysisResult {
   handle: string;
@@ -275,30 +322,24 @@ export interface GrokAnalysisResult {
     createdAt?: string;
     xUrl?: string;
   };
-  github?: string;
-  website?: string;
-  accountAge?: string;
-  activityLevel?: 'low' | 'medium' | 'high';
-  team: Array<{
-    name: string;
-    role?: string;
-    xHandle?: string;
-  }>;
-  funding?: string;
-  controversies: string[];
-  rebrand?: {
-    isRebrand: boolean;
-    previousName?: string;
-  };
-  influencers: string[];
+  // Structured indicators for scoring
+  positiveIndicators: PositiveIndicators;
+  negativeIndicators: NegativeIndicators;
+  // Project details
+  github?: string | null;
+  website?: string | null;
   contract?: {
     address: string;
     chain: string;
-    isFork?: boolean;
-  };
+  } | null;
+  // Findings
+  controversies: string[];
   keyFindings: string[];
+  overallAssessment?: string;
+  // Risk assessment
   riskLevel: 'low' | 'medium' | 'high';
   confidence: 'low' | 'medium' | 'high';
+  // Metadata
   rawAnalysis: string;
   citations: Array<{ url: string; title?: string }>;
   tokensUsed?: number;
