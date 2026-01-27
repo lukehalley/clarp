@@ -43,20 +43,84 @@ function getEndOfDay(): Date {
 
 /**
  * Check if request is within rate limits
- * NOTE: Rate limiting disabled for development
  */
 export async function checkRateLimit(
   wallet: string | null,
   ip: string
 ): Promise<RateLimitResult> {
-  // Rate limiting disabled for development
+  const supabase = getServiceClient();
+
+  // If no supabase, fail open with free tier defaults
+  if (!supabase) {
+    return {
+      allowed: true,
+      remaining: TIER_LIMITS.free.dailyScans,
+      limit: TIER_LIMITS.free.dailyScans,
+      resetAt: getEndOfDay(),
+      tier: 'free',
+      reason: 'Database unavailable, using defaults',
+    };
+  }
+
+  // Get user tier
+  let tier: Tier = 'free';
+  if (wallet) {
+    try {
+      const tierInfo = await getUserTier(wallet);
+      tier = tierInfo.tier;
+    } catch (err) {
+      console.error('[RateLimiter] Failed to get tier:', err);
+      // Default to free tier on error
+    }
+  }
+
+  const limits = TIER_LIMITS[tier];
+
+  // Unlimited tiers always pass
+  if (limits.dailyScans === Infinity) {
+    return {
+      allowed: true,
+      remaining: Infinity,
+      limit: Infinity,
+      resetAt: getEndOfDay(),
+      tier,
+    };
+  }
+
+  // Count today's scans
+  const startOfDay = getStartOfDay();
+  const identifier = wallet || hashIP(ip);
+  const identifierColumn = wallet ? 'wallet' : 'ip_hash';
+
+  const { count, error } = await supabase
+    .from('scan_usage')
+    .select('*', { count: 'exact', head: true })
+    .eq(identifierColumn, identifier)
+    .gte('created_at', startOfDay.toISOString());
+
+  if (error) {
+    console.error('[RateLimiter] Database error:', error);
+    // Fail open - allow request but log error
+    return {
+      allowed: true,
+      remaining: limits.dailyScans,
+      limit: limits.dailyScans,
+      resetAt: getEndOfDay(),
+      tier,
+      reason: 'Rate limit check failed, allowing request',
+    };
+  }
+
+  const used = count || 0;
+  const remaining = Math.max(0, limits.dailyScans - used);
+
   return {
-    allowed: true,
-    remaining: Infinity,
-    limit: Infinity,
+    allowed: remaining > 0,
+    remaining,
+    limit: limits.dailyScans,
     resetAt: getEndOfDay(),
-    tier: 'whale',
-    reason: 'Rate limiting disabled',
+    tier,
+    reason: remaining === 0 ? `Daily limit of ${limits.dailyScans} scans reached` : undefined,
   };
 }
 
