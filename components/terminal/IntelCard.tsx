@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Shield, AlertTriangle, TrendingUp } from 'lucide-react';
 import ContractAvatar from '@/components/ContractAvatar';
@@ -39,6 +39,7 @@ function detectChain(address?: string): Chain | null {
 }
 
 export default function IntelCard({ project, scoreDelta24h }: IntelCardProps) {
+  const router = useRouter();
   const score = project.trustScore?.score ?? 50;
   const displayScore = Math.max(1, score);
   const isTrusted = displayScore >= 70;
@@ -52,14 +53,18 @@ export default function IntelCard({ project, scoreDelta24h }: IntelCardProps) {
   // Extract tags from project
   const tags = project.tags?.slice(0, 3) || [];
 
+  const handleClick = () => {
+    router.push(`/terminal/project/${project.xHandle || project.id}`);
+  };
+
   return (
-    <Link
-      href={`/terminal/project/${project.xHandle || project.id}`}
-      className="group block"
+    <div
+      onClick={handleClick}
+      className="group block cursor-pointer"
     >
       <div className="flex border-2 border-ivory-light/20 bg-ivory-light/5 hover:border-danger-orange/30 transition-colors overflow-hidden min-h-[90px] sm:h-[100px]">
         {/* Left: Avatar - Responsive sizing */}
-        <div className="shrink-0 bg-[#0a0a09] border-r border-ivory-light/10 w-[80px] h-[90px] sm:w-[100px] sm:h-[100px] overflow-hidden relative">
+        <div className="shrink-0 bg-[#0a0a09] border-r border-ivory-light/10 w-[80px] h-[90px] sm:w-[100px] sm:h-[100px] overflow-hidden relative pointer-events-none">
           {project.avatarUrl ? (
             <Image
               src={project.avatarUrl}
@@ -154,6 +159,6 @@ export default function IntelCard({ project, scoreDelta24h }: IntelCardProps) {
           </div>
         </div>
       </div>
-    </Link>
+    </div>
   );
 }

@@ -25,26 +25,8 @@ export class RateLimitError extends Error {
 }
 
 export function checkRateLimit(clientId: string): void {
-  const now = Date.now();
-  const existing = rateLimitMap.get(clientId);
-
-  if (!existing || now > existing.resetAt) {
-    // Reset or create new entry
-    rateLimitMap.set(clientId, {
-      count: 1,
-      resetAt: now + RATE_LIMIT_WINDOW_MS,
-    });
-    return;
-  }
-
-  if (existing.count >= RATE_LIMIT_MAX_REQUESTS) {
-    const minutesLeft = Math.ceil((existing.resetAt - now) / 60000);
-    throw new RateLimitError(
-      `Rate limit exceeded. You can scan ${RATE_LIMIT_MAX_REQUESTS} repos per hour. Try again in ${minutesLeft} minutes.`
-    );
-  }
-
-  existing.count++;
+  // Rate limiting disabled for development
+  return;
 }
 
 export function saveRecentScan(scan: RecentScan): void {

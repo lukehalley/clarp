@@ -22,9 +22,9 @@ type CategoryFilter = 'all' | 'verified' | 'high-risk' | 'low-risk';
 type SortOption = 'score-high' | 'score-low' | 'recent' | 'name-asc';
 
 const SORT_OPTIONS: { id: SortOption; label: string }[] = [
-  { id: 'recent', label: 'Recently Scanned' },
   { id: 'score-high', label: 'Trust: High to Low' },
   { id: 'score-low', label: 'Trust: Low to High' },
+  { id: 'recent', label: 'Recently Scanned' },
   { id: 'name-asc', label: 'Name: A to Z' },
 ];
 
@@ -164,15 +164,18 @@ function EmptyState({ onRequestScan }: { onRequestScan: () => void }) {
 // PAGE
 // ============================================================================
 
+const ITEMS_PER_PAGE = 10;
+
 export default function TerminalPage() {
   const router = useRouter();
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Filters
   const [category, setCategory] = useState<CategoryFilter>('all');
-  const [sortBy, setSortBy] = useState<SortOption>('recent');
+  const [sortBy, setSortBy] = useState<SortOption>('score-high');
   const [scoreRange, setScoreRange] = useState<[number, number]>([0, 100]);
   const [verifiedOnly, setVerifiedOnly] = useState(false);
 
@@ -203,14 +206,14 @@ export default function TerminalPage() {
 
   const resetFilters = () => {
     setCategory('all');
-    setSortBy('recent');
+    setSortBy('score-high');
     setScoreRange([0, 100]);
     setVerifiedOnly(false);
   };
 
   const hasActiveFilters =
     category !== 'all' ||
-    sortBy !== 'recent' ||
+    sortBy !== 'score-high' ||
     scoreRange[0] !== 0 ||
     scoreRange[1] !== 100 ||
     verifiedOnly;
@@ -250,6 +253,18 @@ export default function TerminalPage() {
       }
     });
 
+  // Pagination
+  const totalPages = Math.ceil(filteredProjects.length / ITEMS_PER_PAGE);
+  const paginatedProjects = filteredProjects.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [category, sortBy, verifiedOnly]);
+
   return (
     <div className="px-4 sm:px-6 py-6">
       <div className="max-w-7xl mx-auto">
@@ -288,11 +303,48 @@ export default function TerminalPage() {
         ) : filteredProjects.length === 0 ? (
           <EmptyState onRequestScan={handleRequestScan} />
         ) : (
-          <div className="space-y-4">
-            {filteredProjects.map((project) => (
-              <IntelCard key={project.id} project={project} />
-            ))}
-          </div>
+          <>
+            <div className="space-y-4">
+              {paginatedProjects.map((project) => (
+                <IntelCard key={project.id} project={project} />
+              ))}
+            </div>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-2 mt-6 pt-4 border-t border-ivory-light/10">
+                <button
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="px-3 py-1.5 font-mono text-xs border border-ivory-light/20 text-ivory-light/60 hover:text-ivory-light hover:border-ivory-light/40 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                >
+                  ← Prev
+                </button>
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`w-8 h-8 font-mono text-xs transition-colors ${
+                        currentPage === page
+                          ? 'bg-danger-orange text-black font-bold'
+                          : 'border border-ivory-light/20 text-ivory-light/60 hover:text-ivory-light hover:border-ivory-light/40'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  className="px-3 py-1.5 font-mono text-xs border border-ivory-light/20 text-ivory-light/60 hover:text-ivory-light hover:border-ivory-light/40 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                >
+                  Next →
+                </button>
+              </div>
+            )}
+          </>
         )}
 
         {/* Bottom hint */}
