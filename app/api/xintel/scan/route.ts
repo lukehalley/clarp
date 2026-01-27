@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { submitScan, getScanJob, getActiveScanByHandle } from '@/lib/terminal/xintel/scan-service';
-import { formatHandle, isValidHandle } from '@/types/xintel';
+import { submitUniversalScan, getScanJob, getActiveScanByHandle } from '@/lib/terminal/xintel/scan-service';
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,23 +14,19 @@ export async function POST(request: NextRequest) {
     }
 
     // Clean the input
-    const query = handle.trim();
+    const input = handle.trim();
 
-    if (query.length < 2) {
+    if (input.length < 2) {
       return NextResponse.json(
         { error: 'Search query too short' },
         { status: 400 }
       );
     }
 
-    // Try to detect if this looks like an X handle
-    const formattedHandle = formatHandle(query);
-    const looksLikeHandle = isValidHandle(formattedHandle);
-
-    // Pass the query to scan service - it will figure out what to do
-    const result = await submitScan({
-      handle: looksLikeHandle ? formattedHandle : query,
-      depth: depth || 800,
+    // Use universal scan - it accepts any input type (token address, X handle, website, GitHub)
+    const result = await submitUniversalScan({
+      input,
+      depth: depth || 200,
       force: force || false,
     });
 
@@ -44,11 +39,26 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       jobId: result.jobId,
-      handle: result.handle,
+      inputType: result.inputType,
+      canonicalId: result.canonicalId,
       status: result.status,
       cached: result.cached,
+      // Include OSINT data if available (for immediate display)
+      osintData: result.osintData ? {
+        name: result.osintData.name,
+        symbol: result.osintData.symbol,
+        website: result.osintData.website,
+        xHandle: result.osintData.xHandle,
+        github: result.osintData.github,
+        telegram: result.osintData.telegram,
+        discord: result.osintData.discord,
+        confidence: result.osintData.confidence,
+        securityIntel: result.osintData.securityIntel,
+        marketIntel: result.osintData.marketIntel,
+      } : undefined,
     });
-  } catch {
+  } catch (err) {
+    console.error('[API] Scan error:', err);
     return NextResponse.json(
       { error: 'Failed to process scan request' },
       { status: 500 }

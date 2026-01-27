@@ -88,8 +88,8 @@ export default function TerminalLayout({ children }: TerminalLayoutProps) {
             </div>
 
             {/* Search + Actions */}
-            <div className="hidden md:flex items-center gap-3 flex-1 justify-end max-w-lg">
-              <div className="hidden lg:block flex-1">
+            <div className="hidden md:flex items-center gap-3 flex-1 justify-end max-w-2xl">
+              <div className="hidden lg:block flex-1 min-w-[280px]">
                 <SearchInput compact />
               </div>
 

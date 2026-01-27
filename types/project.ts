@@ -104,6 +104,20 @@ export interface ShippingMilestone {
   evidenceUrl?: string;
 }
 
+export interface SecurityIntel {
+  // RugCheck-style data
+  mintAuthorityEnabled: boolean;
+  freezeAuthorityEnabled: boolean;
+  lpLocked: boolean;
+  lpLockedPercent?: number;
+  risks: string[];
+  holdersCount?: number;
+  top10HoldersPercent?: number;
+  // Domain WHOIS
+  domainAgeDays?: number;
+  domainRegistrar?: string;
+}
+
 // ============================================================================
 // PROJECT ENTITY - The unified view
 // ============================================================================
@@ -123,6 +137,8 @@ export interface Project {
   websiteUrl?: string;        // https://jup.ag
   tokenAddress?: string;      // Solana contract address
   ticker?: string;            // $JUP
+  discordUrl?: string;        // Discord server link
+  telegramUrl?: string;       // Telegram group link
 
   // Trust metrics
   trustScore: TrustScore;
@@ -211,6 +227,9 @@ export interface Project {
 
   // Technical Architecture
   techStack?: TechStack;
+
+  // Security Intel (RugCheck-style data)
+  securityIntel?: SecurityIntel;
 
   // Shipping History (what they've actually built/released)
   shippingHistory?: ShippingMilestone[];

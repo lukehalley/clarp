@@ -136,12 +136,12 @@ export default function ConnectWallet({ className = '', compact = false }: Conne
             flex items-center justify-center gap-2
             bg-larp-green border-2 border-black
             font-mono font-bold text-black
-            ${compact ? 'px-3 py-2 text-xs' : 'px-4 py-2.5 text-sm'}
+            ${compact ? 'h-10 px-4 text-xs' : 'px-4 py-2.5 text-sm'}
           `}
           style={{ boxShadow: '3px 3px 0 black' }}
         >
-          <Wallet size={compact ? 14 : 16} />
-          <span className={compact ? 'hidden sm:inline' : ''}>CONNECT WALLET</span>
+          <Wallet size={compact ? 16 : 16} />
+          <span className={compact ? 'hidden sm:inline' : ''}>connect wallet</span>
         </div>
       </div>
     );
@@ -160,19 +160,19 @@ export default function ConnectWallet({ className = '', compact = false }: Conne
             font-mono font-bold text-black
             transition-all hover:translate-x-0.5 hover:translate-y-0.5
             disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-x-0 disabled:hover:translate-y-0
-            ${compact ? 'px-3 py-2 text-xs' : 'px-4 py-2.5 text-sm'}
+            ${compact ? 'h-10 px-4 text-xs' : 'px-4 py-2.5 text-sm'}
           `}
           style={{ boxShadow: isConnecting ? 'none' : '3px 3px 0 black' }}
         >
           {isConnecting ? (
             <>
               <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
-              <span className={compact ? 'hidden sm:inline' : ''}>CONNECTING...</span>
+              <span className={compact ? 'hidden sm:inline' : ''}>connecting...</span>
             </>
           ) : (
             <>
-              <Wallet size={compact ? 14 : 16} />
-              <span className={compact ? 'hidden sm:inline' : ''}>CONNECT WALLET</span>
+              <Wallet size={compact ? 16 : 16} />
+              <span className={compact ? 'hidden sm:inline' : ''}>connect wallet</span>
             </>
           )}
         </button>
@@ -194,10 +194,10 @@ export default function ConnectWallet({ className = '', compact = false }: Conne
         onClick={() => setDropdownOpen(!dropdownOpen)}
         className={`
           flex items-center gap-2
-          bg-larp-green/20 border border-larp-green/50
+          bg-larp-green/20 border-2 border-larp-green/50
           text-larp-green font-mono
           transition-all hover:bg-larp-green/30 hover:border-larp-green
-          ${compact ? 'px-3 py-2 text-xs' : 'px-4 py-2.5 text-sm'}
+          ${compact ? 'h-10 px-4 text-xs' : 'px-4 py-2.5 text-sm'}
         `}
       >
         <div className="w-2 h-2 bg-larp-green rounded-full animate-pulse" />

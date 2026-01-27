@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, X, AtSign, Link as LinkIcon } from 'lucide-react';
+import { Search, X, AtSign, Link as LinkIcon, Coins, Github } from 'lucide-react';
 
 interface SearchInputProps {
   compact?: boolean;
@@ -10,19 +10,31 @@ interface SearchInputProps {
   onSearch?: (query: string) => void;
 }
 
-type InputType = 'x_handle' | 'x_url';
+type InputType = 'token_address' | 'x_handle' | 'x_url' | 'website' | 'github';
 
 const INPUT_ICONS: Record<InputType, React.ReactNode> = {
+  token_address: <Coins size={14} />,
   x_handle: <AtSign size={14} />,
   x_url: <LinkIcon size={14} />,
+  website: <LinkIcon size={14} />,
+  github: <Github size={14} />,
+};
+
+const INPUT_LABELS: Record<InputType, string> = {
+  token_address: 'token',
+  x_handle: 'handle',
+  x_url: 'x url',
+  website: 'website',
+  github: 'github',
 };
 
 const RECENT_SEARCHES_KEY = 'clarp-recent-searches';
 const MAX_RECENT_SEARCHES = 5;
 
 const PLACEHOLDER_OPTIONS = [
+  'Paste token address...',
   'Enter @handle...',
-  'Paste x.com/username...',
+  'Paste website URL...',
 ];
 
 export default function SearchInput({ compact, initialValue = '', onSearch }: SearchInputProps) {
@@ -133,34 +145,54 @@ export default function SearchInput({ compact, initialValue = '', onSearch }: Se
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Detect input type (only X handles or URLs)
+  // Detect input type - prioritize token addresses
   const getDetectedType = (q: string): InputType | null => {
     if (!q) return null;
-    if (q.startsWith('@')) return 'x_handle';
-    if (q.includes('x.com/') || q.includes('twitter.com/')) return 'x_url';
+    const trimmed = q.trim();
+
+    // Solana address: base58, 32-44 chars (typically 43-44)
+    if (/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(trimmed)) return 'token_address';
+
+    // EVM address: 0x + 40 hex chars
+    if (/^0x[a-fA-F0-9]{40}$/.test(trimmed)) return 'token_address';
+
+    // GitHub URL
+    if (trimmed.includes('github.com/')) return 'github';
+
+    // X/Twitter URL
+    if (trimmed.includes('x.com/') || trimmed.includes('twitter.com/')) return 'x_url';
+
+    // Website URL (has protocol or looks like domain)
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) return 'website';
+    if (/^[a-zA-Z0-9][-a-zA-Z0-9]*\.[a-zA-Z]{2,}/.test(trimmed)) return 'website';
+
+    // X handle with @
+    if (trimmed.startsWith('@')) return 'x_handle';
+
     // Looks like a handle without @ (alphanumeric + underscore, 1-15 chars)
-    if (/^[a-zA-Z0-9_]{1,15}$/.test(q)) return 'x_handle';
+    if (/^[a-zA-Z0-9_]{1,15}$/.test(trimmed)) return 'x_handle';
+
     return null;
   };
 
   const detectedType = getDetectedType(query);
 
   return (
-    <div className="relative">
-      <form onSubmit={handleSubmit}>
+    <div className={`relative ${compact ? 'h-10' : ''}`}>
+      <form onSubmit={handleSubmit} className={compact ? 'h-full' : ''}>
         <div
-          className={`flex items-center gap-2 bg-slate-dark/50 border transition-colors ${
+          className={`flex items-center gap-2 bg-slate-dark/50 border-2 transition-colors ${
             isFocused
               ? 'border-danger-orange'
               : 'border-ivory-light/20 hover:border-ivory-light/30'
-          } ${compact ? 'px-3 py-2' : 'px-4 py-3'}`}
+          } ${compact ? 'h-full px-3' : 'px-4 py-3'}`}
         >
           <Search size={compact ? 16 : 18} className="text-ivory-light/40 shrink-0" />
 
           {detectedType && (
             <span className="flex items-center gap-1 px-2 py-0.5 bg-danger-orange/20 text-danger-orange text-xs font-mono shrink-0">
               {INPUT_ICONS[detectedType]}
-              {detectedType === 'x_url' ? 'url' : 'handle'}
+              {INPUT_LABELS[detectedType]}
             </span>
           )}
 
@@ -241,8 +273,10 @@ export default function SearchInput({ compact, initialValue = '', onSearch }: Se
           <div className="p-2 border-t border-ivory-light/10">
             <div className="text-xs font-mono text-ivory-light/40 px-2 py-1">Accepted formats</div>
             <div className="grid grid-cols-2 gap-1 text-xs font-mono text-ivory-light/50 px-2">
+              <span className="flex items-center gap-1">{INPUT_ICONS.token_address} Token address</span>
               <span className="flex items-center gap-1">{INPUT_ICONS.x_handle} @handle</span>
-              <span className="flex items-center gap-1">{INPUT_ICONS.x_url} x.com/username</span>
+              <span className="flex items-center gap-1">{INPUT_ICONS.website} Website URL</span>
+              <span className="flex items-center gap-1">{INPUT_ICONS.github} GitHub repo</span>
             </div>
           </div>
         </div>

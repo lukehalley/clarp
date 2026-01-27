@@ -138,20 +138,22 @@ function ScanPageInner() {
   const [jobId, setJobId] = useState<string | null>(null);
   const [resolvedHandle, setResolvedHandle] = useState<string | null>(null);
 
-  // Detect query type for step labels
-  const isPlainText = query && !query.startsWith('@') && !query.startsWith('$') && !query.includes('x.com') && !query.includes('twitter.com');
+  // Detect if input is a token address
+  const isTokenAddress = query && /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(query.trim());
+  const isEVMAddress = query && /^0x[a-fA-F0-9]{40}$/.test(query.trim());
+  const isAddress = isTokenAddress || isEVMAddress;
 
-  // Initialize steps based on query type
+  // Initialize steps based on query type - OSINT first, then AI
   const initSteps = (): ScanStep[] => [
     {
-      id: 'identify',
-      label: isPlainText ? 'identifying entity' : 'looking up profile',
+      id: 'resolve',
+      label: isAddress ? 'resolving token' : 'identifying entity',
       status: 'pending'
     },
-    { id: 'classify', label: 'classifying account type', status: 'pending' },
-    { id: 'analyze', label: 'analyzing reputation', status: 'pending' },
-    { id: 'score', label: 'calculating trust score', status: 'pending' },
-    { id: 'enrich', label: 'enriching with market data', status: 'pending' },
+    { id: 'osint', label: 'gathering osint data', status: 'pending' },
+    { id: 'social', label: 'discovering social links', status: 'pending' },
+    { id: 'analyze', label: 'ai analysis', status: 'pending' },
+    { id: 'report', label: 'building trust report', status: 'pending' },
   ];
 
   // Update a specific step
@@ -161,46 +163,53 @@ function ScanPageInner() {
     );
   };
 
-  // Map API status to our steps
+  // Map API status to our steps - reflects OSINT → AI flow
   const mapStatusToStep = (status: string, _progress: number, message?: string) => {
-    // Use API status field for accurate step mapping
     switch (status) {
       case 'queued':
-        updateStep('identify', { status: 'active', detail: 'waiting in queue...' });
+        updateStep('resolve', { status: 'active', detail: 'waiting in queue...' });
+        break;
+      case 'resolving':
+        updateStep('resolve', { status: 'active', detail: message || 'detecting input type...' });
         break;
       case 'fetching':
-        updateStep('identify', { status: 'active', detail: message || 'fetching profile and posts...' });
+        // OSINT phase - gathering free data
+        updateStep('resolve', { status: 'complete', detail: 'entity resolved' });
+        updateStep('osint', { status: 'active', detail: message || 'querying RugCheck, DexScreener...' });
         break;
       case 'extracting':
-        updateStep('identify', { status: 'complete', detail: 'profile loaded' });
-        updateStep('classify', { status: 'active', detail: message || 'extracting entities...' });
+        updateStep('resolve', { status: 'complete', detail: 'entity resolved' });
+        updateStep('osint', { status: 'complete', detail: 'security + market data collected' });
+        updateStep('social', { status: 'active', detail: message || 'crawling website, finding socials...' });
         break;
       case 'analyzing':
-        updateStep('identify', { status: 'complete', detail: 'profile loaded' });
-        updateStep('classify', { status: 'complete', detail: 'crypto-related' });
-        updateStep('analyze', { status: 'active', detail: message || 'analyzing behavior patterns...' });
+        updateStep('resolve', { status: 'complete', detail: 'entity resolved' });
+        updateStep('osint', { status: 'complete', detail: 'security + market data collected' });
+        updateStep('social', { status: 'complete', detail: 'social links discovered' });
+        updateStep('analyze', { status: 'active', detail: message || 'AI analyzing X activity...' });
         break;
       case 'scoring':
-        updateStep('identify', { status: 'complete', detail: 'profile loaded' });
-        updateStep('classify', { status: 'complete', detail: 'crypto-related' });
+        updateStep('resolve', { status: 'complete', detail: 'entity resolved' });
+        updateStep('osint', { status: 'complete', detail: 'security + market data collected' });
+        updateStep('social', { status: 'complete', detail: 'social links discovered' });
         updateStep('analyze', { status: 'complete', detail: 'analysis complete' });
-        updateStep('score', { status: 'active', detail: message || 'building trust report...' });
+        updateStep('report', { status: 'active', detail: message || 'calculating trust score...' });
         break;
       case 'enriching':
-        updateStep('identify', { status: 'complete', detail: 'profile loaded' });
-        updateStep('classify', { status: 'complete', detail: 'crypto-related' });
+        updateStep('resolve', { status: 'complete', detail: 'entity resolved' });
+        updateStep('osint', { status: 'complete', detail: 'security + market data collected' });
+        updateStep('social', { status: 'complete', detail: 'social links discovered' });
         updateStep('analyze', { status: 'complete', detail: 'analysis complete' });
-        updateStep('score', { status: 'complete', detail: 'score calculated' });
-        updateStep('enrich', { status: 'active', detail: message || 'fetching token data...' });
+        updateStep('report', { status: 'active', detail: message || 'enriching with additional data...' });
         break;
       case 'complete':
       case 'cached':
         // All steps complete
-        updateStep('identify', { status: 'complete', detail: 'profile loaded' });
-        updateStep('classify', { status: 'complete', detail: 'crypto-related' });
+        updateStep('resolve', { status: 'complete', detail: 'entity resolved' });
+        updateStep('osint', { status: 'complete', detail: 'security + market data collected' });
+        updateStep('social', { status: 'complete', detail: 'social links discovered' });
         updateStep('analyze', { status: 'complete', detail: 'analysis complete' });
-        updateStep('score', { status: 'complete', detail: 'score calculated' });
-        updateStep('enrich', { status: 'complete', detail: 'data enriched' });
+        updateStep('report', { status: 'complete', detail: 'report generated' });
         break;
     }
   };
@@ -213,13 +222,13 @@ function ScanPageInner() {
     setSteps(initSteps());
     setError(null);
 
-    // Start first step - use a timeout to ensure state is set before update
+    // Start first step
     setTimeout(() => {
-      updateStep('identify', { status: 'active', detail: `looking up "${query}"...` });
+      updateStep('resolve', { status: 'active', detail: `resolving "${query.slice(0, 20)}${query.length > 20 ? '...' : ''}"` });
     }, 10);
 
     try {
-      // Pass raw query to API - it will detect type and resolve if needed
+      // Pass raw query to API - it accepts any input type
       const res = await fetch('/api/xintel/scan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -232,27 +241,48 @@ function ScanPageInner() {
         throw new Error(data.error || 'Failed to start scan');
       }
 
-      if (data.cached) {
+      // Update resolve step with detected type
+      updateStep('resolve', { status: 'complete', detail: `detected: ${data.inputType || 'unknown'}` });
+
+      // If we got immediate OSINT data, show progress
+      if (data.osintData) {
+        updateStep('osint', { status: 'complete', detail: data.osintData.securityIntel ? 'RugCheck + market data' : 'market data collected' });
+        if (data.osintData.xHandle) {
+          updateStep('social', { status: 'complete', detail: `found @${data.osintData.xHandle}` });
+        }
+      }
+
+      if (data.cached || data.status === 'complete') {
         // Fast path - already have data
         setSteps((prev) =>
-          prev.map((s) => ({ ...s, status: 'complete', detail: 'cached' }))
+          prev.map((s) => ({ ...s, status: 'complete', detail: s.detail || 'cached' }))
         );
         setPhase('complete');
-        // Redirect to project page
-        const handle = data.handle || query.replace('@', '').toLowerCase();
-        setTimeout(() => router.push(`/terminal/project/${handle}`), 1200);
+        // Redirect to project page using canonicalId or X handle
+        const projectId = data.osintData?.xHandle || data.canonicalId || query.replace('@', '').toLowerCase();
+        setTimeout(() => router.push(`/terminal/project/${projectId}`), 1200);
         return;
       }
 
       setJobId(data.jobId);
-      if (data.handle) {
-        setResolvedHandle(data.handle);
+      if (data.canonicalId) {
+        setResolvedHandle(data.osintData?.xHandle || data.canonicalId);
+      }
+
+      // If OSINT-only (no X handle to analyze), complete early
+      if (data.status === 'complete' && !data.osintData?.xHandle) {
+        setSteps((prev) =>
+          prev.map((s) => ({ ...s, status: 'complete', detail: s.detail || 'complete' }))
+        );
+        setPhase('complete');
+        const projectId = data.canonicalId || query;
+        setTimeout(() => router.push(`/terminal/project/${projectId}`), 1200);
       }
     } catch (err) {
       console.error('[ScanPage] Error:', err);
       setError(err instanceof Error ? err.message : 'Failed to start scan');
       setPhase('failed');
-      updateStep('identify', { status: 'failed', detail: 'search failed' });
+      updateStep('resolve', { status: 'failed', detail: 'resolution failed' });
     }
   };
 

@@ -8,7 +8,11 @@ import {
   ExternalLink,
   Users,
   Shield,
+  ShieldAlert,
+  ShieldCheck,
+  ShieldX,
   AlertTriangle,
+  AlertOctagon,
   Loader2,
   RefreshCw,
   Twitter,
@@ -33,6 +37,7 @@ import {
   Target,
   CheckCircle2,
   Circle,
+  XCircle,
   Cpu,
   Wifi,
   WifiOff,
@@ -45,6 +50,17 @@ import {
   GitCommit,
   Eye,
   CircleDot,
+  Globe,
+  MessageCircle,
+  Send,
+  Package,
+  Snowflake,
+  UserCheck,
+  UserX,
+  ThumbsUp,
+  ThumbsDown,
+  FileText,
+  Activity,
 } from 'lucide-react';
 import ContractAvatar from '@/components/ContractAvatar';
 import type {
@@ -56,6 +72,8 @@ import type {
   RoadmapMilestone,
   AuditInfo,
   TechStack,
+  SecurityIntel,
+  ShippingMilestone,
 } from '@/types/project';
 
 // ============================================================================
@@ -308,7 +326,18 @@ function TrustScoreRing({ score }: { score: number }) {
 
 function GitHubSection({ project }: { project: Project }) {
   const intel = project.githubIntel;
-  if (!intel) return null;
+
+  if (!intel) {
+    return (
+      <Section title="Development Activity" icon={GithubIcon} accentColor="#6b7280">
+        <div className="p-4 border border-dashed border-ivory-light/10 text-center">
+          <GithubIcon size={24} className="mx-auto mb-2 text-ivory-light/20" />
+          <p className="text-xs text-ivory-light/30 font-mono">No GitHub data available</p>
+          <p className="text-[10px] text-ivory-light/20 mt-1">{project.githubUrl ? 'GitHub not analyzed yet' : 'No GitHub linked'}</p>
+        </div>
+      </Section>
+    );
+  }
 
   return (
     <Section
@@ -376,7 +405,18 @@ function GitHubSection({ project }: { project: Project }) {
 
 function TeamSection({ project }: { project: Project }) {
   const team = project.team || [];
-  if (team.length === 0) return null;
+
+  if (team.length === 0) {
+    return (
+      <Section title="Team" icon={Users} accentColor="#6b7280">
+        <div className="p-4 border border-dashed border-ivory-light/10 text-center">
+          <UserX size={24} className="mx-auto mb-2 text-ivory-light/20" />
+          <p className="text-xs text-ivory-light/30 font-mono">No team members identified</p>
+          <p className="text-[10px] text-ivory-light/20 mt-1">Team not discovered or anonymous</p>
+        </div>
+      </Section>
+    );
+  }
 
   return (
     <Section title="Team" icon={Users} accentColor="#3b82f6">
@@ -429,7 +469,18 @@ function TeamSection({ project }: { project: Project }) {
 
 function MarketSection({ project }: { project: Project }) {
   const market = project.marketData;
-  if (!market) return null;
+
+  if (!market) {
+    return (
+      <Section title="Market Data" icon={BarChart3} accentColor="#6b7280">
+        <div className="p-4 border border-dashed border-ivory-light/10 text-center">
+          <BarChart3 size={24} className="mx-auto mb-2 text-ivory-light/20" />
+          <p className="text-xs text-ivory-light/30 font-mono">No market data available</p>
+          <p className="text-[10px] text-ivory-light/20 mt-1">{project.tokenAddress ? 'Token not found on DEX' : 'No token address'}</p>
+        </div>
+      </Section>
+    );
+  }
 
   const priceUp = (market.priceChange24h ?? 0) >= 0;
 
@@ -475,7 +526,17 @@ function MarketSection({ project }: { project: Project }) {
 // ============================================================================
 
 function LegalSection({ entity }: { entity?: LegalEntity | null }) {
-  if (!entity || (!entity.companyName && !entity.isRegistered)) return null;
+  if (!entity || (!entity.companyName && !entity.isRegistered)) {
+    return (
+      <Section title="Legal Entity" icon={Building2} accentColor="#6b7280">
+        <div className="p-4 border border-dashed border-ivory-light/10 text-center">
+          <Building2 size={24} className="mx-auto mb-2 text-ivory-light/20" />
+          <p className="text-xs text-ivory-light/30 font-mono">No legal entity found</p>
+          <p className="text-[10px] text-ivory-light/20 mt-1">Company info not discovered</p>
+        </div>
+      </Section>
+    );
+  }
 
   return (
     <Section title="Legal Entity" icon={Building2} accentColor={entity.isRegistered ? '#22c55e' : '#6b7280'}>
@@ -507,7 +568,17 @@ function LegalSection({ entity }: { entity?: LegalEntity | null }) {
 // ============================================================================
 
 function AffiliationsSection({ affiliations }: { affiliations?: Affiliation[] | null }) {
-  if (!affiliations || affiliations.length === 0) return null;
+  if (!affiliations || affiliations.length === 0) {
+    return (
+      <Section title="Affiliations" icon={Award} accentColor="#6b7280">
+        <div className="p-4 border border-dashed border-ivory-light/10 text-center">
+          <Award size={24} className="mx-auto mb-2 text-ivory-light/20" />
+          <p className="text-xs text-ivory-light/30 font-mono">No affiliations found</p>
+          <p className="text-[10px] text-ivory-light/20 mt-1">No councils, VCs, or accelerators</p>
+        </div>
+      </Section>
+    );
+  }
 
   const typeColors: Record<string, string> = {
     council: 'text-blue-400',
@@ -539,7 +610,17 @@ function AffiliationsSection({ affiliations }: { affiliations?: Affiliation[] | 
 // ============================================================================
 
 function TokenomicsSection({ tokenomics }: { tokenomics?: Tokenomics | null }) {
-  if (!tokenomics) return null;
+  if (!tokenomics) {
+    return (
+      <Section title="Tokenomics" icon={Coins} accentColor="#6b7280">
+        <div className="p-4 border border-dashed border-ivory-light/10 text-center">
+          <Coins size={24} className="mx-auto mb-2 text-ivory-light/20" />
+          <p className="text-xs text-ivory-light/30 font-mono">No tokenomics data</p>
+          <p className="text-[10px] text-ivory-light/20 mt-1">Supply info not available</p>
+        </div>
+      </Section>
+    );
+  }
 
   return (
     <Section title="Tokenomics" icon={Coins} accentColor="#f59e0b">
@@ -583,7 +664,17 @@ function TokenomicsSection({ tokenomics }: { tokenomics?: Tokenomics | null }) {
 // ============================================================================
 
 function LiquiditySection({ liquidity }: { liquidity?: LiquidityInfo | null }) {
-  if (!liquidity) return null;
+  if (!liquidity) {
+    return (
+      <Section title="Liquidity" icon={DollarSign} accentColor="#6b7280">
+        <div className="p-4 border border-dashed border-ivory-light/10 text-center">
+          <DollarSign size={24} className="mx-auto mb-2 text-ivory-light/20" />
+          <p className="text-xs text-ivory-light/30 font-mono">No liquidity data</p>
+          <p className="text-[10px] text-ivory-light/20 mt-1">DEX pool not found</p>
+        </div>
+      </Section>
+    );
+  }
 
   return (
     <Section title="Liquidity" icon={DollarSign} accentColor={liquidity.liquidityLocked ? '#22c55e' : '#f97316'}>
@@ -630,7 +721,17 @@ function LiquiditySection({ liquidity }: { liquidity?: LiquidityInfo | null }) {
 // ============================================================================
 
 function RoadmapSection({ roadmap }: { roadmap?: RoadmapMilestone[] | null }) {
-  if (!roadmap || roadmap.length === 0) return null;
+  if (!roadmap || roadmap.length === 0) {
+    return (
+      <Section title="Roadmap" icon={Target} accentColor="#6b7280">
+        <div className="p-4 border border-dashed border-ivory-light/10 text-center">
+          <Target size={24} className="mx-auto mb-2 text-ivory-light/20" />
+          <p className="text-xs text-ivory-light/30 font-mono">No roadmap found</p>
+          <p className="text-[10px] text-ivory-light/20 mt-1">Project milestones not available</p>
+        </div>
+      </Section>
+    );
+  }
 
   const statusIcons = {
     completed: <CheckCircle2 size={14} className="text-larp-green" />,
@@ -704,7 +805,17 @@ function AuditSection({ audit }: { audit?: AuditInfo | null }) {
 // ============================================================================
 
 function TechStackSection({ techStack }: { techStack?: TechStack | null }) {
-  if (!techStack) return null;
+  if (!techStack) {
+    return (
+      <Section title="Tech Stack" icon={Cpu} accentColor="#6b7280">
+        <div className="p-4 border border-dashed border-ivory-light/10 text-center">
+          <Cpu size={24} className="mx-auto mb-2 text-ivory-light/20" />
+          <p className="text-xs text-ivory-light/30 font-mono">No tech stack info</p>
+          <p className="text-[10px] text-ivory-light/20 mt-1">Technical details not available</p>
+        </div>
+      </Section>
+    );
+  }
 
   return (
     <Section title="Tech Stack" icon={Cpu} accentColor={techStack.zkTech ? '#a855f7' : '#6366f1'}>
@@ -749,7 +860,17 @@ function TechStackSection({ techStack }: { techStack?: TechStack | null }) {
 // ============================================================================
 
 function KeyFindingsSection({ findings }: { findings?: string[] | null }) {
-  if (!findings || findings.length === 0) return null;
+  if (!findings || findings.length === 0) {
+    return (
+      <Section title="Key Findings" icon={Eye} accentColor="#6b7280">
+        <div className="p-4 border border-dashed border-ivory-light/10 text-center">
+          <Eye size={24} className="mx-auto mb-2 text-ivory-light/20" />
+          <p className="text-xs text-ivory-light/30 font-mono">No key findings</p>
+          <p className="text-[10px] text-ivory-light/20 mt-1">AI analysis pending</p>
+        </div>
+      </Section>
+    );
+  }
 
   return (
     <Section title="Key Findings" icon={Eye} accentColor="#f97316">
@@ -761,6 +882,461 @@ function KeyFindingsSection({ findings }: { findings?: string[] | null }) {
           </li>
         ))}
       </ul>
+    </Section>
+  );
+}
+
+// ============================================================================
+// SECURITY INTEL SECTION (RugCheck-style)
+// ============================================================================
+
+function SecurityIntelSection({ security }: { security?: SecurityIntel | null }) {
+  const hasData = !!security;
+  const hasRisks = security?.risks && security.risks.length > 0;
+  const allSafe = hasData && !security.mintAuthorityEnabled && !security.freezeAuthorityEnabled && security.lpLocked && !hasRisks;
+
+  if (!hasData) {
+    return (
+      <Section title="Security Intel" icon={Shield} accentColor="#6b7280">
+        <div className="p-4 border border-dashed border-ivory-light/10 text-center">
+          <ShieldX size={24} className="mx-auto mb-2 text-ivory-light/20" />
+          <p className="text-xs text-ivory-light/30 font-mono">No security data available</p>
+          <p className="text-[10px] text-ivory-light/20 mt-1">Rescan to gather RugCheck data</p>
+        </div>
+      </Section>
+    );
+  }
+
+  return (
+    <Section
+      title="Security Intel"
+      icon={allSafe ? ShieldCheck : ShieldAlert}
+      accentColor={allSafe ? '#22c55e' : '#f97316'}
+    >
+      {/* Security Status Grid */}
+      <div className="grid grid-cols-2 gap-2 mb-4">
+        <div className={`flex items-center gap-2 p-2 border ${!security.mintAuthorityEnabled ? 'border-larp-green/20 bg-larp-green/5' : 'border-larp-red/20 bg-larp-red/5'}`}>
+          {!security.mintAuthorityEnabled ? (
+            <Lock size={14} className="text-larp-green" />
+          ) : (
+            <Unlock size={14} className="text-larp-red" />
+          )}
+          <div>
+            <div className="text-[10px] text-ivory-light/40 uppercase">Mint Authority</div>
+            <div className={`text-xs font-mono ${!security.mintAuthorityEnabled ? 'text-larp-green' : 'text-larp-red'}`}>
+              {security.mintAuthorityEnabled ? 'ENABLED' : 'DISABLED'}
+            </div>
+          </div>
+        </div>
+
+        <div className={`flex items-center gap-2 p-2 border ${!security.freezeAuthorityEnabled ? 'border-larp-green/20 bg-larp-green/5' : 'border-larp-red/20 bg-larp-red/5'}`}>
+          {!security.freezeAuthorityEnabled ? (
+            <ShieldCheck size={14} className="text-larp-green" />
+          ) : (
+            <Snowflake size={14} className="text-larp-red" />
+          )}
+          <div>
+            <div className="text-[10px] text-ivory-light/40 uppercase">Freeze Authority</div>
+            <div className={`text-xs font-mono ${!security.freezeAuthorityEnabled ? 'text-larp-green' : 'text-larp-red'}`}>
+              {security.freezeAuthorityEnabled ? 'ENABLED' : 'DISABLED'}
+            </div>
+          </div>
+        </div>
+
+        <div className={`flex items-center gap-2 p-2 border ${security.lpLocked ? 'border-larp-green/20 bg-larp-green/5' : 'border-larp-yellow/20 bg-larp-yellow/5'}`}>
+          {security.lpLocked ? (
+            <Lock size={14} className="text-larp-green" />
+          ) : (
+            <Unlock size={14} className="text-larp-yellow" />
+          )}
+          <div>
+            <div className="text-[10px] text-ivory-light/40 uppercase">LP Status</div>
+            <div className={`text-xs font-mono ${security.lpLocked ? 'text-larp-green' : 'text-larp-yellow'}`}>
+              {security.lpLocked ? `LOCKED${security.lpLockedPercent ? ` (${security.lpLockedPercent}%)` : ''}` : 'UNLOCKED'}
+            </div>
+          </div>
+        </div>
+
+        {security.holdersCount && (
+          <div className="flex items-center gap-2 p-2 border border-ivory-light/10 bg-ivory-light/[0.02]">
+            <Users size={14} className="text-ivory-light/50" />
+            <div>
+              <div className="text-[10px] text-ivory-light/40 uppercase">Holders</div>
+              <div className="text-xs font-mono text-ivory-light">
+                {formatNumber(security.holdersCount)}
+                {security.top10HoldersPercent && (
+                  <span className="text-ivory-light/40 ml-1">(top 10: {security.top10HoldersPercent}%)</span>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Domain Intel */}
+      {(security.domainAgeDays || security.domainRegistrar) && (
+        <div className="border-t border-ivory-light/10 pt-3 mt-3">
+          <div className="text-xs text-ivory-light/40 mb-2 flex items-center gap-1">
+            <Globe size={10} /> Domain Intel
+          </div>
+          <div className="space-y-0">
+            {security.domainAgeDays !== undefined && (
+              <DataItem
+                label="Domain Age"
+                value={
+                  <span style={{ color: security.domainAgeDays > 365 ? '#22c55e' : security.domainAgeDays < 30 ? '#dc2626' : undefined }}>
+                    {security.domainAgeDays} days
+                  </span>
+                }
+              />
+            )}
+            {security.domainRegistrar && (
+              <DataItem label="Registrar" value={security.domainRegistrar} />
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Risk Flags */}
+      {hasRisks && (
+        <div className="mt-3 p-3 bg-larp-red/5 border border-larp-red/20">
+          <div className="flex items-center gap-2 text-xs text-larp-red font-medium mb-2">
+            <AlertOctagon size={12} />
+            RISK FLAGS DETECTED
+          </div>
+          <ul className="space-y-1">
+            {security.risks.map((risk, idx) => (
+              <li key={idx} className="flex items-start gap-2 text-xs text-ivory-light/60">
+                <XCircle size={10} className="text-larp-red mt-0.5 shrink-0" />
+                {risk}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </Section>
+  );
+}
+
+// ============================================================================
+// WEBSITE INTEL SECTION
+// ============================================================================
+
+function WebsiteIntelSection({ intel, websiteUrl }: { intel?: Project['websiteIntel']; websiteUrl?: string }) {
+  if (!intel) {
+    return (
+      <Section title="Website Intel" icon={Globe} accentColor="#6b7280">
+        <div className="p-4 border border-dashed border-ivory-light/10 text-center">
+          <Globe size={24} className="mx-auto mb-2 text-ivory-light/20" />
+          <p className="text-xs text-ivory-light/30 font-mono">No website data available</p>
+          <p className="text-[10px] text-ivory-light/20 mt-1">Website not analyzed yet</p>
+        </div>
+      </Section>
+    );
+  }
+
+  const qualityColors: Record<string, string> = {
+    professional: '#22c55e',
+    basic: '#6b7280',
+    suspicious: '#dc2626',
+    unknown: '#6b7280',
+  };
+
+  const checkItems = [
+    { key: 'isLive', label: 'Website Live', value: intel.isLive },
+    { key: 'hasDocumentation', label: 'Documentation', value: intel.hasDocumentation },
+    { key: 'hasRoadmap', label: 'Roadmap Page', value: intel.hasRoadmap },
+    { key: 'hasTokenomics', label: 'Tokenomics Page', value: intel.hasTokenomics },
+    { key: 'hasTeamPage', label: 'Team Page', value: intel.hasTeamPage },
+    { key: 'hasAuditInfo', label: 'Audit Info', value: intel.hasAuditInfo },
+  ];
+
+  return (
+    <Section
+      title="Website Intel"
+      icon={Globe}
+      accentColor={qualityColors[intel.websiteQuality] || '#6b7280'}
+      action={
+        websiteUrl && (
+          <a
+            href={websiteUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs text-ivory-light/30 hover:text-danger-orange transition-colors flex items-center gap-1"
+          >
+            Visit Site <ExternalLink size={10} />
+          </a>
+        )
+      }
+    >
+      {/* Quality Score */}
+      <div className="flex items-center justify-between mb-4 p-2 bg-ivory-light/[0.02] border border-ivory-light/10">
+        <div>
+          <div className="text-[10px] text-ivory-light/40 uppercase">Website Quality</div>
+          <div className="text-sm font-mono font-medium capitalize" style={{ color: qualityColors[intel.websiteQuality] }}>
+            {intel.websiteQuality}
+          </div>
+        </div>
+        <div className="text-right">
+          <div className="text-[10px] text-ivory-light/40 uppercase">Score</div>
+          <div className="text-sm font-mono font-bold" style={{ color: qualityColors[intel.websiteQuality] }}>
+            {intel.qualityScore}/100
+          </div>
+        </div>
+      </div>
+
+      {/* Checklist Grid */}
+      <div className="grid grid-cols-2 gap-1 mb-3">
+        {checkItems.map((item) => (
+          <div key={item.key} className="flex items-center gap-2 py-1">
+            {item.value ? (
+              <CheckCircle2 size={12} className="text-larp-green" />
+            ) : (
+              <XCircle size={12} className="text-ivory-light/20" />
+            )}
+            <span className={`text-xs ${item.value ? 'text-ivory-light/70' : 'text-ivory-light/30'}`}>
+              {item.label}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      {/* Trust Indicators */}
+      {intel.trustIndicators && intel.trustIndicators.length > 0 && (
+        <div className="mb-3">
+          <div className="text-xs text-larp-green/70 mb-1 flex items-center gap-1">
+            <ThumbsUp size={10} /> Trust Indicators
+          </div>
+          <div className="flex flex-wrap gap-1">
+            {intel.trustIndicators.map((indicator, idx) => (
+              <Badge key={idx} variant="success">{indicator}</Badge>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Red Flags */}
+      {intel.redFlags && intel.redFlags.length > 0 && (
+        <div className="p-2 bg-larp-red/5 border border-larp-red/20">
+          <div className="text-xs text-larp-red/70 mb-1 flex items-center gap-1">
+            <AlertTriangle size={10} /> Red Flags
+          </div>
+          <div className="flex flex-wrap gap-1">
+            {intel.redFlags.map((flag, idx) => (
+              <Badge key={idx} variant="danger">{flag}</Badge>
+            ))}
+          </div>
+        </div>
+      )}
+    </Section>
+  );
+}
+
+// ============================================================================
+// TRUST SIGNALS SECTION (Positive + Negative Indicators)
+// ============================================================================
+
+function TrustSignalsSection({ project }: { project: Project }) {
+  const pos = project.positiveIndicators;
+  const neg = project.negativeIndicators;
+
+  if (!pos && !neg) {
+    return (
+      <Section title="Trust Signals" icon={Shield} accentColor="#6b7280">
+        <div className="p-4 border border-dashed border-ivory-light/10 text-center">
+          <Shield size={24} className="mx-auto mb-2 text-ivory-light/20" />
+          <p className="text-xs text-ivory-light/30 font-mono">No trust signals analyzed</p>
+          <p className="text-[10px] text-ivory-light/20 mt-1">AI analysis not yet complete</p>
+        </div>
+      </Section>
+    );
+  }
+
+  // Build positive signals list
+  const positiveSignals: Array<{ label: string; detail?: string | null }> = [];
+  if (pos) {
+    if (pos.isDoxxed) positiveSignals.push({ label: 'Team Doxxed', detail: pos.doxxedDetails });
+    if (pos.hasActiveGithub) positiveSignals.push({ label: 'Active GitHub', detail: pos.githubActivity });
+    if (pos.hasRealProduct) positiveSignals.push({ label: 'Real Product', detail: pos.productDetails });
+    if (pos.hasConsistentHistory) positiveSignals.push({ label: 'Consistent History' });
+    if (pos.hasOrganicEngagement) positiveSignals.push({ label: 'Organic Engagement' });
+    if (pos.hasCredibleBackers) positiveSignals.push({ label: 'Credible Backers', detail: pos.backersDetails });
+    if (pos.accountAgeDays > 365) positiveSignals.push({ label: `Account Age: ${Math.floor(pos.accountAgeDays / 365)}+ years` });
+  }
+
+  // Build negative signals list
+  const negativeSignals: Array<{ label: string; detail?: string | null; severity: 'high' | 'medium' | 'low' }> = [];
+  if (neg) {
+    if (neg.hasScamAllegations) negativeSignals.push({ label: 'Scam Allegations', detail: neg.scamDetails, severity: 'high' });
+    if (neg.hasRugHistory) negativeSignals.push({ label: 'Rug History', detail: neg.rugDetails, severity: 'high' });
+    if (neg.isAnonymousTeam) negativeSignals.push({ label: 'Anonymous Team', severity: 'medium' });
+    if (neg.hasSuspiciousFollowers) negativeSignals.push({ label: 'Suspicious Followers', detail: neg.suspiciousDetails, severity: 'medium' });
+    if (neg.hasPreviousRebrand) negativeSignals.push({ label: 'Previous Rebrand', detail: neg.rebrandDetails, severity: 'low' });
+    if (neg.hasHypeLanguage) negativeSignals.push({ label: 'Hype Language', severity: 'low' });
+    if (neg.hasAggressivePromotion) negativeSignals.push({ label: 'Aggressive Promotion', detail: neg.promotionDetails, severity: 'low' });
+    if (neg.noPublicAudit) negativeSignals.push({ label: 'No Public Audit', severity: 'medium' });
+    if (neg.lowLiquidity) negativeSignals.push({ label: 'Low Liquidity', severity: 'medium' });
+    if (neg.unverifiedLegalEntity) negativeSignals.push({ label: 'Unverified Legal Entity', severity: 'low' });
+  }
+
+  if (positiveSignals.length === 0 && negativeSignals.length === 0) return null;
+
+  return (
+    <Section
+      title="Trust Signals"
+      icon={Shield}
+      accentColor={negativeSignals.some(s => s.severity === 'high') ? '#dc2626' : positiveSignals.length > negativeSignals.length ? '#22c55e' : '#f97316'}
+    >
+      <div className="space-y-4">
+        {/* Positive Signals */}
+        {positiveSignals.length > 0 && (
+          <div>
+            <div className="flex items-center gap-1 text-xs text-larp-green mb-2">
+              <ThumbsUp size={12} />
+              <span className="font-medium">Positive Signals ({positiveSignals.length})</span>
+            </div>
+            <div className="space-y-1">
+              {positiveSignals.map((signal, idx) => (
+                <div key={idx} className="flex items-start gap-2 p-2 bg-larp-green/5 border border-larp-green/10">
+                  <CheckCircle2 size={12} className="text-larp-green mt-0.5 shrink-0" />
+                  <div>
+                    <span className="text-xs text-ivory-light">{signal.label}</span>
+                    {signal.detail && (
+                      <p className="text-[10px] text-ivory-light/50 mt-0.5">{signal.detail}</p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Negative Signals */}
+        {negativeSignals.length > 0 && (
+          <div>
+            <div className="flex items-center gap-1 text-xs text-larp-red mb-2">
+              <ThumbsDown size={12} />
+              <span className="font-medium">Risk Signals ({negativeSignals.length})</span>
+            </div>
+            <div className="space-y-1">
+              {negativeSignals.map((signal, idx) => (
+                <div
+                  key={idx}
+                  className={`flex items-start gap-2 p-2 border ${
+                    signal.severity === 'high'
+                      ? 'bg-larp-red/10 border-larp-red/30'
+                      : signal.severity === 'medium'
+                      ? 'bg-larp-yellow/5 border-larp-yellow/20'
+                      : 'bg-ivory-light/[0.02] border-ivory-light/10'
+                  }`}
+                >
+                  <XCircle
+                    size={12}
+                    className={`mt-0.5 shrink-0 ${
+                      signal.severity === 'high' ? 'text-larp-red' : signal.severity === 'medium' ? 'text-larp-yellow' : 'text-ivory-light/40'
+                    }`}
+                  />
+                  <div>
+                    <span className={`text-xs ${signal.severity === 'high' ? 'text-larp-red' : 'text-ivory-light'}`}>
+                      {signal.label}
+                    </span>
+                    {signal.detail && (
+                      <p className="text-[10px] text-ivory-light/50 mt-0.5">{signal.detail}</p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </Section>
+  );
+}
+
+// ============================================================================
+// CONTROVERSIES SECTION
+// ============================================================================
+
+function ControversiesSection({ controversies }: { controversies?: string[] | null }) {
+  // Only show placeholder if there are no controversies - this is actually good!
+  if (!controversies || controversies.length === 0) {
+    return (
+      <Section title="Controversies" icon={AlertOctagon} accentColor="#22c55e">
+        <div className="p-3 bg-larp-green/5 border border-larp-green/20 text-center">
+          <CheckCircle2 size={18} className="mx-auto mb-1 text-larp-green" />
+          <p className="text-xs text-larp-green font-mono">No controversies found</p>
+        </div>
+      </Section>
+    );
+  }
+
+  return (
+    <Section title="Controversies" icon={AlertOctagon} accentColor="#dc2626">
+      <div className="space-y-2">
+        {controversies.map((item, idx) => (
+          <div key={idx} className="flex items-start gap-2 p-2 bg-larp-red/5 border border-larp-red/10">
+            <AlertTriangle size={12} className="text-larp-red mt-0.5 shrink-0" />
+            <span className="text-xs text-ivory-light/70">{item}</span>
+          </div>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
+// ============================================================================
+// SHIPPING HISTORY SECTION (Timeline)
+// ============================================================================
+
+function ShippingHistorySection({ history }: { history?: ShippingMilestone[] | null }) {
+  if (!history || history.length === 0) {
+    return (
+      <Section title="Shipping History" icon={Package} accentColor="#6b7280">
+        <div className="p-4 border border-dashed border-ivory-light/10 text-center">
+          <Package size={24} className="mx-auto mb-2 text-ivory-light/20" />
+          <p className="text-xs text-ivory-light/30 font-mono">No shipping history</p>
+          <p className="text-[10px] text-ivory-light/20 mt-1">No releases or milestones tracked</p>
+        </div>
+      </Section>
+    );
+  }
+
+  return (
+    <Section title="Shipping History" icon={Package} accentColor="#06b6d4">
+      <div className="relative">
+        {/* Timeline line */}
+        <div className="absolute left-[5px] top-3 bottom-3 w-px bg-ivory-light/10" />
+
+        <div className="space-y-3">
+          {history.map((item, idx) => (
+            <div key={idx} className="flex items-start gap-3 relative">
+              {/* Timeline dot */}
+              <div className="w-[11px] h-[11px] rounded-full bg-cyan-500 border-2 border-slate-dark shrink-0 z-10" />
+
+              <div className="flex-1 pb-3">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-xs font-mono text-cyan-400">{item.date}</span>
+                  {item.evidenceUrl && (
+                    <a
+                      href={item.evidenceUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-ivory-light/30 hover:text-ivory-light/60 transition-colors"
+                    >
+                      <ExternalLink size={10} />
+                    </a>
+                  )}
+                </div>
+                <div className="text-sm text-ivory-light">{item.milestone}</div>
+                {item.details && (
+                  <p className="text-xs text-ivory-light/50 mt-1">{item.details}</p>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     </Section>
   );
 }
@@ -926,9 +1502,9 @@ export default function ProjectPage() {
                   )}
                 </div>
 
-                {/* Links */}
-                <div className="flex items-center gap-3 mb-3 text-sm">
-                  {project.xHandle && (
+                {/* Links - Show all, gray out unavailable */}
+                <div className="flex items-center gap-3 mb-3 text-sm flex-wrap">
+                  {project.xHandle ? (
                     <a
                       href={`https://x.com/${project.xHandle}`}
                       target="_blank"
@@ -938,19 +1514,31 @@ export default function ProjectPage() {
                       <Twitter size={14} />
                       @{project.xHandle}
                     </a>
+                  ) : (
+                    <span className="flex items-center gap-1 text-ivory-light/20 cursor-not-allowed">
+                      <Twitter size={14} />
+                      X/Twitter
+                    </span>
                   )}
-                  {project.websiteUrl && (
+
+                  {project.websiteUrl ? (
                     <a
                       href={project.websiteUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center gap-1 text-ivory-light/50 hover:text-ivory-light transition-colors"
                     >
-                      <Link2 size={14} />
+                      <Globe size={14} />
                       Website
                     </a>
+                  ) : (
+                    <span className="flex items-center gap-1 text-ivory-light/20 cursor-not-allowed">
+                      <Globe size={14} />
+                      Website
+                    </span>
                   )}
-                  {project.githubUrl && (
+
+                  {project.githubUrl ? (
                     <a
                       href={project.githubUrl}
                       target="_blank"
@@ -960,6 +1548,45 @@ export default function ProjectPage() {
                       <GithubIcon size={14} />
                       GitHub
                     </a>
+                  ) : (
+                    <span className="flex items-center gap-1 text-ivory-light/20 cursor-not-allowed">
+                      <GithubIcon size={14} />
+                      GitHub
+                    </span>
+                  )}
+
+                  {project.discordUrl ? (
+                    <a
+                      href={project.discordUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1 text-ivory-light/50 hover:text-ivory-light transition-colors"
+                    >
+                      <MessageCircle size={14} />
+                      Discord
+                    </a>
+                  ) : (
+                    <span className="flex items-center gap-1 text-ivory-light/20 cursor-not-allowed">
+                      <MessageCircle size={14} />
+                      Discord
+                    </span>
+                  )}
+
+                  {project.telegramUrl ? (
+                    <a
+                      href={project.telegramUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1 text-ivory-light/50 hover:text-ivory-light transition-colors"
+                    >
+                      <Send size={14} />
+                      Telegram
+                    </a>
+                  ) : (
+                    <span className="flex items-center gap-1 text-ivory-light/20 cursor-not-allowed">
+                      <Send size={14} />
+                      Telegram
+                    </span>
                   )}
                 </div>
 
@@ -990,22 +1617,27 @@ export default function ProjectPage() {
 
           {/* Two Column Layout */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Left Column */}
+            {/* Left Column - Core Data */}
             <div>
-              <GitHubSection project={project} />
-              <TeamSection project={project} />
+              <SecurityIntelSection security={project.securityIntel} />
               <MarketSection project={project} />
               <TokenomicsSection tokenomics={project.tokenomics} />
               <LiquiditySection liquidity={project.liquidity} />
+              <GitHubSection project={project} />
+              <TeamSection project={project} />
             </div>
 
-            {/* Right Column */}
+            {/* Right Column - Trust & Intel */}
             <div>
+              <TrustSignalsSection project={project} />
+              <WebsiteIntelSection intel={project.websiteIntel} websiteUrl={project.websiteUrl} />
+              <AuditSection audit={project.audit} />
               <LegalSection entity={project.legalEntity} />
               <AffiliationsSection affiliations={project.affiliations} />
-              <AuditSection audit={project.audit} />
               <TechStackSection techStack={project.techStack} />
               <RoadmapSection roadmap={project.roadmap} />
+              <ShippingHistorySection history={project.shippingHistory} />
+              <ControversiesSection controversies={project.controversies} />
               <KeyFindingsSection findings={project.keyFindings} />
             </div>
           </div>
