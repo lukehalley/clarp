@@ -260,13 +260,120 @@ export interface GrokAnnotation {
 // ============================================================================
 
 /**
- * Team member information
+ * Team member information (OSINT-enhanced)
  */
 export interface TeamMember {
   name: string;
+  realName?: string;              // Actual name if doxxed (e.g., "Hayden Porter")
   role?: string;
   xHandle?: string;
   isDoxxed?: boolean;
+  previousEmployers?: string[];   // e.g., ["MetaMask", "USAA", "Twitter"]
+  linkedIn?: string | null;
+}
+
+/**
+ * Legal entity information
+ */
+export interface LegalEntity {
+  companyName?: string | null;
+  jurisdiction?: string | null;   // e.g., "Texas, USA"
+  isRegistered: boolean;
+  registrationDetails?: string | null;
+}
+
+/**
+ * Industry affiliation
+ */
+export interface Affiliation {
+  name: string;                   // e.g., "Texas Blockchain Council"
+  type: 'council' | 'accelerator' | 'vc' | 'exchange' | 'regulatory' | 'other';
+  details?: string;
+}
+
+/**
+ * Token economics information
+ */
+export interface Tokenomics {
+  totalSupply?: number | string | null;
+  circulatingSupply?: number | string | null;
+  burnMechanism?: string | null;  // e.g., "0.1-2% per transaction"
+  burnRate?: string | null;
+  isDeflationary: boolean;
+  vestingSchedule?: string | null;
+}
+
+/**
+ * Liquidity information
+ */
+export interface LiquidityInfo {
+  primaryDex?: string | null;     // e.g., "Meteora", "Raydium", "Jupiter"
+  poolType?: string | null;       // e.g., "DAMM v2", "DLMM"
+  liquidityUsd?: number | null;
+  liquidityLocked: boolean;
+  lockDuration?: string | null;
+}
+
+/**
+ * Roadmap milestone
+ */
+export interface RoadmapMilestone {
+  milestone: string;
+  targetDate?: string;
+  status: 'completed' | 'in-progress' | 'planned';
+}
+
+/**
+ * Audit information
+ */
+export interface AuditInfo {
+  hasAudit: boolean;
+  auditor?: string | null;        // e.g., "CertiK", "Trail of Bits"
+  auditDate?: string | null;
+  auditUrl?: string | null;
+  auditStatus: 'none' | 'pending' | 'completed';
+}
+
+/**
+ * Tech stack information
+ */
+export interface TechStack {
+  blockchain: string;             // e.g., "solana", "ethereum", "multi-chain"
+  smartContractLanguage?: string; // e.g., "Rust", "Solidity", "Move"
+  zkTech?: string | null;         // e.g., "Groth16 zk-SNARKs", "PLONK"
+  offlineCapability: boolean;
+  hardwareProducts?: string[];    // e.g., ["NFC tags", "RISC-V hardware wallet"]
+  keyTechnologies?: string[];     // e.g., ["React Native", "gRPC", "Redis"]
+}
+
+/**
+ * Funding round information
+ */
+export interface FundingRound {
+  round: 'seed' | 'series-a' | 'series-b' | 'public' | 'grant' | 'other';
+  amount?: string | null;
+  date?: string | null;
+  investors?: string[];
+  valuation?: string | null;
+}
+
+/**
+ * Competitor analysis
+ */
+export interface CompetitorAnalysis {
+  directCompetitors?: string[];
+  uniqueValue?: string;
+  marketPosition?: 'leader' | 'challenger' | 'niche' | 'new-entrant' | 'unknown';
+}
+
+/**
+ * Community metrics
+ */
+export interface CommunityMetrics {
+  discordMembers?: number | null;
+  telegramMembers?: number | null;
+  discordActivity?: 'active' | 'moderate' | 'dead' | 'unknown';
+  sentiment?: 'positive' | 'mixed' | 'negative' | 'unknown';
 }
 
 /**
@@ -289,7 +396,7 @@ export interface PositiveIndicators {
 }
 
 /**
- * Negative risk indicators - these DECREASE the score
+ * Negative risk indicators - these DECREASE the score (OSINT-enhanced)
  */
 export interface NegativeIndicators {
   hasScamAllegations: boolean;
@@ -305,6 +412,10 @@ export interface NegativeIndicators {
   rebrandDetails?: string | null;
   hasAggressivePromotion: boolean;
   promotionDetails?: string | null;
+  // OSINT-enhanced fields
+  noPublicAudit?: boolean;        // No third-party security audit
+  lowLiquidity?: boolean;         // Liquidity below safe threshold
+  unverifiedLegalEntity?: boolean; // Claims company but can't verify
 }
 
 /**
@@ -375,7 +486,7 @@ export interface GrokVerdict {
 }
 
 /**
- * Analysis result from Grok with live X data
+ * Analysis result from Grok with live X data (OSINT-enhanced)
  */
 export interface GrokAnalysisResult {
   handle: string;
@@ -384,6 +495,7 @@ export interface GrokAnalysisResult {
     handle: string;
     displayName?: string;
     bio?: string;
+    avatarUrl?: string;
     verified: boolean;
     followers?: number;
     following?: number;
@@ -399,7 +511,27 @@ export interface GrokAnalysisResult {
   contract?: {
     address: string;
     chain: string;
+    ticker?: string;
   } | null;
+  // OSINT-enhanced fields
+  legalEntity?: LegalEntity;
+  affiliations?: Affiliation[];
+  tokenomics?: Tokenomics;
+  liquidity?: LiquidityInfo;
+  roadmap?: RoadmapMilestone[];
+  audit?: AuditInfo;
+  techStack?: TechStack;
+  // Shipping history (what they've actually built/released)
+  shippingHistory?: Array<{
+    date: string;
+    milestone: string;
+    details?: string;
+    evidenceUrl?: string;
+  }>;
+  // Deep analysis fields (available when search tools disabled)
+  fundingHistory?: FundingRound[];
+  competitorAnalysis?: CompetitorAnalysis;
+  communityMetrics?: CommunityMetrics;
   // Findings
   controversies: string[];
   keyFindings: string[];

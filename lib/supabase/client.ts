@@ -236,6 +236,232 @@ export async function cleanupExpiredReports(): Promise<number> {
 }
 
 // ============================================================================
+// SCAN JOB FUNCTIONS (for persistent background scans)
+// ============================================================================
+
+export interface ScanJobRow {
+  id: string;
+  handle: string;
+  depth: number;
+  status: string;
+  progress: number;
+  status_message: string | null;
+  started_at: string;
+  completed_at: string | null;
+  error: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+/**
+ * Create a new scan job in the database
+ */
+export async function createScanJob(job: {
+  id: string;
+  handle: string;
+  depth: number;
+  status: string;
+  progress: number;
+  statusMessage?: string;
+  startedAt: Date;
+}): Promise<boolean> {
+  const client = getSupabaseClient();
+  if (!client) return false;
+
+  try {
+    const { error } = await client.from('scan_jobs').insert({
+      id: job.id,
+      handle: job.handle,
+      depth: job.depth,
+      status: job.status,
+      progress: job.progress,
+      status_message: job.statusMessage || null,
+      started_at: job.startedAt.toISOString(),
+    });
+
+    if (error) {
+      console.error('[Supabase] Error creating scan job:', error.message);
+      return false;
+    }
+
+    return true;
+  } catch (err) {
+    console.error('[Supabase] Failed to create scan job:', err);
+    return false;
+  }
+}
+
+/**
+ * Update scan job status in the database
+ */
+export async function updateScanJob(
+  jobId: string,
+  updates: {
+    status?: string;
+    progress?: number;
+    statusMessage?: string;
+    completedAt?: Date;
+    error?: string;
+  }
+): Promise<boolean> {
+  const client = getSupabaseClient();
+  if (!client) return false;
+
+  try {
+    const updateData: Record<string, unknown> = {};
+    if (updates.status !== undefined) updateData.status = updates.status;
+    if (updates.progress !== undefined) updateData.progress = updates.progress;
+    if (updates.statusMessage !== undefined) updateData.status_message = updates.statusMessage;
+    if (updates.completedAt !== undefined) updateData.completed_at = updates.completedAt.toISOString();
+    if (updates.error !== undefined) updateData.error = updates.error;
+
+    const { error } = await client
+      .from('scan_jobs')
+      .update(updateData)
+      .eq('id', jobId);
+
+    if (error) {
+      console.error('[Supabase] Error updating scan job:', error.message);
+      return false;
+    }
+
+    return true;
+  } catch (err) {
+    console.error('[Supabase] Failed to update scan job:', err);
+    return false;
+  }
+}
+
+/**
+ * Get a scan job by ID from the database
+ */
+export async function getScanJobFromDb(jobId: string): Promise<ScanJobRow | null> {
+  const client = getSupabaseClient();
+  if (!client) return null;
+
+  try {
+    const { data, error } = await client
+      .from('scan_jobs')
+      .select('*')
+      .eq('id', jobId)
+      .single();
+
+    if (error) {
+      if (error.code !== 'PGRST116') {
+        console.error('[Supabase] Error fetching scan job:', error.message);
+      }
+      return null;
+    }
+
+    return data as ScanJobRow;
+  } catch (err) {
+    console.error('[Supabase] Failed to fetch scan job:', err);
+    return null;
+  }
+}
+
+/**
+ * Get the most recent active (non-complete, non-failed) scan job for a handle
+ * This is used to resume scans when user refreshes the page
+ */
+export async function getActiveScanJobByHandle(handle: string): Promise<ScanJobRow | null> {
+  const client = getSupabaseClient();
+  if (!client) return null;
+
+  const normalizedHandle = handle.toLowerCase().replace('@', '');
+
+  try {
+    const { data, error } = await client
+      .from('scan_jobs')
+      .select('*')
+      .eq('handle', normalizedHandle)
+      .not('status', 'in', '("complete","failed","cached")')
+      .order('started_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    if (error) {
+      if (error.code !== 'PGRST116') {
+        console.error('[Supabase] Error fetching active scan job:', error.message);
+      }
+      return null;
+    }
+
+    return data as ScanJobRow;
+  } catch (err) {
+    console.error('[Supabase] Failed to fetch active scan job:', err);
+    return null;
+  }
+}
+
+/**
+ * Get the most recent scan job for a handle (any status)
+ * Used to check if a recent scan exists
+ */
+export async function getRecentScanJobByHandle(
+  handle: string,
+  maxAgeMs: number = 5 * 60 * 1000 // default 5 minutes
+): Promise<ScanJobRow | null> {
+  const client = getSupabaseClient();
+  if (!client) return null;
+
+  const normalizedHandle = handle.toLowerCase().replace('@', '');
+  const cutoff = new Date(Date.now() - maxAgeMs).toISOString();
+
+  try {
+    const { data, error } = await client
+      .from('scan_jobs')
+      .select('*')
+      .eq('handle', normalizedHandle)
+      .gte('started_at', cutoff)
+      .order('started_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    if (error) {
+      if (error.code !== 'PGRST116') {
+        console.error('[Supabase] Error fetching recent scan job:', error.message);
+      }
+      return null;
+    }
+
+    return data as ScanJobRow;
+  } catch (err) {
+    console.error('[Supabase] Failed to fetch recent scan job:', err);
+    return null;
+  }
+}
+
+/**
+ * Cleanup old completed/failed scan jobs (keep last 24 hours)
+ */
+export async function cleanupOldScanJobs(): Promise<number> {
+  const client = getSupabaseClient();
+  if (!client) return 0;
+
+  const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+
+  try {
+    const { data, error } = await client
+      .from('scan_jobs')
+      .delete()
+      .in('status', ['complete', 'failed', 'cached'])
+      .lt('completed_at', cutoff)
+      .select('id');
+
+    if (error) {
+      console.error('[Supabase] Error cleaning up scan jobs:', error.message);
+      return 0;
+    }
+
+    return data?.length || 0;
+  } catch (err) {
+    console.error('[Supabase] Failed to cleanup scan jobs:', err);
+    return 0;
+  }
+}
+
+// ============================================================================
 // TOKEN CACHE FUNCTIONS
 // ============================================================================
 

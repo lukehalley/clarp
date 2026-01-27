@@ -2,8 +2,7 @@
 
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, X, Hash, Wallet, AtSign, Globe } from 'lucide-react';
-import type { EntityType } from '@/types/terminal';
+import { Search, X, AtSign, Link as LinkIcon } from 'lucide-react';
 
 interface SearchInputProps {
   compact?: boolean;
@@ -11,21 +10,19 @@ interface SearchInputProps {
   onSearch?: (query: string) => void;
 }
 
-const ENTITY_ICONS: Record<EntityType, React.ReactNode> = {
-  ticker: <Hash size={14} />,
-  contract: <Wallet size={14} />,
+type InputType = 'x_handle' | 'x_url';
+
+const INPUT_ICONS: Record<InputType, React.ReactNode> = {
   x_handle: <AtSign size={14} />,
-  domain: <Globe size={14} />,
+  x_url: <LinkIcon size={14} />,
 };
 
 const RECENT_SEARCHES_KEY = 'clarp-recent-searches';
 const MAX_RECENT_SEARCHES = 5;
 
 const PLACEHOLDER_OPTIONS = [
-  'Search ticker...',
-  'Search contract...',
-  'Search @handle...',
-  'Search domain...',
+  'Enter @handle...',
+  'Paste x.com/username...',
 ];
 
 export default function SearchInput({ compact, initialValue = '', onSearch }: SearchInputProps) {
@@ -97,7 +94,8 @@ export default function SearchInput({ compact, initialValue = '', onSearch }: Se
     if (onSearch) {
       onSearch(trimmed);
     } else {
-      router.push(`/terminal/search?q=${encodeURIComponent(trimmed)}`);
+      // Navigate to scan page to analyze
+      router.push(`/terminal/scan?q=${encodeURIComponent(trimmed)}`);
     }
   }, [onSearch, router, saveRecentSearch]);
 
@@ -135,13 +133,13 @@ export default function SearchInput({ compact, initialValue = '', onSearch }: Se
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Detect entity type from query
-  const getDetectedType = (q: string): EntityType | null => {
+  // Detect input type (only X handles or URLs)
+  const getDetectedType = (q: string): InputType | null => {
     if (!q) return null;
-    if (q.startsWith('$') || q.startsWith('#')) return 'ticker';
-    if (q.startsWith('@') || q.includes('x.com/') || q.includes('twitter.com/')) return 'x_handle';
-    if (/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(q)) return 'contract'; // Solana
-    if (q.includes('.') && !q.includes(' ')) return 'domain';
+    if (q.startsWith('@')) return 'x_handle';
+    if (q.includes('x.com/') || q.includes('twitter.com/')) return 'x_url';
+    // Looks like a handle without @ (alphanumeric + underscore, 1-15 chars)
+    if (/^[a-zA-Z0-9_]{1,15}$/.test(q)) return 'x_handle';
     return null;
   };
 
@@ -151,7 +149,7 @@ export default function SearchInput({ compact, initialValue = '', onSearch }: Se
     <div className="relative">
       <form onSubmit={handleSubmit}>
         <div
-          className={`flex items-center gap-2 bg-slate-medium/50 border transition-colors ${
+          className={`flex items-center gap-2 bg-slate-dark/50 border transition-colors ${
             isFocused
               ? 'border-danger-orange'
               : 'border-ivory-light/20 hover:border-ivory-light/30'
@@ -161,8 +159,8 @@ export default function SearchInput({ compact, initialValue = '', onSearch }: Se
 
           {detectedType && (
             <span className="flex items-center gap-1 px-2 py-0.5 bg-danger-orange/20 text-danger-orange text-xs font-mono shrink-0">
-              {ENTITY_ICONS[detectedType]}
-              {detectedType}
+              {INPUT_ICONS[detectedType]}
+              {detectedType === 'x_url' ? 'url' : 'handle'}
             </span>
           )}
 
@@ -239,14 +237,12 @@ export default function SearchInput({ compact, initialValue = '', onSearch }: Se
             </div>
           )}
 
-          {/* Entity type hints */}
+          {/* Input format hints */}
           <div className="p-2 border-t border-ivory-light/10">
-            <div className="text-xs font-mono text-ivory-light/40 px-2 py-1">Search by</div>
+            <div className="text-xs font-mono text-ivory-light/40 px-2 py-1">Accepted formats</div>
             <div className="grid grid-cols-2 gap-1 text-xs font-mono text-ivory-light/50 px-2">
-              <span className="flex items-center gap-1">{ENTITY_ICONS.ticker} $TICKER</span>
-              <span className="flex items-center gap-1">{ENTITY_ICONS.x_handle} @handle</span>
-              <span className="flex items-center gap-1">{ENTITY_ICONS.contract} Solana address</span>
-              <span className="flex items-center gap-1">{ENTITY_ICONS.domain} domain.com</span>
+              <span className="flex items-center gap-1">{INPUT_ICONS.x_handle} @handle</span>
+              <span className="flex items-center gap-1">{INPUT_ICONS.x_url} x.com/username</span>
             </div>
           </div>
         </div>

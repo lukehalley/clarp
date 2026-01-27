@@ -8,7 +8,7 @@ import {
   XIntelReport,
   SCAN_STATUS_PROGRESS,
 } from '@/types/xintel';
-import { getGrokClient, isGrokAvailable, GrokApiError } from '@/lib/grok/client';
+import { getGrokClient, isGrokAvailable } from '@/lib/grok/client';
 import { grokAnalysisToReport, enrichShilledEntitiesWithTokenData } from './transformers';
 import {
   isSupabaseAvailable,
@@ -16,7 +16,21 @@ import {
   cacheReportInSupabase,
   deleteCachedReportFromSupabase,
   getCacheAgeFromSupabase,
+  createScanJob,
+  updateScanJob,
+  getScanJobFromDb,
+  getActiveScanJobByHandle,
 } from '@/lib/supabase/client';
+import { upsertProjectByHandle } from '@/lib/terminal/project-service';
+import type { GrokAnalysisResult } from '@/lib/grok/types';
+import { fetchGitHubRepoIntel, checkWebsiteLive, type GitHubRepoIntel } from '@/lib/terminal/osint';
+import {
+  resolveEntity,
+  detectInputType,
+  type ResolvedEntity,
+  type ResolutionResult,
+  type InputType,
+} from '@/lib/terminal/entity-resolver';
 
 // ============================================================================
 // CONFIGURATION
@@ -25,6 +39,10 @@ import {
 // Check if real API mode is enabled (only needs Grok with x_search capability)
 const USE_REAL_API = process.env.ENABLE_REAL_X_API === 'true'
   && isGrokAvailable();
+
+// Check if search tools should be disabled for deeper training-data analysis
+// Set DISABLE_SEARCH_TOOLS=true to use Grok's knowledge instead of live search
+const DISABLE_SEARCH_TOOLS = process.env.DISABLE_SEARCH_TOOLS === 'true';
 
 // In-memory job storage (would be Redis/DB in production)
 const scanJobs: Map<string, ScanJob> = new Map();
@@ -40,6 +58,10 @@ const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 const scanCooldowns: Map<string, Date> = new Map();
 const COOLDOWN_MS = 60 * 1000; // 1 minute between scans of same handle
 
+// OSINT entity cache (for passing OSINT gaps to Grok)
+// Stores resolved entities by handle so processScanJob can extract gaps
+const osintEntityCache: Map<string, ResolvedEntity> = new Map();
+
 // ============================================================================
 // PUBLIC API
 // ============================================================================
@@ -52,18 +74,482 @@ export interface SubmitScanOptions {
 
 export interface SubmitScanResult {
   jobId: string;
+  handle?: string;
   status: ScanStatus;
   cached: boolean;
   error?: string;
   useRealApi?: boolean;
 }
 
+// ============================================================================
+// UNIVERSAL SCAN (ANY INPUT TYPE)
+// ============================================================================
+
+export interface UniversalScanOptions {
+  input: string;              // Any: token address, X handle, website, GitHub URL
+  depth?: number;
+  force?: boolean;
+  skipXAnalysis?: boolean;    // Skip Grok X analysis (just OSINT)
+}
+
+export interface UniversalScanResult {
+  jobId: string;
+  inputType: InputType;
+  canonicalId?: string;
+  status: ScanStatus;
+  cached: boolean;
+  error?: string;
+  // OSINT-only data (available immediately)
+  osintData?: ResolvedEntity;
+  // Full data (after X analysis)
+  fullReport?: XIntelReport;
+}
+
+/**
+ * Submit a universal scan that accepts any input type
+ * Uses entity resolver for OSINT, then optionally Grok for X analysis
+ *
+ * Flow:
+ * 1. Entity resolver gathers all OSINT data (FREE)
+ * 2. If X handle found AND skipXAnalysis=false, run Grok analysis (PAID)
+ * 3. Combine into comprehensive report
+ */
+export async function submitUniversalScan(options: UniversalScanOptions): Promise<UniversalScanResult> {
+  const { input, depth = 200, force = false, skipXAnalysis = false } = options;
+
+  console.log(`[UniversalScan] Starting scan for: "${input.slice(0, 50)}..."`);
+
+  // Step 1: Detect input type
+  const inputType = detectInputType(input);
+  console.log(`[UniversalScan] Detected input type: ${inputType}`);
+
+  // Step 2: Run entity resolver (FREE OSINT)
+  console.log(`[UniversalScan] Running entity resolver...`);
+  const resolutionResult = await resolveEntity(input);
+
+  if (!resolutionResult.success || !resolutionResult.entity) {
+    return {
+      jobId: '',
+      inputType,
+      status: 'failed',
+      cached: false,
+      error: resolutionResult.error || 'Failed to resolve entity',
+    };
+  }
+
+  const entity = resolutionResult.entity;
+  console.log(`[UniversalScan] Entity resolved: ${entity.canonicalId}, confidence: ${entity.confidence}`);
+
+  // Log what OSINT data we found (for debugging)
+  console.log(`[UniversalScan] OSINT Summary:`);
+  console.log(`  - X Handle: ${entity.xHandle || 'not found'}`);
+  console.log(`  - Website: ${entity.website || 'not found'}`);
+  console.log(`  - GitHub: ${entity.github || 'not found'}`);
+  console.log(`  - Telegram: ${entity.telegram || 'not found'}`);
+  console.log(`  - Discord: ${entity.discord || 'not found'}`);
+  console.log(`  - Team members: ${entity.discoveredTeam?.length || 0}`);
+  console.log(`  - Risk flags: ${entity.riskFlags?.length || 0}`);
+  console.log(`  - Legitimacy signals: ${entity.legitimacySignals?.length || 0}`);
+
+  if (entity.securityIntel?.isAccessible) {
+    console.log(`  - RugCheck score: ${entity.securityIntel.normalizedScore}/10`);
+  }
+  if (entity.domainIntel?.isAccessible) {
+    console.log(`  - Domain age: ${entity.domainIntel.ageInDays} days`);
+  }
+  if (entity.marketIntel?.priceUsd) {
+    console.log(`  - Price: $${entity.marketIntel.priceUsd}`);
+  }
+
+  // If no X handle or skipXAnalysis, return OSINT-only result
+  if (!entity.xHandle || skipXAnalysis) {
+    console.log(`[UniversalScan] No X handle or skip requested - returning OSINT-only result`);
+    return {
+      jobId: `osint_${entity.canonicalId}_${Date.now()}`,
+      inputType,
+      canonicalId: entity.canonicalId,
+      status: 'complete',
+      cached: false,
+      osintData: entity,
+    };
+  }
+
+  // Step 3: Run X analysis via existing scan flow
+  console.log(`[UniversalScan] X handle found (@${entity.xHandle}), running X analysis...`);
+
+  // Store OSINT entity for the scan processor to use for gap-filling
+  osintEntityCache.set(entity.xHandle.toLowerCase(), entity);
+
+  const xScanResult = await submitScan({
+    handle: entity.xHandle,
+    depth,
+    force,
+  });
+
+  // If cached, get the cached report and merge with OSINT
+  if (xScanResult.status === 'cached') {
+    try {
+      const cachedReport = await getCachedReport(entity.xHandle);
+      return {
+        jobId: xScanResult.jobId,
+        inputType,
+        canonicalId: entity.canonicalId,
+        status: 'complete',
+        cached: true,
+        osintData: entity,
+        fullReport: mergeOsintWithReport(entity, cachedReport),
+      };
+    } catch (err) {
+      console.error(`[UniversalScan] Failed to get cached report:`, err);
+    }
+  }
+
+  // Return result with OSINT data - X analysis running in background
+  return {
+    jobId: xScanResult.jobId,
+    inputType,
+    canonicalId: entity.canonicalId,
+    status: xScanResult.status,
+    cached: xScanResult.cached,
+    error: xScanResult.error,
+    osintData: entity,
+  };
+}
+
+/**
+ * Merge OSINT entity data with X Intel report
+ */
+function mergeOsintWithReport(entity: ResolvedEntity, report: XIntelReport): XIntelReport {
+  const merged = { ...report };
+
+  // Add OSINT findings to key findings
+  const osintFindings: typeof report.keyFindings = [];
+
+  // Security findings
+  if (entity.securityIntel?.isAccessible) {
+    const sec = entity.securityIntel;
+    if (sec.isRugged) {
+      osintFindings.push({
+        id: 'osint_rugged',
+        title: 'Token Flagged as Rug Pull',
+        description: 'This token has been flagged as a rug pull by RugCheck.xyz',
+        severity: 'critical',
+        evidenceIds: [],
+      });
+    }
+    if (sec.mintAuthority === 'active') {
+      osintFindings.push({
+        id: 'osint_mint_active',
+        title: 'Mint Authority Active',
+        description: 'The token mint authority is still active, meaning unlimited tokens can be created.',
+        severity: 'critical',
+        evidenceIds: [],
+      });
+    }
+    if (sec.freezeAuthority === 'active') {
+      osintFindings.push({
+        id: 'osint_freeze_active',
+        title: 'Freeze Authority Active',
+        description: 'The token freeze authority is active, meaning your tokens can be frozen at any time.',
+        severity: 'critical',
+        evidenceIds: [],
+      });
+    }
+    if (sec.lpLocked === false && sec.totalLiquidityUsd && sec.totalLiquidityUsd > 1000) {
+      osintFindings.push({
+        id: 'osint_lp_unlocked',
+        title: 'Liquidity Not Locked',
+        description: `$${sec.totalLiquidityUsd.toLocaleString()} in liquidity is not locked and can be pulled at any time.`,
+        severity: 'warning',
+        evidenceIds: [],
+      });
+    }
+  }
+
+  // Domain age findings
+  if (entity.domainIntel?.isAccessible && entity.domainIntel.ageRisk === 'new') {
+    osintFindings.push({
+      id: 'osint_new_domain',
+      title: 'Very New Domain',
+      description: `Website domain was registered only ${entity.domainIntel.ageInDays} days ago.`,
+      severity: 'warning',
+      evidenceIds: [],
+    });
+  }
+
+  // GitHub findings (positive)
+  if (entity.githubIntel?.repo) {
+    const gh = entity.githubIntel.repo;
+    if (gh.stars >= 100) {
+      osintFindings.push({
+        id: 'osint_gh_popular',
+        title: 'Active GitHub Repository',
+        description: `GitHub repo has ${gh.stars} stars and ${entity.githubIntel.contributors?.length || 0} contributors.`,
+        severity: 'info',
+        evidenceIds: [],
+      });
+    }
+  }
+
+  // CoinGecko listing (positive)
+  if (entity.marketIntel?.isListed) {
+    osintFindings.push({
+      id: 'osint_coingecko',
+      title: 'Listed on CoinGecko',
+      description: 'Token is listed on CoinGecko, indicating some level of market recognition.',
+      severity: 'info',
+      evidenceIds: [],
+    });
+  }
+
+  // Merge findings
+  merged.keyFindings = [...osintFindings, ...report.keyFindings];
+
+  // Add OSINT disclaimer
+  merged.disclaimer = `${report.disclaimer} OSINT data enriched from: ${[
+    entity.securityIntel?.isAccessible ? 'RugCheck' : null,
+    entity.marketIntel?.sources?.join(', ') || null,
+    entity.domainIntel?.isAccessible ? 'RDAP' : null,
+    entity.historyIntel?.hasArchives ? 'Wayback Machine' : null,
+    entity.githubIntel ? 'GitHub API' : null,
+  ].filter(Boolean).join(', ')}.`;
+
+  return merged;
+}
+
+/**
+ * Extract OSINT context from resolved entity - both what we found AND what's missing.
+ * This gives Grok context to work with and tells it what to look for.
+ */
+function extractOsintGaps(entity: ResolvedEntity): {
+  found?: {
+    website?: string;
+    github?: string;
+    telegram?: string;
+    discord?: string;
+    xHandle?: string;
+    tokenAddress?: string;
+    tokenName?: string;
+    tokenSymbol?: string;
+    teamMembers?: Array<{ name?: string; github?: string; role?: string }>;
+    holders?: number;
+    marketCap?: number;
+    lpLocked?: boolean;
+    domainAgeDays?: number;
+    waybackArchives?: number;
+  };
+  missingGithub?: boolean;
+  missingDiscord?: boolean;
+  missingTelegram?: boolean;
+  missingWebsite?: boolean;
+  missingTeamInfo?: boolean;
+  missingTokenAddress?: boolean;
+  missingAudit?: boolean;
+  websiteUrl?: string;
+} {
+  // Collect what we found
+  const found: {
+    website?: string;
+    github?: string;
+    telegram?: string;
+    discord?: string;
+    xHandle?: string;
+    tokenAddress?: string;
+    tokenName?: string;
+    tokenSymbol?: string;
+    teamMembers?: Array<{ name?: string; github?: string; role?: string }>;
+    holders?: number;
+    marketCap?: number;
+    lpLocked?: boolean;
+    domainAgeDays?: number;
+    waybackArchives?: number;
+  } = {};
+
+  if (entity.website) found.website = entity.website;
+  if (entity.github) found.github = entity.github;
+  if (entity.telegram) found.telegram = entity.telegram;
+  if (entity.discord) found.discord = entity.discord;
+  if (entity.xHandle) found.xHandle = entity.xHandle;
+
+  if (entity.tokenAddresses?.[0]) {
+    found.tokenAddress = entity.tokenAddresses[0].address;
+    found.tokenSymbol = entity.tokenAddresses[0].symbol;
+  }
+  if (entity.name) found.tokenName = entity.name;
+
+  if (entity.discoveredTeam && entity.discoveredTeam.length > 0) {
+    found.teamMembers = entity.discoveredTeam.map(m => ({
+      name: m.name,
+      github: m.github,
+      role: m.role,
+    }));
+  }
+
+  if (entity.securityIntel?.totalHolders) found.holders = entity.securityIntel.totalHolders;
+  if (entity.marketIntel?.marketCap) found.marketCap = entity.marketIntel.marketCap;
+  if (entity.securityIntel?.lpLocked !== undefined && entity.securityIntel.lpLocked !== null) {
+    found.lpLocked = entity.securityIntel.lpLocked;
+  }
+  if (entity.domainIntel?.ageInDays) found.domainAgeDays = entity.domainIntel.ageInDays;
+  if (entity.historyIntel?.totalSnapshots) found.waybackArchives = entity.historyIntel.totalSnapshots;
+
+  // Identify gaps
+  const result: ReturnType<typeof extractOsintGaps> = {};
+
+  // Include found data if we have any
+  if (Object.keys(found).length > 0) {
+    result.found = found;
+  }
+
+  // Check what's missing
+  if (!entity.github && !entity.githubIntel) {
+    result.missingGithub = true;
+    // If we have a website but no GitHub, tell Grok to look harder
+    if (entity.website) {
+      result.websiteUrl = entity.website;
+    }
+  }
+
+  if (!entity.discord && !entity.discordIntel) {
+    result.missingDiscord = true;
+  }
+
+  if (!entity.telegram && !entity.telegramIntel) {
+    result.missingTelegram = true;
+  }
+
+  if (!entity.website && !entity.websiteIntel) {
+    result.missingWebsite = true;
+  }
+
+  // Check for team info
+  if (!entity.discoveredTeam || entity.discoveredTeam.length === 0) {
+    result.missingTeamInfo = true;
+  }
+
+  // Check for token address
+  if (!entity.tokenAddresses || entity.tokenAddresses.length === 0) {
+    result.missingTokenAddress = true;
+  }
+
+  // Always ask about audits - OSINT rarely finds these
+  result.missingAudit = true;
+
+  // Log what we're passing to Grok
+  const foundKeys = result.found ? Object.keys(result.found) : [];
+  const missingKeys = Object.entries(result)
+    .filter(([k, v]) => k.startsWith('missing') && v)
+    .map(([k]) => k);
+
+  if (foundKeys.length > 0 || missingKeys.length > 0) {
+    console.log(`[XIntel] OSINT context for Grok:`);
+    if (foundKeys.length > 0) console.log(`  Found: ${foundKeys.join(', ')}`);
+    if (missingKeys.length > 0) console.log(`  Missing: ${missingKeys.join(', ')}`);
+  }
+
+  return result;
+}
+
+/**
+ * Get universal scan result (combines OSINT + X analysis if available)
+ */
+export async function getUniversalScanResult(jobId: string): Promise<UniversalScanResult | null> {
+  // Check if this is an OSINT-only job
+  if (jobId.startsWith('osint_')) {
+    // OSINT jobs are already complete - no further processing needed
+    return null;
+  }
+
+  // Get the X scan job
+  const job = await getScanJob(jobId);
+  if (!job) return null;
+
+  // If complete, get the report
+  if (job.status === 'complete' || job.status === 'cached') {
+    try {
+      const report = await getCachedReport(job.handle);
+      return {
+        jobId,
+        inputType: 'x_handle',
+        canonicalId: job.handle,
+        status: job.status,
+        cached: job.status === 'cached',
+        fullReport: report,
+      };
+    } catch (err) {
+      // Report not ready yet
+    }
+  }
+
+  return {
+    jobId,
+    inputType: 'x_handle',
+    canonicalId: job.handle,
+    status: job.status,
+    cached: false,
+    error: job.error,
+  };
+}
+
+/**
+ * Detect query type and extract/normalize the handle
+ * Only accepts X URLs or handles - no plain text
+ */
+type QueryType = 'x_url' | 'handle' | 'invalid';
+
+function detectQueryType(query: string): { type: QueryType; value: string; error?: string } {
+  const trimmed = query.trim();
+
+  // X/Twitter URL: https://x.com/username or https://twitter.com/username
+  const urlMatch = trimmed.match(/^https?:\/\/(www\.)?(x|twitter)\.com\/([a-zA-Z0-9_]+)/i);
+  if (urlMatch) {
+    return { type: 'x_url', value: urlMatch[3].toLowerCase() };
+  }
+
+  // @handle format
+  if (trimmed.startsWith('@')) {
+    const handle = trimmed.slice(1).toLowerCase();
+    // Basic validation: alphanumeric + underscore, 1-15 chars
+    if (/^[a-zA-Z0-9_]{1,15}$/.test(handle)) {
+      return { type: 'handle', value: handle };
+    }
+    return { type: 'invalid', value: trimmed, error: 'Invalid handle format. Use @username (1-15 characters).' };
+  }
+
+  // Looks like a handle without @ (alphanumeric + underscore, 1-15 chars)
+  if (/^[a-zA-Z0-9_]{1,15}$/.test(trimmed)) {
+    return { type: 'handle', value: trimmed.toLowerCase() };
+  }
+
+  // Invalid - not a handle or URL
+  return {
+    type: 'invalid',
+    value: trimmed,
+    error: 'Please enter an X handle (@username) or X URL (x.com/username).'
+  };
+}
+
 /**
  * Submit a new scan job
  */
 export async function submitScan(options: SubmitScanOptions): Promise<SubmitScanResult> {
-  const { handle, depth = 200, force = false } = options;
-  const normalizedHandle = handle.toLowerCase().replace('@', '');
+  const { handle: rawQuery, depth = 200, force = false } = options;
+
+  // Detect what type of query this is (only accepts X URLs or handles)
+  const queryInfo = detectQueryType(rawQuery);
+  console.log(`[XIntel] Query type: ${queryInfo.type}, value: "${queryInfo.value}"`);
+
+  // Reject invalid queries immediately
+  if (queryInfo.type === 'invalid') {
+    return {
+      jobId: '',
+      status: 'failed',
+      cached: false,
+      error: queryInfo.error || 'Please enter an X handle (@username) or X URL (x.com/username).',
+    };
+  }
+
+  const normalizedHandle = queryInfo.value.toLowerCase().replace('@', '');
 
   // Check rate limiting
   const lastScan = scanCooldowns.get(normalizedHandle);
@@ -93,6 +579,7 @@ export async function submitScan(options: SubmitScanOptions): Promise<SubmitScan
         });
         return {
           jobId: `cached_${normalizedHandle}`,
+          handle: normalizedHandle,
           status: 'cached',
           cached: true,
           useRealApi: report.disclaimer?.includes('AI-powered') ?? false,
@@ -107,11 +594,40 @@ export async function submitScan(options: SubmitScanOptions): Promise<SubmitScan
       if (age < CACHE_TTL_MS) {
         return {
           jobId: `cached_${normalizedHandle}`,
+          handle: normalizedHandle,
           status: 'cached',
           cached: true,
           useRealApi: cached.report.disclaimer.includes('AI-powered'),
         };
       }
+    }
+  }
+
+  // Check if there's already an active scan for this handle
+  if (isSupabaseAvailable()) {
+    const activeJob = await getActiveScanJobByHandle(normalizedHandle);
+    if (activeJob) {
+      console.log(`[XIntel] Found active scan job ${activeJob.id} for @${normalizedHandle}, resuming`);
+      // Restore to in-memory cache for polling
+      const restoredJob: ScanJob = {
+        id: activeJob.id,
+        handle: activeJob.handle,
+        depth: activeJob.depth,
+        status: activeJob.status as ScanStatus,
+        progress: activeJob.progress,
+        statusMessage: activeJob.status_message || undefined,
+        startedAt: new Date(activeJob.started_at),
+        completedAt: activeJob.completed_at ? new Date(activeJob.completed_at) : undefined,
+        error: activeJob.error || undefined,
+      };
+      scanJobs.set(activeJob.id, restoredJob);
+      return {
+        jobId: activeJob.id,
+        handle: normalizedHandle,
+        status: activeJob.status as ScanStatus,
+        cached: false,
+        useRealApi: USE_REAL_API,
+      };
     }
   }
 
@@ -129,11 +645,24 @@ export async function submitScan(options: SubmitScanOptions): Promise<SubmitScan
   scanJobs.set(jobId, job);
   scanCooldowns.set(normalizedHandle, new Date());
 
+  // Persist job to database for recovery after page refresh
+  if (isSupabaseAvailable()) {
+    createScanJob({
+      id: jobId,
+      handle: normalizedHandle,
+      depth,
+      status: 'queued',
+      progress: 0,
+      startedAt: job.startedAt,
+    }).catch(err => console.error('[XIntel] Failed to persist scan job:', err));
+  }
+
   // Start processing asynchronously
   processScanJob(jobId);
 
   return {
     jobId,
+    handle: normalizedHandle,
     status: 'queued',
     cached: false,
     useRealApi: USE_REAL_API,
@@ -141,10 +670,76 @@ export async function submitScan(options: SubmitScanOptions): Promise<SubmitScan
 }
 
 /**
- * Get scan job status
+ * Get scan job status (checks in-memory first, then database)
  */
-export function getScanJob(jobId: string): ScanJob | null {
-  return scanJobs.get(jobId) || null;
+export async function getScanJob(jobId: string): Promise<ScanJob | null> {
+  // Check in-memory cache first
+  const memoryJob = scanJobs.get(jobId);
+  if (memoryJob) {
+    return memoryJob;
+  }
+
+  // Fall back to database
+  if (isSupabaseAvailable()) {
+    const dbJob = await getScanJobFromDb(jobId);
+    if (dbJob) {
+      // Restore to in-memory cache
+      const job: ScanJob = {
+        id: dbJob.id,
+        handle: dbJob.handle,
+        depth: dbJob.depth,
+        status: dbJob.status as ScanStatus,
+        progress: dbJob.progress,
+        statusMessage: dbJob.status_message || undefined,
+        startedAt: new Date(dbJob.started_at),
+        completedAt: dbJob.completed_at ? new Date(dbJob.completed_at) : undefined,
+        error: dbJob.error || undefined,
+      };
+      scanJobs.set(jobId, job);
+      return job;
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Get active scan job by handle (for resuming scans after page refresh)
+ */
+export async function getActiveScanByHandle(handle: string): Promise<ScanJob | null> {
+  const normalizedHandle = handle.toLowerCase().replace('@', '');
+
+  // Check in-memory cache first
+  for (const job of scanJobs.values()) {
+    if (job.handle === normalizedHandle &&
+        job.status !== 'complete' &&
+        job.status !== 'failed' &&
+        job.status !== 'cached') {
+      return job;
+    }
+  }
+
+  // Fall back to database
+  if (isSupabaseAvailable()) {
+    const dbJob = await getActiveScanJobByHandle(normalizedHandle);
+    if (dbJob) {
+      const job: ScanJob = {
+        id: dbJob.id,
+        handle: dbJob.handle,
+        depth: dbJob.depth,
+        status: dbJob.status as ScanStatus,
+        progress: dbJob.progress,
+        statusMessage: dbJob.status_message || undefined,
+        startedAt: new Date(dbJob.started_at),
+        completedAt: dbJob.completed_at ? new Date(dbJob.completed_at) : undefined,
+        error: dbJob.error || undefined,
+      };
+      scanJobs.set(dbJob.id, job);
+      return job;
+    }
+  }
+
+  return null;
 }
 
 /**
@@ -218,7 +813,17 @@ async function processScanJob(jobId: string): Promise<void> {
     console.error(`[XIntel] Scan job ${jobId} failed:`, error);
     job.status = 'failed';
     job.error = error instanceof Error ? error.message : 'Unknown error';
+    job.completedAt = new Date();
     scanJobs.set(jobId, job);
+
+    // Persist failure to database
+    if (isSupabaseAvailable()) {
+      updateScanJob(jobId, {
+        status: 'failed',
+        error: job.error,
+        completedAt: job.completedAt,
+      }).catch(err => console.error('[XIntel] Failed to persist job failure:', err));
+    }
   }
 }
 
@@ -343,14 +948,22 @@ async function processRealScan(job: ScanJob): Promise<void> {
   await sleep(200);
 
   // Stage 5: AI Analysis (this is the long-running part)
-  console.log(`[XIntel] Stage 5: Analyzing @${job.handle} with Grok (isProject=${isProject})...`);
-  updateJobStatus(job, 'analyzing', 45, isProject ? 'Deep analysis with web search...' : 'Analyzing X activity...');
+  const useSearchTools = !DISABLE_SEARCH_TOOLS;
+  const analysisMode = DISABLE_SEARCH_TOOLS
+    ? 'Deep analysis (training data)'
+    : (isProject ? 'Search analysis with web search' : 'Search analysis (X only)');
+  console.log(`[XIntel] Stage 5: Analyzing @${job.handle} - ${analysisMode}`);
+  updateJobStatus(job, 'analyzing', 45, DISABLE_SEARCH_TOOLS ? 'Deep knowledge analysis...' : (isProject ? 'Deep analysis with web search...' : 'Analyzing X activity...'));
 
   // Start a progress simulation while waiting for Grok
   const progressInterval = startAnalysisProgress(job);
 
   try {
-    const analysis = await grokClient.analyzeProfile(job.handle, { isProject });
+    // Extract OSINT gaps to pass to Grok for targeted discovery
+    const osintEntity = osintEntityCache.get(job.handle.toLowerCase());
+    const osintGaps = osintEntity ? extractOsintGaps(osintEntity) : undefined;
+
+    const analysis = await grokClient.analyzeProfile(job.handle, { isProject, useSearchTools, osintGaps });
     clearInterval(progressInterval);
     console.log(`[XIntel] Grok analysis complete for @${job.handle}, risk: ${analysis.riskLevel}`);
 
@@ -403,6 +1016,10 @@ async function processRealScan(job: ScanJob): Promise<void> {
         report as unknown as Record<string, unknown>,
         CACHE_TTL_MS
       ).catch(err => console.error('[XIntel] Failed to cache to Supabase:', err));
+
+      // Also create/update the project entity
+      upsertProjectFromAnalysis(job.handle, analysis, report)
+        .catch(err => console.error('[XIntel] Failed to upsert project:', err));
     }
   } catch (error) {
     clearInterval(progressInterval);
@@ -447,13 +1064,301 @@ function sleep(ms: number): Promise<void> {
 }
 
 /**
- * Update job status and progress
+ * Update job status and progress (both in-memory and database)
  */
 function updateJobStatus(job: ScanJob, status: ScanStatus, progress?: number, message?: string): void {
   job.status = status;
   job.progress = progress ?? SCAN_STATUS_PROGRESS[status];
   job.statusMessage = message;
   scanJobs.set(job.id, job);
+
+  // Persist to database (async, don't block)
+  if (isSupabaseAvailable()) {
+    const updates: { status: string; progress: number; statusMessage?: string; completedAt?: Date; error?: string } = {
+      status,
+      progress: job.progress,
+      statusMessage: message,
+    };
+    if (status === 'complete' || status === 'failed') {
+      updates.completedAt = new Date();
+    }
+    if (job.error) {
+      updates.error = job.error;
+    }
+    updateScanJob(job.id, updates).catch(err =>
+      console.error('[XIntel] Failed to persist job status update:', err)
+    );
+  }
+}
+
+// ============================================================================
+// PROJECT ENTITY CREATION
+// ============================================================================
+
+/**
+ * Normalize role names into standard categories
+ */
+function normalizeRole(role?: string): string | undefined {
+  if (!role) return undefined;
+
+  const lower = role.toLowerCase();
+
+  // Founder/Leadership
+  if (lower.includes('founder') || lower.includes('ceo') || lower.includes('co-founder')) {
+    return 'Founder';
+  }
+  if (lower.includes('cto') || lower.includes('chief tech')) {
+    return 'CTO';
+  }
+  if (lower.includes('coo') || lower.includes('chief operating')) {
+    return 'COO';
+  }
+
+  // Development
+  if (lower.includes('lead dev') || lower.includes('lead engineer') || lower.includes('head of eng')) {
+    return 'Lead Developer';
+  }
+  if (lower.includes('dev') || lower.includes('engineer') || lower.includes('programmer')) {
+    return 'Developer';
+  }
+  if (lower.includes('front-end') || lower.includes('frontend')) {
+    return 'Frontend Dev';
+  }
+  if (lower.includes('back-end') || lower.includes('backend')) {
+    return 'Backend Dev';
+  }
+  if (lower.includes('smart contract') || lower.includes('solidity') || lower.includes('rust dev')) {
+    return 'Smart Contract Dev';
+  }
+
+  // Design
+  if (lower.includes('design') || lower.includes('ui') || lower.includes('ux')) {
+    return 'Designer';
+  }
+
+  // Community/Marketing
+  if (lower.includes('community') || lower.includes('cm') || lower.includes('mod') || lower.includes('gm')) {
+    return 'Community';
+  }
+  if (lower.includes('marketing') || lower.includes('growth')) {
+    return 'Marketing';
+  }
+  if (lower.includes('social') || lower.includes('content')) {
+    return 'Content';
+  }
+
+  // Operations
+  if (lower.includes('ops') || lower.includes('operations')) {
+    return 'Operations';
+  }
+  if (lower.includes('product') || lower.includes('pm')) {
+    return 'Product';
+  }
+
+  // Advisor/Investor
+  if (lower.includes('advisor') || lower.includes('adviser')) {
+    return 'Advisor';
+  }
+  if (lower.includes('investor') || lower.includes('backer')) {
+    return 'Investor';
+  }
+
+  // Vague/generic roles - return as "Team Member"
+  if (lower === 'team' || lower === 'member' || lower === 'contributor' || lower === 'staff') {
+    return 'Team Member';
+  }
+
+  // Return original if no match (capitalize first letter)
+  return role.charAt(0).toUpperCase() + role.slice(1);
+}
+
+/**
+ * Fetch X profile avatar URL via Twitter syndication API
+ */
+async function fetchXAvatarUrl(handle: string): Promise<string | undefined> {
+  try {
+    const res = await fetch(`https://syndication.twitter.com/srv/timeline-profile/screen-name/${handle}`, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+      },
+    });
+
+    if (!res.ok) {
+      console.log(`[XIntel] Failed to fetch X syndication for @${handle}: ${res.status}`);
+      return undefined;
+    }
+
+    const html = await res.text();
+
+    // Extract profile_images URL
+    const match = html.match(/https:\/\/pbs\.twimg\.com\/profile_images\/[^"'\\]+/);
+    if (match) {
+      // Convert _normal to _400x400 for higher resolution
+      const url = match[0].replace(/_normal\./, '_400x400.');
+      console.log(`[XIntel] Found avatar for @${handle}: ${url}`);
+      return url;
+    }
+
+    return undefined;
+  } catch (err) {
+    console.error(`[XIntel] Error fetching avatar for @${handle}:`, err);
+    return undefined;
+  }
+}
+
+/**
+ * Create or update a project entity from Grok analysis
+ */
+async function upsertProjectFromAnalysis(
+  handle: string,
+  analysis: GrokAnalysisResult,
+  report: XIntelReport
+): Promise<void> {
+  const normalizedHandle = handle.toLowerCase().replace('@', '');
+
+  // Determine project name from analysis
+  const name = analysis.profile?.displayName || `@${normalizedHandle}`;
+
+  // Extract team members from analysis (filter out empty handles) and fetch avatars
+  const rawTeam = (analysis.positiveIndicators?.teamMembers || [])
+    .filter(member => member.xHandle || member.name);
+
+  // Fetch avatars for team members in parallel
+  const team = await Promise.all(
+    rawTeam.map(async (member) => {
+      const memberHandle = member.xHandle?.replace('@', '').toLowerCase();
+      const avatarUrl = memberHandle ? await fetchXAvatarUrl(memberHandle) : undefined;
+      return {
+        handle: member.xHandle || '',
+        displayName: member.name,
+        role: normalizeRole(member.role),
+        avatarUrl,
+      };
+    })
+  );
+
+  // Extract ticker from their own token promotion
+  const ownPromotion = analysis.promotionHistory?.find(p =>
+    p.project?.toLowerCase().includes(name.toLowerCase()) ||
+    p.ticker?.toLowerCase().includes(normalizedHandle)
+  );
+  const ticker = ownPromotion?.ticker?.replace('$', '') ||
+    analysis.contract?.ticker?.replace('$', '') ||
+    undefined;
+
+  // ========================================================================
+  // OSINT ENRICHMENT (using free APIs, not AI)
+  // ========================================================================
+
+  // Fetch GitHub intelligence if URL available
+  let githubIntel: GitHubRepoIntel | null = null;
+  if (analysis.github) {
+    console.log(`[XIntel] Fetching GitHub intel for ${analysis.github}`);
+    githubIntel = await fetchGitHubRepoIntel(analysis.github);
+    if (githubIntel) {
+      console.log(`[XIntel] GitHub: ${githubIntel.stars} stars, ${githubIntel.contributorsCount} contributors, health=${githubIntel.healthScore}`);
+    }
+  }
+
+  // Check website status if URL available
+  let websiteStatus: { isLive: boolean; loadTimeMs?: number } | null = null;
+  if (analysis.website) {
+    console.log(`[XIntel] Checking website status for ${analysis.website}`);
+    websiteStatus = await checkWebsiteLive(analysis.website);
+    console.log(`[XIntel] Website ${analysis.website}: isLive=${websiteStatus.isLive}`);
+  }
+
+  // Build project data
+  const projectData = {
+    name,
+    description: analysis.theStory || analysis.overallAssessment || undefined,
+    avatarUrl: analysis.profile?.avatarUrl || await fetchXAvatarUrl(normalizedHandle),
+    tags: extractTags(analysis, githubIntel),
+    aiSummary: analysis.verdict?.summary || analysis.overallAssessment || undefined,
+    xHandle: normalizedHandle,
+    githubUrl: analysis.github || undefined,
+    websiteUrl: analysis.website || undefined,
+    tokenAddress: analysis.contract?.address || undefined,
+    ticker,
+    trustScore: {
+      score: report.score.overall,
+      tier: report.score.riskLevel === 'low' ? 'trusted' as const :
+            report.score.riskLevel === 'medium' ? 'neutral' as const : 'caution' as const,
+      confidence: report.score.confidence,
+      lastUpdated: new Date(),
+    },
+    team,
+    socialMetrics: {
+      followers: analysis.profile?.followers,
+      engagement: undefined,
+      postsPerWeek: undefined,
+    },
+    // GitHub intelligence (from API - free!)
+    githubIntel: githubIntel ? {
+      stars: githubIntel.stars,
+      forks: githubIntel.forks,
+      watchers: githubIntel.watchers,
+      openIssues: githubIntel.openIssues,
+      lastCommitDate: githubIntel.lastCommitDate || undefined,
+      lastCommitMessage: githubIntel.lastCommitMessage || undefined,
+      commitsLast30d: githubIntel.commitsLast30d,
+      commitsLast90d: githubIntel.commitsLast90d,
+      contributorsCount: githubIntel.contributorsCount,
+      topContributors: githubIntel.topContributors,
+      primaryLanguage: githubIntel.primaryLanguage || undefined,
+      license: githubIntel.license || undefined,
+      isArchived: githubIntel.isArchived,
+      healthScore: githubIntel.healthScore,
+      healthFactors: githubIntel.healthFactors,
+    } : undefined,
+    // Website intelligence (simple status check - free!)
+    websiteIntel: websiteStatus ? {
+      isLive: websiteStatus.isLive,
+      lastChecked: new Date(),
+      hasDocumentation: false, // Would need AI to detect
+      hasRoadmap: false,
+      hasTokenomics: false,
+      hasTeamPage: false,
+      hasAuditInfo: false,
+      redFlags: websiteStatus.isLive ? [] : ['Website not accessible'],
+      trustIndicators: websiteStatus.isLive ? ['Website is live'] : [],
+      websiteQuality: websiteStatus.isLive ? 'unknown' as const : 'suspicious' as const,
+      qualityScore: websiteStatus.isLive ? 50 : 20,
+    } : undefined,
+    lastScanAt: new Date(),
+  };
+
+  await upsertProjectByHandle(normalizedHandle, projectData);
+  console.log(`[XIntel] Upserted project entity for @${normalizedHandle}`);
+}
+
+/**
+ * Extract relevant tags from analysis
+ */
+function extractTags(analysis: GrokAnalysisResult, githubIntel?: GitHubRepoIntel | null): string[] {
+  const tags: string[] = [];
+
+  // Entity type
+  if (analysis.positiveIndicators?.hasRealProduct) tags.push('product');
+  if (analysis.positiveIndicators?.hasActiveGithub) tags.push('builder');
+  if (analysis.positiveIndicators?.isDoxxed) tags.push('doxxed');
+  if (analysis.positiveIndicators?.hasCredibleBackers) tags.push('backed');
+
+  // Risk indicators
+  if (analysis.negativeIndicators?.hasScamAllegations) tags.push('allegations');
+  if (analysis.negativeIndicators?.hasRugHistory) tags.push('rug-history');
+  if (analysis.negativeIndicators?.isAnonymousTeam) tags.push('anon');
+
+  // GitHub-based tags (from free API)
+  if (githubIntel) {
+    if (githubIntel.stars >= 100) tags.push('popular');
+    if (githubIntel.commitsLast30d >= 10) tags.push('active');
+    if (githubIntel.isArchived) tags.push('archived');
+    if (githubIntel.license) tags.push('open-source');
+    if (githubIntel.contributorsCount >= 5) tags.push('team');
+  }
+
+  return tags;
 }
 
 // ============================================================================
@@ -561,9 +1466,11 @@ export function getActiveJobs(): ScanJob[] {
 export function getApiStatus(): {
   grokConfigured: boolean;
   realApiEnabled: boolean;
+  searchToolsDisabled: boolean;
 } {
   return {
     grokConfigured: isGrokAvailable(),
     realApiEnabled: USE_REAL_API,
+    searchToolsDisabled: DISABLE_SEARCH_TOOLS,
   };
 }

@@ -14,8 +14,13 @@ interface WalletProviderProps {
 }
 
 export default function WalletProvider({ children }: WalletProviderProps) {
-  // Use mainnet for production
-  const endpoint = useMemo(() => clusterApiUrl('mainnet-beta'), []);
+  // Use dedicated RPC for production, fallback to public endpoint
+  const endpoint = useMemo(() => {
+    const customRpc = process.env.NEXT_PUBLIC_SOLANA_RPC_URL;
+    if (customRpc) return customRpc;
+    // Public RPC is rate-limited - add NEXT_PUBLIC_SOLANA_RPC_URL for production
+    return clusterApiUrl('mainnet-beta');
+  }, []);
 
   // Configure supported wallets
   const wallets = useMemo(

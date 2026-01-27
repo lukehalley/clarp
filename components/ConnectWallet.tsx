@@ -4,7 +4,10 @@ import { useState, useRef, useEffect } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useWalletModal } from '@solana/wallet-adapter-react-ui';
 import { useAuth } from '@/contexts/AuthContext';
-import { Wallet, LogOut, Copy, Check, ExternalLink } from 'lucide-react';
+import { useUserTier } from '@/hooks/useUserTier';
+import { useTokenBalance } from '@/hooks/useTokenBalance';
+import { TierBadge } from './TierBadge';
+import { Wallet, LogOut, Copy, Check, ExternalLink, RefreshCw } from 'lucide-react';
 
 interface ConnectWalletProps {
   className?: string;
@@ -25,6 +28,8 @@ export default function ConnectWallet({ className = '', compact = false }: Conne
   const { connected, publicKey, disconnect } = useWallet();
   const { setVisible } = useWalletModal();
   const { wallet, isConnecting, isAuthenticated, signIn, signOut } = useAuth();
+  const { tier, balanceFormatted, isLoading: tierLoading } = useUserTier();
+  const { refetch: refetchBalance } = useTokenBalance();
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -201,11 +206,36 @@ export default function ConnectWallet({ className = '', compact = false }: Conne
 
       {/* Dropdown menu */}
       {dropdownOpen && (
-        <div className="absolute right-0 top-full mt-2 w-56 bg-slate-dark border border-ivory-light/20 z-50 shadow-lg">
+        <div className="absolute right-0 top-full mt-2 w-64 bg-slate-dark border border-ivory-light/20 z-50 shadow-lg">
           {/* Wallet address */}
           <div className="p-3 border-b border-ivory-light/10">
             <p className="font-mono text-[10px] text-ivory-light/40 mb-1">CONNECTED WALLET</p>
             <p className="font-mono text-xs text-ivory-light break-all">{wallet}</p>
+          </div>
+
+          {/* Balance and Tier */}
+          <div className="p-3 border-b border-ivory-light/10">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-mono text-[10px] text-ivory-light/40 mb-1">CLARP BALANCE</p>
+                <div className="flex items-center gap-2">
+                  <p className="font-mono text-sm text-larp-green font-bold">
+                    {tierLoading ? '...' : balanceFormatted}
+                  </p>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      refetchBalance();
+                    }}
+                    className="p-0.5 text-ivory-light/40 hover:text-ivory-light transition-colors"
+                    title="Refresh balance"
+                  >
+                    <RefreshCw size={10} className={tierLoading ? 'animate-spin' : ''} />
+                  </button>
+                </div>
+              </div>
+              <TierBadge tier={tier} size="sm" />
+            </div>
           </div>
 
           {/* Actions */}

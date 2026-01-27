@@ -11,12 +11,16 @@
     "remotion:studio": "remotion studio",
     "remotion:render": "remotion render ClarpBrowserPromo out/clarp-browser-promo.mp4",
     "remotion:render:terminal": "remotion render ClarpPromo out/clarp-terminal-promo.mp4",
-    "remotion:render:quick": "remotion render ClarpQuickPromo out/clarp-quick-promo.mp4"
+    "remotion:render:quick": "remotion render ClarpQuickPromo out/clarp-quick-promo.mp4",
+    "seed": "npx tsx scripts/seed-entities.ts",
+    "seed:force": "npx tsx scripts/seed-entities.ts --force",
+    "seed:dry-run": "npx tsx scripts/seed-entities.ts --dry-run"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.71.2",
     "@radix-ui/react-slider": "^1.3.6",
     "@remotion/three": "4.0.409",
+    "@solana/spl-token": "^0.4.14",
     "@solana/wallet-adapter-base": "^0.9.27",
     "@solana/wallet-adapter-react": "^0.15.39",
     "@solana/wallet-adapter-react-ui": "^0.9.39",

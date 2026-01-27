@@ -205,13 +205,14 @@ export interface Alert {
 // SEARCH & ENTITY RESOLUTION
 // ============================================================================
 
-export type EntityType = 'ticker' | 'contract' | 'x_handle' | 'domain';
+export type EntityType = 'ticker' | 'contract' | 'x_handle' | 'domain' | 'ens';
 
 export const ENTITY_TYPE_LABELS: Record<EntityType, string> = {
   ticker: 'Token Ticker',
   contract: 'Contract Address',
   x_handle: 'X Handle',
   domain: 'Website Domain',
+  ens: 'ENS Name',
 };
 
 export interface ResolvedEntity {

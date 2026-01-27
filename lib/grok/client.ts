@@ -4,12 +4,17 @@
 import {
   GrokAnalysisResult,
   GrokClassificationResult,
-  GrokProfileInput,
   GrokResponsesApiResponse,
   GrokTextOutput,
   GrokTopInteraction,
 } from './types';
-import { ANALYSIS_PROMPT, CLASSIFICATION_PROMPT } from './prompts';
+import {
+  ANALYSIS_PROMPT,
+  CLASSIFICATION_PROMPT,
+  DEEP_ANALYSIS_PROMPT,
+  buildOsintGapFinderPrompt,
+  type OsintGaps,
+} from './prompts';
 
 // ============================================================================
 // CONFIGURATION
@@ -60,6 +65,111 @@ export class GrokClient {
    */
   isConfigured(): boolean {
     return !!XAI_API_KEY;
+  }
+
+  /**
+   * Resolve a plain text query to an X handle
+   * Used when user searches for project names, tickers, etc.
+   *
+   * @returns X handle if found, null otherwise
+   */
+  async resolveQuery(query: string): Promise<{
+    handle: string | null;
+    isCryptoRelated: boolean;
+    entityType: 'person' | 'project' | 'company' | 'token' | 'unknown';
+    confidence: 'high' | 'medium' | 'low';
+    reason: string;
+  }> {
+    if (!XAI_API_KEY) {
+      throw new GrokApiError('Grok API client not configured. Set XAI_API_KEY environment variable.');
+    }
+
+    const prompt = `Search for "${query}" and determine if it's related to cryptocurrency, blockchain, or web3.
+
+If you find information about this, respond with JSON:
+{
+  "handle": "the_x_handle_if_found", // X/Twitter handle WITHOUT @ prefix, or null if not found
+  "isCryptoRelated": true, // boolean
+  "entityType": "project", // "person", "project", "company", "token", or "unknown"
+  "confidence": "high", // "high", "medium", or "low"
+  "reason": "Brief explanation"
+}
+
+IMPORTANT:
+- Use x_search to find X/Twitter accounts related to this query
+- If you find an X handle for this entity, include it in "handle"
+- If the query IS an X handle (like @example), just return that handle
+- If the query is a ticker (like $SOL), find the project's X handle
+- Return ONLY valid JSON, no markdown`;
+
+    console.log(`[Grok] Resolving query: "${query}"...`);
+
+    try {
+      const response = await fetch(`${XAI_BASE_URL}/responses`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${XAI_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: this.model,
+          input: [{ role: 'user', content: prompt }],
+          tools: [{ type: 'x_search' }, { type: 'web_search' }],
+          temperature: 0.1,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new GrokApiError(
+          errorData.error || `API request failed with status ${response.status}`,
+          response.status,
+          errorData
+        );
+      }
+
+      const data: GrokResponsesApiResponse = await response.json();
+
+      const textOutput = data.output?.find(
+        (o): o is GrokTextOutput => o.type === 'message' && o.role === 'assistant'
+      );
+
+      if (!textOutput?.content?.[0]?.text) {
+        throw new GrokApiError('No text response from Grok API');
+      }
+
+      const text = textOutput.content[0].text;
+      const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/) || text.match(/(\{[\s\S]*\})/);
+
+      if (!jsonMatch) {
+        console.warn('[Grok] Query resolution failed to parse JSON');
+        return {
+          handle: null,
+          isCryptoRelated: false,
+          entityType: 'unknown',
+          confidence: 'low',
+          reason: 'Could not parse response',
+        };
+      }
+
+      const parsed = JSON.parse(jsonMatch[1].trim());
+      console.log(`[Grok] Resolved query "${query}" -> handle: ${parsed.handle || 'not found'}, crypto: ${parsed.isCryptoRelated}`);
+
+      return {
+        handle: parsed.handle || null,
+        isCryptoRelated: parsed.isCryptoRelated ?? false,
+        entityType: parsed.entityType || 'unknown',
+        confidence: parsed.confidence || 'low',
+        reason: parsed.reason || '',
+      };
+    } catch (error) {
+      if (error instanceof GrokApiError) {
+        throw error;
+      }
+      throw new GrokApiError(
+        error instanceof Error ? error.message : 'Unknown error during query resolution'
+      );
+    }
   }
 
   /**
@@ -171,45 +281,76 @@ export class GrokClient {
    * @param handle - The X handle to analyze
    * @param options.isProject - If true, also use web_search for project research
    *                           If false (default), only use x_search for cost efficiency
+   * @param options.useSearchTools - If false, disable x_search and web_search entirely
+   *                                 and use Grok's training data knowledge (deeper analysis)
    */
   async analyzeProfile(
     handle: string,
-    options: { isProject?: boolean } = {}
+    options: { isProject?: boolean; useSearchTools?: boolean; osintGaps?: OsintGaps } = {}
   ): Promise<GrokAnalysisResult> {
     if (!XAI_API_KEY) {
       throw new GrokApiError('Grok API client not configured. Set XAI_API_KEY environment variable.');
     }
 
-    const { isProject = false } = options;
+    const { isProject = false, useSearchTools = true, osintGaps } = options;
     const normalizedHandle = handle.toLowerCase().replace('@', '');
-    const prompt = ANALYSIS_PROMPT.replace(/{handle}/g, normalizedHandle);
 
-    // For user scans, only use x_search (cheaper)
-    // For project scans, also include web_search for deeper research
-    const tools = isProject
-      ? [{ type: 'x_search' }, { type: 'web_search' }]
-      : [{ type: 'x_search' }];
+    // Choose base prompt based on whether we're using search tools
+    let prompt = useSearchTools
+      ? ANALYSIS_PROMPT.replace(/{handle}/g, normalizedHandle)
+      : DEEP_ANALYSIS_PROMPT.replace(/{handle}/g, normalizedHandle);
 
-    console.log(`[Grok] Analyzing @${normalizedHandle} with tools: ${tools.map(t => t.type).join(', ')}`);
+    // Append OSINT gap-filler instructions if there are gaps to fill
+    if (osintGaps && Object.values(osintGaps).some(v => v)) {
+      const gapPrompt = buildOsintGapFinderPrompt(osintGaps);
+      prompt = prompt + '\n\n' + gapPrompt;
+      console.log(`[Grok] Adding OSINT gap-filler for: ${Object.entries(osintGaps).filter(([, v]) => v).map(([k]) => k).join(', ')}`);
+    }
+
+    // Configure tools based on options
+    // When useSearchTools is false, we don't provide any tools and rely on training data
+    let tools: Array<{ type: string }> | undefined;
+    if (useSearchTools) {
+      // For user scans, only use x_search (cheaper)
+      // For project scans, also include web_search for deeper research
+      tools = isProject
+        ? [{ type: 'x_search' }, { type: 'web_search' }]
+        : [{ type: 'x_search' }];
+    }
+
+    const toolsDesc = tools ? tools.map(t => t.type).join(', ') : 'none (training data only)';
+    console.log(`[Grok] Analyzing @${normalizedHandle} with tools: ${toolsDesc}`);
 
     try {
+      // Build request body - only include tools if we're using them
+      const requestBody: {
+        model: string;
+        input: Array<{ role: string; content: string }>;
+        tools?: Array<{ type: string }>;
+        temperature: number;
+      } = {
+        model: this.model,
+        input: [
+          {
+            role: 'user',
+            content: prompt,
+          },
+        ],
+        temperature: useSearchTools ? 0.3 : 0.2, // Lower temperature for training data mode
+      };
+
+      // Only add tools if we're using them
+      if (tools) {
+        requestBody.tools = tools;
+      }
+
       const response = await fetch(`${XAI_BASE_URL}/responses`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${XAI_API_KEY}`,
         },
-        body: JSON.stringify({
-          model: this.model,
-          input: [
-            {
-              role: 'user',
-              content: prompt,
-            },
-          ],
-          tools,
-          temperature: 0.3,
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) {
@@ -473,6 +614,59 @@ export class GrokClient {
           riskLevel: this.normalizeRiskLevel((parsed.verdict as any).riskLevel),
           confidence: this.normalizeConfidence((parsed.verdict as any).confidence),
           summary: String((parsed.verdict as any).summary || ''),
+        } : undefined,
+        // OSINT-enhanced fields
+        legalEntity: parsed.legalEntity ? {
+          companyName: (parsed.legalEntity as any).companyName || null,
+          jurisdiction: (parsed.legalEntity as any).jurisdiction || null,
+          isRegistered: Boolean((parsed.legalEntity as any).isRegistered),
+          registrationDetails: (parsed.legalEntity as any).registrationDetails || null,
+        } : undefined,
+        affiliations: Array.isArray(parsed.affiliations) ? parsed.affiliations : undefined,
+        tokenomics: parsed.tokenomics ? {
+          totalSupply: (parsed.tokenomics as any).totalSupply,
+          circulatingSupply: (parsed.tokenomics as any).circulatingSupply,
+          burnMechanism: (parsed.tokenomics as any).burnMechanism,
+          burnRate: (parsed.tokenomics as any).burnRate,
+          isDeflationary: Boolean((parsed.tokenomics as any).isDeflationary),
+          vestingSchedule: (parsed.tokenomics as any).vestingSchedule,
+        } : undefined,
+        liquidity: parsed.liquidity ? {
+          primaryDex: (parsed.liquidity as any).primaryDex,
+          poolType: (parsed.liquidity as any).poolType,
+          liquidityUsd: (parsed.liquidity as any).liquidityUsd,
+          liquidityLocked: Boolean((parsed.liquidity as any).liquidityLocked),
+          lockDuration: (parsed.liquidity as any).lockDuration,
+        } : undefined,
+        roadmap: Array.isArray(parsed.roadmap) ? parsed.roadmap : undefined,
+        audit: parsed.audit ? {
+          hasAudit: Boolean((parsed.audit as any).hasAudit),
+          auditor: (parsed.audit as any).auditor,
+          auditDate: (parsed.audit as any).auditDate,
+          auditUrl: (parsed.audit as any).auditUrl,
+          auditStatus: (parsed.audit as any).auditStatus || 'none',
+        } : undefined,
+        techStack: parsed.techStack ? {
+          blockchain: (parsed.techStack as any).blockchain || 'unknown',
+          smartContractLanguage: (parsed.techStack as any).smartContractLanguage,
+          zkTech: (parsed.techStack as any).zkTech,
+          offlineCapability: Boolean((parsed.techStack as any).offlineCapability),
+          hardwareProducts: Array.isArray((parsed.techStack as any).hardwareProducts) ? (parsed.techStack as any).hardwareProducts : [],
+          keyTechnologies: Array.isArray((parsed.techStack as any).keyTechnologies) ? (parsed.techStack as any).keyTechnologies : [],
+        } : undefined,
+        shippingHistory: Array.isArray(parsed.shippingHistory) ? parsed.shippingHistory : undefined,
+        // Deep analysis fields
+        fundingHistory: Array.isArray(parsed.fundingHistory) ? parsed.fundingHistory : undefined,
+        competitorAnalysis: parsed.competitorAnalysis ? {
+          directCompetitors: Array.isArray((parsed.competitorAnalysis as any).directCompetitors) ? (parsed.competitorAnalysis as any).directCompetitors : [],
+          uniqueValue: (parsed.competitorAnalysis as any).uniqueValue,
+          marketPosition: (parsed.competitorAnalysis as any).marketPosition || 'unknown',
+        } : undefined,
+        communityMetrics: parsed.communityMetrics ? {
+          discordMembers: (parsed.communityMetrics as any).discordMembers,
+          telegramMembers: (parsed.communityMetrics as any).telegramMembers,
+          discordActivity: (parsed.communityMetrics as any).discordActivity || 'unknown',
+          sentiment: (parsed.communityMetrics as any).sentiment || 'unknown',
         } : undefined,
         riskLevel: this.normalizeRiskLevel(parsed.riskLevel as string),
         confidence: this.normalizeConfidence(parsed.confidence as string),
