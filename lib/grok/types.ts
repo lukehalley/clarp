@@ -335,11 +335,24 @@ export interface GrokTimelinePeriod {
 export interface GrokPromotionHistoryItem {
   project: string;
   ticker?: string;
-  role: string;
-  period: string;
-  claims: string[];
-  outcome: string;
-  evidenceUrls: string[];
+  role?: string;
+  period?: string;
+  firstMention?: string;
+  lastMention?: string;
+  mentionCount?: number;
+  claims?: string[];
+  outcome?: string;
+  evidenceUrls?: string[];
+}
+
+/**
+ * Top interaction from Grok analysis - who they engage with most
+ */
+export interface GrokTopInteraction {
+  handle: string;
+  relationship: 'collaborator' | 'promoter' | 'critic' | 'friend' | 'unknown';
+  interactionCount: number;
+  context?: string;
 }
 
 /**
@@ -396,6 +409,7 @@ export interface GrokAnalysisResult {
   theStory?: string;
   timeline?: GrokTimelinePeriod[];
   promotionHistory?: GrokPromotionHistoryItem[];
+  topInteractions?: GrokTopInteraction[];
   reputation?: GrokReputation;
   verdict?: GrokVerdict;
   // Risk assessment
@@ -447,6 +461,23 @@ export interface GrokProfileInput {
   following_count: number;
   tweet_count: number;
   verified: boolean;
+}
+
+// ============================================================================
+// CLASSIFICATION RESULT (for pre-scan)
+// ============================================================================
+
+/**
+ * Result from quick classification pre-scan
+ * Used to determine if we should do a full scan and what type
+ */
+export interface GrokClassificationResult {
+  handle: string;
+  isCryptoRelated: boolean;
+  entityType: 'person' | 'project' | 'company' | 'unknown';
+  confidence: 'low' | 'medium' | 'high';
+  reason: string;
+  tokensUsed?: number;
 }
 
 // ============================================================================

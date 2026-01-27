@@ -3,11 +3,13 @@
 
 import {
   GrokAnalysisResult,
+  GrokClassificationResult,
   GrokProfileInput,
   GrokResponsesApiResponse,
   GrokTextOutput,
+  GrokTopInteraction,
 } from './types';
-import { ANALYSIS_PROMPT } from './prompts';
+import { ANALYSIS_PROMPT, CLASSIFICATION_PROMPT } from './prompts';
 
 // ============================================================================
 // CONFIGURATION
@@ -61,16 +63,134 @@ export class GrokClient {
   }
 
   /**
-   * Analyze an X profile using Grok's live search capabilities
-   * This uses the Responses API with x_search and web_search tools
+   * Quick classification to determine if handle is crypto-related and person vs project
+   * This is a lightweight pre-scan to save costs on non-crypto handles
+   *
+   * @returns Classification result with isCryptoRelated and entityType
    */
-  async analyzeProfile(handle: string): Promise<GrokAnalysisResult> {
+  async classifyHandle(handle: string): Promise<GrokClassificationResult> {
     if (!XAI_API_KEY) {
       throw new GrokApiError('Grok API client not configured. Set XAI_API_KEY environment variable.');
     }
 
     const normalizedHandle = handle.toLowerCase().replace('@', '');
-    const prompt = ANALYSIS_PROMPT.replace('{handle}', normalizedHandle);
+    const prompt = CLASSIFICATION_PROMPT.replace(/{handle}/g, normalizedHandle);
+
+    console.log(`[Grok] Classifying @${normalizedHandle}...`);
+
+    try {
+      const response = await fetch(`${XAI_BASE_URL}/responses`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${XAI_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: this.model,
+          input: [{ role: 'user', content: prompt }],
+          tools: [{ type: 'x_search' }],
+          temperature: 0.1, // Low temperature for consistent classification
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new GrokApiError(
+          errorData.error || `API request failed with status ${response.status}`,
+          response.status,
+          errorData
+        );
+      }
+
+      const data: GrokResponsesApiResponse = await response.json();
+
+      if (data.error) {
+        throw new GrokApiError(data.error, undefined, data);
+      }
+
+      const textOutput = data.output?.find(
+        (o): o is GrokTextOutput => o.type === 'message' && o.role === 'assistant'
+      );
+
+      if (!textOutput?.content?.[0]?.text) {
+        throw new GrokApiError('No text response from Grok API');
+      }
+
+      const text = textOutput.content[0].text;
+      const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/) || text.match(/(\{[\s\S]*\})/);
+
+      if (!jsonMatch) {
+        console.warn('[Grok] Classification failed to parse, defaulting to crypto person');
+        return {
+          handle: normalizedHandle,
+          isCryptoRelated: true,
+          entityType: 'person',
+          confidence: 'low',
+          reason: 'Failed to parse classification response',
+          tokensUsed: data.usage?.total_tokens,
+        };
+      }
+
+      try {
+        const parsed = JSON.parse(jsonMatch[1]);
+        console.log(`[Grok] Classification: crypto=${parsed.isCryptoRelated}, type=${parsed.entityType}, tokens=${data.usage?.total_tokens}`);
+
+        return {
+          handle: normalizedHandle,
+          isCryptoRelated: Boolean(parsed.isCryptoRelated),
+          entityType: this.normalizeEntityType(parsed.entityType),
+          confidence: this.normalizeConfidence(parsed.confidence),
+          reason: String(parsed.reason || ''),
+          tokensUsed: data.usage?.total_tokens,
+        };
+      } catch {
+        console.warn('[Grok] Classification JSON parse failed, defaulting to crypto person');
+        return {
+          handle: normalizedHandle,
+          isCryptoRelated: true,
+          entityType: 'person',
+          confidence: 'low',
+          reason: 'Failed to parse classification JSON',
+          tokensUsed: data.usage?.total_tokens,
+        };
+      }
+    } catch (error) {
+      if (error instanceof GrokApiError) throw error;
+      throw new GrokApiError(
+        error instanceof Error ? error.message : 'Unknown error during classification',
+        undefined,
+        error
+      );
+    }
+  }
+
+  /**
+   * Analyze an X profile using Grok's live search capabilities
+   * This uses the Responses API with x_search (and optionally web_search)
+   *
+   * @param handle - The X handle to analyze
+   * @param options.isProject - If true, also use web_search for project research
+   *                           If false (default), only use x_search for cost efficiency
+   */
+  async analyzeProfile(
+    handle: string,
+    options: { isProject?: boolean } = {}
+  ): Promise<GrokAnalysisResult> {
+    if (!XAI_API_KEY) {
+      throw new GrokApiError('Grok API client not configured. Set XAI_API_KEY environment variable.');
+    }
+
+    const { isProject = false } = options;
+    const normalizedHandle = handle.toLowerCase().replace('@', '');
+    const prompt = ANALYSIS_PROMPT.replace(/{handle}/g, normalizedHandle);
+
+    // For user scans, only use x_search (cheaper)
+    // For project scans, also include web_search for deeper research
+    const tools = isProject
+      ? [{ type: 'x_search' }, { type: 'web_search' }]
+      : [{ type: 'x_search' }];
+
+    console.log(`[Grok] Analyzing @${normalizedHandle} with tools: ${tools.map(t => t.type).join(', ')}`);
 
     try {
       const response = await fetch(`${XAI_BASE_URL}/responses`, {
@@ -87,7 +207,7 @@ export class GrokClient {
               content: prompt,
             },
           ],
-          tools: [{ type: 'x_search' }, { type: 'web_search' }],
+          tools,
           temperature: 0.3,
         }),
       });
@@ -325,7 +445,24 @@ export class GrokClient {
         overallAssessment: parsed.overallAssessment as string | undefined,
         theStory: parsed.theStory as string | undefined,
         timeline: Array.isArray(parsed.timeline) ? parsed.timeline : undefined,
-        promotionHistory: Array.isArray(parsed.promotionHistory) ? parsed.promotionHistory : undefined,
+        promotionHistory: Array.isArray(parsed.promotionHistory) ? parsed.promotionHistory.map((p: Record<string, unknown>) => ({
+          project: String(p.project || ''),
+          ticker: p.ticker as string | undefined,
+          role: p.role as string | undefined,
+          period: p.period as string | undefined,
+          firstMention: p.firstMention as string | undefined,
+          lastMention: p.lastMention as string | undefined,
+          mentionCount: typeof p.mentionCount === 'number' ? p.mentionCount : undefined,
+          claims: Array.isArray(p.claims) ? p.claims : undefined,
+          outcome: p.outcome as string | undefined,
+          evidenceUrls: Array.isArray(p.evidenceUrls) ? p.evidenceUrls : undefined,
+        })) : undefined,
+        topInteractions: Array.isArray(parsed.topInteractions) ? parsed.topInteractions.map((i: Record<string, unknown>) => ({
+          handle: String(i.handle || ''),
+          relationship: this.normalizeRelationship(i.relationship as string),
+          interactionCount: typeof i.interactionCount === 'number' ? i.interactionCount : 1,
+          context: i.context as string | undefined,
+        })) : undefined,
         reputation: parsed.reputation ? {
           supporters: Array.isArray((parsed.reputation as any).supporters) ? (parsed.reputation as any).supporters : [],
           critics: Array.isArray((parsed.reputation as any).critics) ? (parsed.reputation as any).critics : [],
@@ -363,6 +500,23 @@ export class GrokClient {
     if (normalized === 'low') return 'low';
     if (normalized === 'high') return 'high';
     return 'medium';
+  }
+
+  private normalizeRelationship(rel: string | undefined): GrokTopInteraction['relationship'] {
+    const normalized = String(rel || '').toLowerCase();
+    if (normalized === 'collaborator') return 'collaborator';
+    if (normalized === 'promoter') return 'promoter';
+    if (normalized === 'critic') return 'critic';
+    if (normalized === 'friend') return 'friend';
+    return 'unknown';
+  }
+
+  private normalizeEntityType(type: string | undefined): GrokClassificationResult['entityType'] {
+    const normalized = String(type || '').toLowerCase();
+    if (normalized === 'person') return 'person';
+    if (normalized === 'project') return 'project';
+    if (normalized === 'company') return 'company';
+    return 'unknown';
   }
 
   private normalizeEvidenceLabel(

@@ -225,6 +225,11 @@ async function processScanJob(jobId: string): Promise<void> {
 /**
  * Process scan using Grok with live X search
  * Grok handles all data fetching via x_search and web_search tools
+ *
+ * Flow:
+ * 1. Quick classification to check if crypto-related and person vs project
+ * 2. If not crypto-related, return early with "not relevant" report
+ * 3. If project, use web_search for deeper research; if person, skip it
  */
 async function processRealScan(job: ScanJob): Promise<void> {
   const grokClient = getGrokClient();
@@ -234,17 +239,100 @@ async function processRealScan(job: ScanJob): Promise<void> {
   updateJobStatus(job, 'queued', 5, 'Initializing scan...');
   await sleep(200);
 
-  // Stage 2: Fetching profile
-  console.log(`[XIntel] Stage 2: Fetching for @${job.handle}`);
-  updateJobStatus(job, 'fetching', 10, 'Connecting to X API...');
-  await sleep(300);
+  // Stage 2: Quick classification (cheap pre-scan)
+  console.log(`[XIntel] Stage 2: Classifying @${job.handle}...`);
+  updateJobStatus(job, 'fetching', 10, 'Classifying account type...');
+
+  let isProject = false;
+  try {
+    const classification = await grokClient.classifyHandle(job.handle);
+    console.log(`[XIntel] Classification result: crypto=${classification.isCryptoRelated}, type=${classification.entityType}`);
+
+    // Early exit if not crypto-related
+    if (!classification.isCryptoRelated) {
+      console.log(`[XIntel] @${job.handle} is not crypto-related, creating minimal report`);
+      updateJobStatus(job, 'complete', 100, 'Not crypto-related');
+      job.completedAt = new Date();
+      scanJobs.set(job.id, job);
+
+      // Create a minimal "not relevant" report
+      const notRelevantReport: XIntelReport = {
+        id: `report_${job.handle}_${Date.now()}`,
+        profile: {
+          handle: job.handle,
+          verified: false,
+          languagesDetected: ['en'],
+        },
+        score: {
+          overall: 100,
+          riskLevel: 'low',
+          factors: [],
+          confidence: 'high',
+        },
+        keyFindings: [{
+          id: 'kf_not_crypto',
+          title: 'Not Crypto-Related',
+          description: classification.reason || 'This account does not appear to be involved in cryptocurrency.',
+          severity: 'info',
+          evidenceIds: [],
+        }],
+        shilledEntities: [],
+        backlashEvents: [],
+        behaviorMetrics: {
+          toxicity: { score: 0, examples: [] },
+          vulgarity: { score: 0, examples: [] },
+          hype: { score: 0, examples: [], keywords: [] },
+          aggression: { score: 0, examples: [], targetPatterns: [] },
+          consistency: { score: 100, topicDrift: 0, contradictions: [] },
+          spamBurst: { detected: false, burstPeriods: [] },
+        },
+        networkMetrics: {
+          topInteractions: [],
+          mentionList: [],
+          engagementHeuristics: {
+            replyRatio: 0,
+            retweetRatio: 0,
+            avgEngagementRate: 0,
+            suspiciousPatterns: [],
+          },
+        },
+        linkedEntities: [],
+        evidence: [],
+        scanTime: new Date(),
+        postsAnalyzed: 0,
+        cached: false,
+        disclaimer: `AI-powered classification. Tokens used: ${classification.tokensUsed || 0}. This account was determined to not be crypto-related.`,
+      };
+
+      // Cache the report
+      reportCache.set(job.handle, { report: notRelevantReport, cachedAt: new Date() });
+      if (isSupabaseAvailable()) {
+        cacheReportInSupabase(
+          job.handle,
+          notRelevantReport as unknown as Record<string, unknown>,
+          CACHE_TTL_MS
+        ).catch(err => console.error('[XIntel] Failed to cache to Supabase:', err));
+      }
+      return;
+    }
+
+    // Determine if it's a project (use web_search) or person (skip web_search)
+    isProject = classification.entityType === 'project' || classification.entityType === 'company';
+    console.log(`[XIntel] @${job.handle} is a ${classification.entityType}, isProject=${isProject}`);
+  } catch (err) {
+    // Classification failed, continue with default (person, no web_search)
+    console.warn(`[XIntel] Classification failed for @${job.handle}, assuming crypto person:`, err);
+  }
+
+  // Stage 3: Fetching profile (UI progress)
+  console.log(`[XIntel] Stage 3: Fetching for @${job.handle}`);
   updateJobStatus(job, 'fetching', 15, 'Fetching profile metadata...');
   await sleep(200);
   updateJobStatus(job, 'fetching', 20, 'Loading recent posts...');
   await sleep(200);
 
-  // Stage 3: Extracting data
-  console.log(`[XIntel] Stage 3: Extracting data for @${job.handle}`);
+  // Stage 4: Extracting data
+  console.log(`[XIntel] Stage 4: Extracting data for @${job.handle}`);
   updateJobStatus(job, 'extracting', 25, 'Extracting mentioned entities...');
   await sleep(200);
   updateJobStatus(job, 'extracting', 30, 'Parsing linked accounts...');
@@ -254,15 +342,15 @@ async function processRealScan(job: ScanJob): Promise<void> {
   updateJobStatus(job, 'extracting', 40, 'Mapping engagement patterns...');
   await sleep(200);
 
-  // Stage 4: AI Analysis (this is the long-running part)
-  console.log(`[XIntel] Stage 4: Analyzing @${job.handle} with Grok...`);
-  updateJobStatus(job, 'analyzing', 45, 'Starting AI analysis...');
+  // Stage 5: AI Analysis (this is the long-running part)
+  console.log(`[XIntel] Stage 5: Analyzing @${job.handle} with Grok (isProject=${isProject})...`);
+  updateJobStatus(job, 'analyzing', 45, isProject ? 'Deep analysis with web search...' : 'Analyzing X activity...');
 
   // Start a progress simulation while waiting for Grok
   const progressInterval = startAnalysisProgress(job);
 
   try {
-    const analysis = await grokClient.analyzeProfile(job.handle);
+    const analysis = await grokClient.analyzeProfile(job.handle, { isProject });
     clearInterval(progressInterval);
     console.log(`[XIntel] Grok analysis complete for @${job.handle}, risk: ${analysis.riskLevel}`);
 

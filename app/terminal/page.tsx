@@ -1,5 +1,5 @@
-import { redirect } from 'next/navigation';
+import UnifiedHomePage from '@/components/terminal/unified/UnifiedHomePage';
 
 export default function TerminalIndex() {
-  redirect('/terminal/projects');
+  return <UnifiedHomePage />;
 }

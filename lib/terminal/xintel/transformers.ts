@@ -416,25 +416,44 @@ function buildDefaultNetworkMetrics(analysis: GrokAnalysisResult): NetworkMetric
   const pos = analysis.positiveIndicators;
   const neg = analysis.negativeIndicators;
 
-  // Build top interactions from team members
-  const topInteractions = pos.teamMembers
-    .filter(m => m.xHandle)
-    .map((member, i) => ({
-      handle: member.xHandle || member.name,
-      displayName: member.name,
+  // Build top interactions from Grok's topInteractions (preferred) or fall back to team members
+  let topInteractions: NetworkMetrics['topInteractions'] = [];
+
+  if (analysis.topInteractions && analysis.topInteractions.length > 0) {
+    // Use Grok's analysis of who they interact with most
+    topInteractions = analysis.topInteractions.map(interaction => ({
+      handle: interaction.handle.replace(/^@/, ''),
+      displayName: undefined,
       followers: undefined,
-      interactionCount: 1,
-      interactionType: 'mention' as const,
+      interactionCount: interaction.interactionCount,
+      interactionType: interaction.relationship === 'collaborator' ? 'mention' as const
+        : interaction.relationship === 'promoter' ? 'retweet' as const
+        : 'reply' as const,
     }));
+  } else {
+    // Fall back to team members
+    topInteractions = pos.teamMembers
+      .filter(m => m.xHandle)
+      .map(member => ({
+        handle: member.xHandle || member.name,
+        displayName: member.name,
+        followers: undefined,
+        interactionCount: 1,
+        interactionType: 'mention' as const,
+      }));
+  }
 
   const suspiciousPatterns: string[] = [];
   if (neg.hasSuspiciousFollowers) {
     suspiciousPatterns.push(neg.suspiciousDetails || 'Suspicious follower patterns detected');
   }
 
+  // Build mention list from top interactions
+  const mentionList = topInteractions.map(i => i.handle);
+
   return {
     topInteractions,
-    mentionList: pos.teamMembers.map(m => m.xHandle || m.name),
+    mentionList,
     engagementHeuristics: {
       replyRatio: 0.3,
       retweetRatio: 0.2,

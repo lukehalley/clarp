@@ -3,10 +3,8 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import SearchInput from './SearchInput';
 import TerminalLoader from './TerminalLoader';
 import {
-  FolderKanban,
   Bookmark,
   Bell,
   Menu,
@@ -15,6 +13,8 @@ import {
   ArrowLeft,
   Radar,
   Settings,
+  Trophy,
+  AlertTriangle,
 } from 'lucide-react';
 import ConnectWallet from '@/components/ConnectWallet';
 
@@ -24,9 +24,11 @@ interface NavItem {
   icon: React.ReactNode;
 }
 
+// Simplified nav - single home + leaderboards + warnings
 const NAV_ITEMS: NavItem[] = [
-  { href: '/terminal/projects', label: 'Projects', icon: <FolderKanban size={18} /> },
-  { href: '/terminal/xintel', label: 'X Intel', icon: <Radar size={18} /> },
+  { href: '/terminal', label: 'Home', icon: <Radar size={18} /> },
+  { href: '/terminal/leaderboard', label: 'Leaderboard', icon: <Trophy size={18} /> },
+  { href: '/terminal/warnings', label: 'Warnings', icon: <AlertTriangle size={18} /> },
 ];
 
 interface TerminalLayoutProps {
@@ -62,9 +64,11 @@ export default function TerminalLayout({ children }: TerminalLayoutProps) {
   };
 
   const isActive = (href: string) => {
-    if (href === '/terminal/projects') {
-      return pathname === '/terminal/projects' || pathname.startsWith('/terminal/project/');
+    // Exact match for home
+    if (href === '/terminal') {
+      return pathname === '/terminal';
     }
+    // Prefix match for other routes
     return pathname.startsWith(href);
   };
 
@@ -86,7 +90,7 @@ export default function TerminalLayout({ children }: TerminalLayoutProps) {
 
       {/* Header */}
       <header className="shrink-0 border-b border-ivory-light/10 bg-slate-dark">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+        <div className="px-3 h-16 flex items-center justify-between gap-4">
           {/* Back + Logo + Demo + Nav */}
           <div className="flex items-center gap-3 shrink-0">
             <button
@@ -128,12 +132,8 @@ export default function TerminalLayout({ children }: TerminalLayoutProps) {
             </nav>
           </div>
 
-          {/* Search + Actions */}
-          <div className="hidden md:flex items-center gap-3 flex-1 justify-end max-w-lg">
-            <div className="hidden lg:block flex-1">
-              <SearchInput compact />
-            </div>
-
+          {/* Actions */}
+          <div className="hidden md:flex items-center gap-3">
             {/* Connect Wallet Button */}
             <ConnectWallet compact />
 
@@ -243,10 +243,7 @@ export default function TerminalLayout({ children }: TerminalLayoutProps) {
         {/* Mobile Menu */}
         {mobileMenuOpen && (
           <div className="md:hidden border-t border-ivory-light/10 bg-slate-dark">
-            <div className="p-4">
-              <SearchInput />
-            </div>
-            <nav className="pb-4">
+            <nav className="py-2">
               {NAV_ITEMS.map((item) => (
                 <Link
                   key={item.href}
@@ -312,20 +309,15 @@ export default function TerminalLayout({ children }: TerminalLayoutProps) {
 
       {/* Scrollable content area */}
       <div className="flex-1 overflow-y-auto">
-        {/* Search Bar - Mobile (below header) */}
-        <div className="lg:hidden bg-slate-dark border-b border-ivory-light/10 p-4">
-          <SearchInput />
-        </div>
-
         {/* Main Content */}
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 w-full">
+        <main className="px-3 py-3 w-full h-full">
           {children}
         </main>
       </div>
 
       {/* Footer */}
-      <footer className="shrink-0 border-t border-ivory-light/10 py-4 px-4 sm:px-6 bg-slate-dark">
-        <div className="max-w-7xl mx-auto space-y-3">
+      <footer className="shrink-0 border-t border-ivory-light/10 py-3 px-3 bg-slate-dark">
+        <div className="space-y-2">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-mono text-ivory-light/40">
             <div className="flex items-center gap-2">
               <span className="text-danger-orange">CLARP</span>

@@ -4,16 +4,57 @@
 import type { GrokTweetInput, GrokProfileInput } from './types';
 
 // ============================================================================
+// PRE-SCAN CLASSIFICATION PROMPT (lightweight, fast, cheap)
+// ============================================================================
+
+/**
+ * Quick classification prompt to determine:
+ * 1. Is this account crypto-related?
+ * 2. Is it a person or a project/company?
+ *
+ * This runs first to avoid wasting tokens on non-crypto handles
+ * and to determine whether to use web_search (for projects)
+ */
+export const CLASSIFICATION_PROMPT = `Quick check on @{handle}. One x_search only.
+
+Return JSON:
+{
+  "handle": "{handle}",
+  "isCryptoRelated": true/false,
+  "entityType": "person" | "project" | "company" | "unknown",
+  "confidence": "low" | "medium" | "high",
+  "reason": "1 sentence why"
+}
+
+Rules:
+- isCryptoRelated: Do they post about crypto, tokens, DeFi, NFTs, web3?
+- entityType: "person" = individual influencer/trader, "project" = token/protocol/company account
+- If bio mentions nothing crypto and recent posts aren't crypto, set isCryptoRelated=false
+
+Return ONLY valid JSON.`;
+
+// ============================================================================
 // LIVE X SEARCH ANALYSIS PROMPT (for Responses API with Agent Tools)
 // ============================================================================
 
 /**
  * Prompt for analyzing X profiles using Grok's live x_search capability
  * This is used with the Responses API and grok-4-1-fast model
+ *
+ * OPTIMIZED FOR:
+ * - Capturing ALL tokens/projects they promote (promotionHistory)
+ * - Tracking who they interact with most (topInteractions)
+ * - Scanning a full year of history
+ * - Cost efficiency (structured output, no web search for users)
  */
-export const ANALYSIS_PROMPT = `Analyze @{handle} for crypto scam risk.
+export const ANALYSIS_PROMPT = `Analyze @{handle} for crypto scam risk. Search their FULL history from the past year.
 
-IMPORTANT: Use ONLY ONE x_search call with query "@{handle}". Do NOT do multiple searches.
+SEARCH STRATEGY:
+1. Search "@{handle}" to get their posts and profile
+2. Search "@{handle} scam OR rug OR fraud" to find any allegations
+3. Look at posts from the past 12 months, not just recent
+
+CRITICAL: Identify ALL crypto tokens/projects they have promoted (tickers starting with $).
 
 Return JSON:
 {
@@ -50,9 +91,28 @@ Return JSON:
     "hasSuspiciousFollowers": false,
     "hasAggressivePromotion": false
   },
-  "theStory": "1-2 sentences about who they are",
-  "keyFindings": ["top 3-5 findings"],
-  "evidence": [{"date":"","tweetExcerpt":"","tweetUrl":"","label":"","relevance":""}],
+  "promotionHistory": [
+    {
+      "project": "Token/Project Name",
+      "ticker": "$TICKER",
+      "firstMention": "YYYY-MM-DD",
+      "lastMention": "YYYY-MM-DD",
+      "mentionCount": 5,
+      "outcome": "active|rugged|failed|unknown",
+      "evidenceUrls": ["https://x.com/..."]
+    }
+  ],
+  "topInteractions": [
+    {
+      "handle": "@username",
+      "relationship": "collaborator|promoter|critic|friend",
+      "interactionCount": 10,
+      "context": "Brief description"
+    }
+  ],
+  "theStory": "2-3 sentences about who they are and what they do",
+  "keyFindings": ["top 5-7 findings with specifics"],
+  "evidence": [{"date":"YYYY-MM-DD","tweetExcerpt":"","tweetUrl":"","label":"shill|backlash|hype|neutral|positive","relevance":""}],
   "verdict": {
     "trustLevel": 5,
     "riskLevel": "medium",
@@ -63,6 +123,16 @@ Return JSON:
   "website": null,
   "contract": null
 }
+
+IMPORTANT for promotionHistory:
+- Include EVERY token/project they've promoted in the past year
+- Note if any tokens rugged after their promotion
+- Track how many times they mentioned each
+
+IMPORTANT for topInteractions:
+- Who do they reply to most?
+- Who do they retweet/quote most?
+- Are they part of any crypto groups/cabals?
 
 Scoring: doxxed+github=trustworthy(8-10), anonymous+hype=suspicious(4-6), scam allegations=high risk(1-3).
 Return ONLY valid JSON.`;
