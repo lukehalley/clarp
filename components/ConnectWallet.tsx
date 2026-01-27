@@ -30,11 +30,16 @@ export default function ConnectWallet({ className = '', compact = false }: Conne
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [userDisconnected, setUserDisconnected] = useState(false);
+  const [signInRejected, setSignInRejected] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Track mount state to avoid hydration mismatch
   useEffect(() => {
     setMounted(true);
+    // Check if user previously disconnected
+    const disconnected = localStorage.getItem('wallet-user-disconnected') === 'true';
+    setUserDisconnected(disconnected);
   }, []);
 
   // Close dropdown on click outside
@@ -54,26 +59,34 @@ export default function ConnectWallet({ className = '', compact = false }: Conne
     };
   }, [dropdownOpen]);
 
-  // Auto sign-in when wallet connects
+  // Auto sign-in when wallet connects (but not if user manually disconnected or rejected sign-in)
   useEffect(() => {
-    if (connected && publicKey && !isAuthenticated && !isConnecting && mounted) {
+    if (connected && publicKey && !isAuthenticated && !isConnecting && mounted && !userDisconnected && !signInRejected) {
       signIn().catch((err) => {
         console.error('[ConnectWallet] Auto sign-in failed:', err);
+        setSignInRejected(true);
         setError(err instanceof Error ? err.message : 'Sign in failed');
         setTimeout(() => setError(null), 5000);
       });
     }
-  }, [connected, publicKey, isAuthenticated, isConnecting, mounted, signIn]);
+  }, [connected, publicKey, isAuthenticated, isConnecting, mounted, signIn, userDisconnected, signInRejected]);
 
   // Handle connect - opens wallet modal
   const handleConnect = () => {
     setError(null);
+    // Clear flags when user manually initiates connection
+    localStorage.removeItem('wallet-user-disconnected');
+    setUserDisconnected(false);
+    setSignInRejected(false);
     setVisible(true);
   };
 
   // Handle disconnect
   const handleDisconnect = async () => {
     setDropdownOpen(false);
+    // Remember that user manually disconnected to prevent auto-reconnect spam
+    localStorage.setItem('wallet-user-disconnected', 'true');
+    setUserDisconnected(true);
     try {
       await signOut();
       await disconnect();
