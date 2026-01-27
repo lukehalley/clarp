@@ -21,7 +21,7 @@ import {
   getScanJobFromDb,
   getActiveScanJobByHandle,
 } from '@/lib/supabase/client';
-import { upsertProjectByHandle } from '@/lib/terminal/project-service';
+import { upsertProjectByHandle, upsertProjectByTokenAddress } from '@/lib/terminal/project-service';
 import type { GrokAnalysisResult } from '@/lib/grok/types';
 import { fetchGitHubRepoIntel, checkWebsiteLive, type GitHubRepoIntel } from '@/lib/terminal/osint';
 import {
@@ -164,6 +164,54 @@ export async function submitUniversalScan(options: UniversalScanOptions): Promis
   // If no X handle or skipXAnalysis, return OSINT-only result
   if (!entity.xHandle || skipXAnalysis) {
     console.log(`[UniversalScan] No X handle or skip requested - returning OSINT-only result`);
+
+    // Save the project to DB so redirect works (even without X handle)
+    if (isSupabaseAvailable() && entity.tokenAddresses?.[0]?.address) {
+      const tokenAddress = entity.tokenAddresses[0].address;
+      const projectData = {
+        name: entity.name || entity.symbol || `Token ${tokenAddress.slice(0, 8)}...`,
+        description: entity.description || undefined,
+        avatarUrl: entity.imageUrl || undefined,
+        tokenAddress,
+        ticker: entity.symbol || undefined,
+        websiteUrl: entity.website || undefined,
+        githubUrl: entity.github || undefined,
+        telegramUrl: entity.telegram || undefined,
+        discordUrl: entity.discord || undefined,
+        trustScore: {
+          score: 50,
+          tier: 'neutral' as const,
+          confidence: 'low' as const,
+          lastUpdated: new Date(),
+        },
+        marketData: entity.marketIntel ? {
+          price: entity.marketIntel.priceUsd || 0,
+          priceChange24h: entity.marketIntel.priceChange24h || 0,
+          marketCap: entity.marketIntel.marketCap,
+          volume24h: entity.marketIntel.volume24h,
+          liquidity: entity.marketIntel.liquidity,
+        } : undefined,
+        securityIntel: entity.securityIntel?.isAccessible ? {
+          mintAuthorityEnabled: entity.securityIntel.mintAuthority === 'active',
+          freezeAuthorityEnabled: entity.securityIntel.freezeAuthority === 'active',
+          lpLocked: entity.securityIntel.lpLocked === true,
+          holdersCount: entity.securityIntel.totalHolders,
+          risks: entity.securityIntel.risks?.map(r => r.description || r.name) || [],
+        } : undefined,
+        keyFindings: [
+          ...(entity.securityIntel?.isRugged ? ['⚠️ FLAGGED AS RUG PULL'] : []),
+          ...(entity.securityIntel?.mintAuthority === 'active' ? ['Mint authority active'] : []),
+          ...(entity.securityIntel?.freezeAuthority === 'active' ? ['Freeze authority active'] : []),
+          'OSINT-only scan (no X handle found)',
+        ],
+        lastScanAt: new Date(),
+      };
+
+      upsertProjectByTokenAddress(tokenAddress, projectData)
+        .then(p => p && console.log(`[UniversalScan] Saved OSINT-only project: ${p.name}`))
+        .catch(err => console.error('[UniversalScan] Failed to save OSINT-only project:', err));
+    }
+
     return {
       jobId: `osint_${entity.canonicalId}_${Date.now()}`,
       inputType,

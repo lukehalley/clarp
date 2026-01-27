@@ -473,6 +473,69 @@ export async function upsertProjectByHandle(
   }
 }
 
+/**
+ * Upsert project by token address (for OSINT-only projects without X handle)
+ */
+export async function upsertProjectByTokenAddress(
+  tokenAddress: string,
+  project: Partial<Project> & { name: string }
+): Promise<Project | null> {
+  const client = getSupabaseClient();
+  if (!client) return null;
+
+  try {
+    // First check if a project with this token address already exists
+    const existing = await getProjectByTokenAddress(tokenAddress);
+
+    if (existing) {
+      // Update the existing project
+      const updateData = projectToUpdate({
+        ...project,
+        lastScanAt: new Date(),
+      });
+
+      const { data, error } = await client
+        .from('projects')
+        .update(updateData)
+        .eq('id', existing.id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('[ProjectService] Error updating project by token:', error.message);
+        return null;
+      }
+
+      console.log(`[ProjectService] Updated project by token: ${tokenAddress.slice(0, 8)}...`);
+      return rowToProject(data as ProjectRow);
+    }
+
+    // Create new project
+    const insert = {
+      ...projectToInsert(project),
+      token_address: tokenAddress,
+      last_scan_at: new Date().toISOString(),
+    };
+
+    const { data, error } = await client
+      .from('projects')
+      .insert(insert)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('[ProjectService] Error creating project by token:', error.message);
+      return null;
+    }
+
+    console.log(`[ProjectService] Created project by token: ${tokenAddress.slice(0, 8)}...`);
+    return rowToProject(data as ProjectRow);
+  } catch (err) {
+    console.error('[ProjectService] Failed to upsert project by token:', err);
+    return null;
+  }
+}
+
 // ============================================================================
 // LIST & FEED OPERATIONS
 // ============================================================================

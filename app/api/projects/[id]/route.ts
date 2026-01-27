@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getProjectById, getProjectByHandle, deleteProject, deleteProjectByHandle } from '@/lib/terminal/project-service';
+import { getProjectById, getProjectByHandle, getProjectByTokenAddress, deleteProject, deleteProjectByHandle } from '@/lib/terminal/project-service';
 import { deleteCachedReportFromSupabase } from '@/lib/supabase/client';
 
 export async function GET(
@@ -18,13 +18,20 @@ export async function GET(
 
     // Check if it looks like a UUID
     const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+    // Check if it looks like a Solana address (base58, 32-44 chars)
+    const isSolanaAddress = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(id);
 
     let project = null;
 
     if (isUuid) {
       project = await getProjectById(id);
-    } else {
-      // Treat as handle
+    } else if (isSolanaAddress) {
+      // Try token address first
+      project = await getProjectByTokenAddress(id);
+    }
+
+    // If not found yet, try as X handle
+    if (!project) {
       const handle = id.replace(/^@/, '').toLowerCase();
       project = await getProjectByHandle(handle);
     }
