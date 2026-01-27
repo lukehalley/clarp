@@ -87,10 +87,7 @@ export class GrokClient {
               content: prompt,
             },
           ],
-          tools: [
-            { type: 'x_search' },
-            { type: 'web_search' },
-          ],
+          tools: [{ type: 'x_search' }, { type: 'web_search' }],
           temperature: 0.3,
         }),
       });
@@ -158,10 +155,7 @@ export class GrokClient {
               content: query,
             },
           ],
-          tools: [
-            { type: 'x_search' },
-            { type: 'web_search' },
-          ],
+          tools: [{ type: 'x_search' }, { type: 'web_search' }],
           temperature: 0.3,
         }),
       });

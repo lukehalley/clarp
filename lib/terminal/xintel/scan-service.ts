@@ -32,8 +32,9 @@ const scanJobs: Map<string, ScanJob> = new Map();
 // Report cache (would be Redis/DB in production)
 const reportCache: Map<string, { report: XIntelReport; cachedAt: Date }> = new Map();
 
-// Default cache TTL: 6 hours
-const CACHE_TTL_MS = 6 * 60 * 60 * 1000;
+// Default cache TTL: 24 hours (aggressive caching to reduce Grok API costs)
+// See docs/adr/001-aggressive-caching.md for decision rationale
+const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 
 // Rate limiting (per handle)
 const scanCooldowns: Map<string, Date> = new Map();
