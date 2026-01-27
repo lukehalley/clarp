@@ -4,7 +4,6 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import SearchInput from './SearchInput';
-import TerminalLoader from './TerminalLoader';
 import ConnectWallet from '@/components/ConnectWallet';
 import {
   Bookmark,
@@ -12,10 +11,7 @@ import {
   Menu,
   X,
   ArrowLeft,
-  Settings,
 } from 'lucide-react';
-
-// No nav items currently - just the header search/actions
 
 interface TerminalLayoutProps {
   children: React.ReactNode;
@@ -24,19 +20,7 @@ interface TerminalLayoutProps {
 export default function TerminalLayout({ children }: TerminalLayoutProps) {
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [alertsOpen, setAlertsOpen] = useState(false);
-  const [showLoader, setShowLoader] = useState(false); // Disabled loader for faster access
-  const [booted, setBooted] = useState(true);
-  const [isFadingIn, setIsFadingIn] = useState(false);
   const [isFadingOut, setIsFadingOut] = useState(false);
-
-  const handleBootComplete = () => {
-    setShowLoader(false);
-    setBooted(true);
-    setTimeout(() => {
-      setIsFadingIn(false);
-    }, 50);
-  };
 
   const handleBackToHome = () => {
     setIsFadingOut(true);
@@ -45,18 +29,11 @@ export default function TerminalLayout({ children }: TerminalLayoutProps) {
     }, 500);
   };
 
-  if (showLoader && !booted) {
-    return <TerminalLoader onComplete={handleBootComplete} />;
-  }
-
   return (
     <>
       {/* Persistent background */}
       <div className="fixed inset-0 bg-slate-dark -z-10" />
-      <div
-        className="h-screen bg-slate-dark flex flex-col overflow-hidden transition-opacity duration-500 ease-out"
-        style={{ opacity: isFadingIn ? 0 : 1 }}
-      >
+      <div className="min-h-screen bg-slate-dark flex flex-col">
         {/* Construction stripe */}
         <div className="construction-stripe h-2 shrink-0" />
 
@@ -79,111 +56,31 @@ export default function TerminalLayout({ children }: TerminalLayoutProps) {
                 <span className="text-danger-orange">CLARP</span>
                 <span className="text-ivory-light/60">TERMINAL</span>
               </Link>
-              {/* Demo Badge */}
-              <div className="hidden sm:flex items-center">
-                <span className="px-2 py-0.5 bg-larp-yellow/20 border border-larp-yellow/50 text-larp-yellow font-mono text-[10px] font-bold tracking-wider animate-pulse">
-                  DEMO
-                </span>
-              </div>
             </div>
 
             {/* Search + Actions */}
-            <div className="hidden md:flex items-center gap-3 flex-1 justify-end max-w-2xl">
-              <div className="hidden lg:block flex-1 min-w-[280px]">
+            <div className="hidden md:flex items-center gap-3 flex-1 justify-end max-w-3xl">
+              <div className="hidden lg:block flex-1 min-w-[400px]">
                 <SearchInput compact />
               </div>
 
-              {/* Watchlist Button */}
-              <Link
-                href="/terminal/watchlist"
-                className="shrink-0 w-10 h-10 flex items-center justify-center bg-larp-yellow border-2 border-black transition-all hover:translate-x-0.5 hover:translate-y-0.5"
-                style={{ boxShadow: '3px 3px 0 black' }}
-                title="Watchlist"
+              {/* Watchlist Button - Disabled/Coming Soon */}
+              <div
+                className="shrink-0 w-10 h-10 flex items-center justify-center bg-larp-yellow/30 border-2 border-black/30 cursor-not-allowed opacity-40"
+                title="Watchlist - Coming Soon"
               >
-                <Bookmark size={18} className="text-black" />
-              </Link>
+                <Bookmark size={18} className="text-black/50" />
+              </div>
 
-              {/* Alerts Icon */}
+              {/* Alerts Icon - Disabled/Coming Soon */}
               <div className="relative shrink-0">
-                <button
-                  onClick={() => setAlertsOpen(!alertsOpen)}
-                  className="relative w-10 h-10 flex items-center justify-center bg-danger-orange border-2 border-black transition-all hover:translate-x-0.5 hover:translate-y-0.5"
-                  style={{ boxShadow: alertsOpen ? 'none' : '3px 3px 0 black' }}
-                  title="Alerts"
+                <div
+                  className="relative w-10 h-10 flex items-center justify-center bg-danger-orange/30 border-2 border-black/30 cursor-not-allowed opacity-40"
+                  title="Alerts - Coming Soon"
                 >
-                  <Bell size={18} className="text-black" />
-                  {/* Notification dot */}
-                  <span className="absolute -top-1 -right-1 w-3 h-3 bg-larp-red border border-black" />
-                </button>
+                  <Bell size={18} className="text-black/50" />
+                </div>
 
-                {/* Alerts Dropdown */}
-                {alertsOpen && (
-                  <>
-                    <div
-                      className="fixed inset-0 z-40"
-                      onClick={() => setAlertsOpen(false)}
-                    />
-                    <div className="absolute right-0 top-full mt-2 w-80 bg-slate-dark border-2 border-danger-orange/50 z-50 shadow-lg">
-                      <div className="p-4 border-b border-ivory-light/10">
-                        <div className="flex items-center justify-between">
-                          <span className="font-mono font-bold text-ivory-light">ALERTS</span>
-                          <span className="px-2 py-0.5 bg-larp-red/20 text-larp-red font-mono text-xs">
-                            3 NEW
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Alert Items */}
-                      <div className="max-h-64 overflow-y-auto">
-                        <div className="p-3 border-b border-ivory-light/5 hover:bg-ivory-light/5">
-                          <div className="flex items-start gap-2">
-                            <span className="w-2 h-2 mt-1.5 bg-larp-red shrink-0" />
-                            <div>
-                              <p className="font-mono text-xs text-ivory-light">
-                                @cryptokol_alpha score dropped to 28
-                              </p>
-                              <p className="font-mono text-[10px] text-ivory-light/40 mt-1">2m ago</p>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="p-3 border-b border-ivory-light/5 hover:bg-ivory-light/5">
-                          <div className="flex items-start gap-2">
-                            <span className="w-2 h-2 mt-1.5 bg-larp-yellow shrink-0" />
-                            <div>
-                              <p className="font-mono text-xs text-ivory-light">
-                                New backlash event for @degen_trader
-                              </p>
-                              <p className="font-mono text-[10px] text-ivory-light/40 mt-1">15m ago</p>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="p-3 border-b border-ivory-light/5 hover:bg-ivory-light/5">
-                          <div className="flex items-start gap-2">
-                            <span className="w-2 h-2 mt-1.5 bg-larp-green shrink-0" />
-                            <div>
-                              <p className="font-mono text-xs text-ivory-light">
-                                @legit_builder passed all checks
-                              </p>
-                              <p className="font-mono text-[10px] text-ivory-light/40 mt-1">1h ago</p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Configure Button */}
-                      <div className="p-3 border-t border-ivory-light/10">
-                        <Link
-                          href="/terminal/alerts"
-                          onClick={() => setAlertsOpen(false)}
-                          className="flex items-center justify-center gap-2 w-full py-2 border border-ivory-light/20 text-ivory-light/70 font-mono text-xs hover:border-danger-orange hover:text-danger-orange transition-colors"
-                        >
-                          <Settings size={14} />
-                          CONFIGURE RULES
-                        </Link>
-                      </div>
-                    </div>
-                  </>
-                )}
               </div>
 
               {/* Connect Wallet */}
@@ -206,26 +103,20 @@ export default function TerminalLayout({ children }: TerminalLayoutProps) {
                 <SearchInput />
               </div>
               <div className="pb-4">
-                {/* Mobile Action Buttons */}
+                {/* Mobile Action Buttons - Disabled/Coming Soon */}
                 <div className="flex gap-3 px-4 py-3">
-                  <Link
-                    href="/terminal/watchlist"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex-1 flex items-center justify-center gap-2 py-3 bg-larp-yellow border-2 border-black font-mono text-sm text-black font-bold"
-                    style={{ boxShadow: '3px 3px 0 black' }}
+                  <div
+                    className="flex-1 flex items-center justify-center gap-2 py-3 bg-larp-yellow/30 border-2 border-black/30 font-mono text-sm text-black/50 font-bold cursor-not-allowed opacity-40"
                   >
                     <Bookmark size={16} />
                     WATCHLIST
-                  </Link>
-                  <Link
-                    href="/terminal/alerts"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex-1 flex items-center justify-center gap-2 py-3 bg-danger-orange border-2 border-black font-mono text-sm text-black font-bold"
-                    style={{ boxShadow: '3px 3px 0 black' }}
+                  </div>
+                  <div
+                    className="flex-1 flex items-center justify-center gap-2 py-3 bg-danger-orange/30 border-2 border-black/30 font-mono text-sm text-black/50 font-bold cursor-not-allowed opacity-40"
                   >
                     <Bell size={16} />
                     ALERTS
-                  </Link>
+                  </div>
                 </div>
                 {/* Mobile Wallet */}
                 <div className="px-4 py-3 border-t border-ivory-light/10">
@@ -254,7 +145,7 @@ export default function TerminalLayout({ children }: TerminalLayoutProps) {
         </div>
 
         {/* Main Content */}
-        <main className="flex-1 overflow-y-auto overflow-x-hidden">
+        <main className="flex-1 overflow-x-hidden">
           {children}
         </main>
 
