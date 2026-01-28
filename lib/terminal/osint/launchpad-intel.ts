@@ -202,7 +202,8 @@ async function scrapePumpFunPage(tokenAddress: string, result: LaunchpadTokenInf
     // Try to extract socials from page
     const twitterMatch = html.match(/(?:twitter\.com|x\.com)\/(@?[\w]+)/i);
     if (twitterMatch) {
-      result.twitter = twitterMatch[1].replace('@', '');
+      const handle = extractTwitterHandle(twitterMatch[0]);
+      if (handle) result.twitter = handle;
     }
 
     const telegramMatch = html.match(/(?:t\.me|telegram\.me)\/([\w]+)/i);
@@ -324,7 +325,8 @@ async function scrapeBagsFmPage(tokenAddress: string, result: LaunchpadTokenInfo
     // Try to extract socials
     const twitterMatch = html.match(/(?:twitter\.com|x\.com)\/(@?[\w]+)/i);
     if (twitterMatch) {
-      result.twitter = twitterMatch[1].replace('@', '');
+      const handle = extractTwitterHandle(twitterMatch[0]);
+      if (handle) result.twitter = handle;
     }
 
     const telegramMatch = html.match(/(?:t\.me|telegram\.me)\/([\w]+)/i);
@@ -369,21 +371,48 @@ export async function fetchLaunchpadToken(tokenAddress: string): Promise<Launchp
 // HELPERS
 // ============================================================================
 
+// Common false positive Twitter handles (Twitter UI paths, CDN paths, etc.)
+const TWITTER_BLACKLIST = new Set([
+  'intent', 'share', 'home', 'search', 'explore', 'notifications',
+  'messages', 'settings', 'login', 'signup', 'i', 'hashtag',
+  'compose', 'oauth', 'account', 'privacy', 'tos', 'help',
+  'status', 'following', 'followers', 'lists', 'moments',
+]);
+
+/**
+ * Validate a Twitter handle
+ */
+function isValidTwitterHandle(handle: string): boolean {
+  if (!handle) return false;
+  const lower = handle.toLowerCase();
+  // Must be at least 2 chars, not in blacklist, and not all numbers
+  return handle.length >= 2 &&
+         !TWITTER_BLACKLIST.has(lower) &&
+         !/^\d+$/.test(handle);
+}
+
 /**
  * Extract Twitter handle from various URL formats
  */
 function extractTwitterHandle(input: string | undefined | null): string | undefined {
   if (!input) return undefined;
 
+  let handle: string | undefined;
+
   // Already just a handle
   if (/^@?[\w]+$/.test(input)) {
-    return input.replace('@', '');
+    handle = input.replace('@', '');
+  } else {
+    // URL format
+    const match = input.match(/(?:twitter\.com|x\.com)\/(@?[\w]+)/i);
+    if (match) {
+      handle = match[1].replace('@', '');
+    }
   }
 
-  // URL format
-  const match = input.match(/(?:twitter\.com|x\.com)\/(@?[\w]+)/i);
-  if (match) {
-    return match[1].replace('@', '');
+  // Validate the extracted handle
+  if (handle && isValidTwitterHandle(handle)) {
+    return handle;
   }
 
   return undefined;

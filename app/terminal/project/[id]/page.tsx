@@ -1610,15 +1610,19 @@ function ProjectPageContent() {
 
               {/* Links */}
               <div className="flex items-center gap-3 sm:gap-4 flex-wrap">
-                {project.xHandle && (
+                {(project.xUrl || project.xHandle) && (
                   <a
-                    href={`https://x.com/${project.xHandle}`}
+                    href={project.xUrl || `https://x.com/${project.xHandle}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-1 text-xs text-ivory-light/50 hover:text-ivory-light transition-colors"
                   >
                     <Twitter size={12} />
-                    <span className="hidden xs:inline">@</span>{project.xHandle}
+                    {project.xHandle ? (
+                      <><span className="hidden xs:inline">@</span>{project.xHandle}</>
+                    ) : (
+                      <span className="hidden xs:inline">X</span>
+                    )}
                   </a>
                 )}
                 {project.websiteUrl && (

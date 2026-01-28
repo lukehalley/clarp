@@ -10,15 +10,17 @@ interface ScanProgressIndicatorProps {
 }
 
 const POLL_INTERVAL = 3000; // 3 seconds
+const MAX_POLL_ERRORS = 5; // Dismiss after 5 consecutive errors
 
 export default function ScanProgressIndicator({
   scanJobId,
   onComplete,
   onDismiss,
 }: ScanProgressIndicatorProps) {
-  const [status, setStatus] = useState<'analyzing' | 'complete' | 'dismissed'>('analyzing');
+  const [status, setStatus] = useState<'analyzing' | 'complete' | 'failed' | 'dismissed'>('analyzing');
   const [glitchFrame, setGlitchFrame] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
+  const [errorCount, setErrorCount] = useState(0);
 
   // Handle transition to complete state
   const transitionToComplete = useCallback(() => {
@@ -39,14 +41,47 @@ export default function ScanProgressIndicator({
 
     try {
       const res = await fetch(`/api/xintel/scan?jobId=${scanJobId}`);
-      if (!res.ok) return;
+
+      // Handle 404 - job not found (could be server restart, treat as complete)
+      if (res.status === 404) {
+        console.log('[ScanProgress] Job not found, treating as complete');
+        transitionToComplete();
+        return;
+      }
+
+      if (!res.ok) {
+        setErrorCount(prev => {
+          const newCount = prev + 1;
+          if (newCount >= MAX_POLL_ERRORS) {
+            console.log('[ScanProgress] Max errors reached, dismissing');
+            transitionToComplete();
+          }
+          return newCount;
+        });
+        return;
+      }
+
+      // Reset error count on successful response
+      setErrorCount(0);
 
       const data = await res.json();
       if (data.status === 'complete' || data.status === 'cached') {
         transitionToComplete();
+      } else if (data.status === 'failed') {
+        // Handle failed status - show completion (user can see error on project page)
+        console.log('[ScanProgress] Job failed:', data.error);
+        transitionToComplete();
       }
     } catch (err) {
       console.error('[ScanProgress] Poll error:', err);
+      setErrorCount(prev => {
+        const newCount = prev + 1;
+        if (newCount >= MAX_POLL_ERRORS) {
+          console.log('[ScanProgress] Max errors reached, dismissing');
+          transitionToComplete();
+        }
+        return newCount;
+      });
     }
   }, [scanJobId, status, transitionToComplete]);
 

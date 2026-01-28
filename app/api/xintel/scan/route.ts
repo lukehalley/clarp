@@ -49,12 +49,22 @@ export async function POST(request: NextRequest) {
         symbol: result.osintData.symbol,
         website: result.osintData.website,
         xHandle: result.osintData.xHandle,
+        xUrl: result.osintData.xUrl,
+        xCommunityId: result.osintData.xCommunityId,
         github: result.osintData.github,
         telegram: result.osintData.telegram,
         discord: result.osintData.discord,
         confidence: result.osintData.confidence,
         securityIntel: result.osintData.securityIntel,
         marketIntel: result.osintData.marketIntel,
+        // Include tokenData for market prices from DexScreener
+        tokenData: result.osintData.tokenData ? {
+          priceUsd: result.osintData.tokenData.priceUsd,
+          priceChange24h: result.osintData.tokenData.priceChange24h,
+          volume24h: result.osintData.tokenData.volume24h,
+          liquidity: result.osintData.tokenData.liquidity,
+          marketCap: result.osintData.tokenData.marketCap,
+        } : undefined,
       } : undefined,
     });
   } catch (err) {

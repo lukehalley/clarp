@@ -138,7 +138,8 @@ export interface Project {
   tags: string[];
 
   // Multi-platform identifiers (any can be null)
-  xHandle?: string;           // @JupiterExchange
+  xHandle?: string;           // @JupiterExchange (extracted handle for AI analysis)
+  xUrl?: string;              // Full X/Twitter URL from DexScreener (may be community, profile, etc.)
   githubUrl?: string;         // https://github.com/jup-ag
   websiteUrl?: string;        // https://jup.ag
   tokenAddress?: string;      // Solana contract address

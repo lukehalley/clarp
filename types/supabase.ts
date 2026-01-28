@@ -53,6 +53,7 @@ export type Database = {
           website_intel: Json | null
           website_url: string | null
           x_handle: string | null
+          x_url: string | null
         }
         Insert: {
           affiliations?: Json | null
@@ -94,6 +95,7 @@ export type Database = {
           website_intel?: Json | null
           website_url?: string | null
           x_handle?: string | null
+          x_url?: string | null
         }
         Update: {
           affiliations?: Json | null
@@ -135,6 +137,7 @@ export type Database = {
           website_intel?: Json | null
           website_url?: string | null
           x_handle?: string | null
+          x_url?: string | null
         }
         Relationships: []
       }

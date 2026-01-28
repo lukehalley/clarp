@@ -183,9 +183,10 @@ export async function submitUniversalScan(options: UniversalScanOptions): Promis
     console.log(`  - Price: $${entity.marketIntel.priceUsd}`);
   }
 
-  // If no X handle or skipXAnalysis, return OSINT-only result
-  if (!entity.xHandle || skipXAnalysis) {
-    console.log(`[UniversalScan] No X handle or skip requested - returning OSINT-only result`);
+  // If no X handle AND no X community, or skipXAnalysis, return OSINT-only result
+  const hasXPresence = entity.xHandle || entity.xCommunityId;
+  if (!hasXPresence || skipXAnalysis) {
+    console.log(`[UniversalScan] No X presence or skip requested - returning OSINT-only result`);
 
     // Save the project to DB so redirect works (even without X handle)
     if (isSupabaseAvailable() && entity.tokenAddresses?.[0]?.address) {
@@ -196,6 +197,7 @@ export async function submitUniversalScan(options: UniversalScanOptions): Promis
         avatarUrl: entity.imageUrl || undefined,
         tokenAddress,
         ticker: entity.symbol || undefined,
+        xUrl: entity.xUrl,
         websiteUrl: entity.website || undefined,
         githubUrl: entity.github || undefined,
         telegramUrl: entity.telegram || undefined,
@@ -206,12 +208,13 @@ export async function submitUniversalScan(options: UniversalScanOptions): Promis
           confidence: 'low' as const,
           lastUpdated: new Date(),
         },
-        marketData: entity.marketIntel ? {
-          price: entity.marketIntel.priceUsd || 0,
-          priceChange24h: entity.marketIntel.priceChange24h || 0,
-          marketCap: entity.marketIntel.marketCap,
-          volume24h: entity.marketIntel.volume24h,
-          liquidity: entity.marketIntel.liquidity,
+        marketData: entity.tokenData ? {
+          // Use DexScreener as primary source (entity.tokenData), fallback to marketIntel
+          price: entity.tokenData.priceUsd || entity.marketIntel?.priceUsd || 0,
+          priceChange24h: entity.tokenData.priceChange24h || entity.marketIntel?.priceChange24h || 0,
+          marketCap: entity.tokenData.marketCap || entity.marketIntel?.marketCap,
+          volume24h: entity.tokenData.volume24h || entity.marketIntel?.volume24h,
+          liquidity: entity.tokenData.liquidity || entity.marketIntel?.liquidity,
         } : undefined,
         securityIntel: entity.securityIntel?.isAccessible ? {
           mintAuthorityEnabled: entity.securityIntel.mintAuthority === 'active',
@@ -251,10 +254,22 @@ export async function submitUniversalScan(options: UniversalScanOptions): Promis
   }
 
   // Step 3: Run X analysis via existing scan flow
-  console.log(`[UniversalScan] X handle found (@${entity.xHandle}), running X analysis...`);
+  // Determine what X presence we have: handle or community
+  const xQuery = entity.xHandle
+    ? entity.xHandle
+    : entity.xCommunityId
+      ? `https://x.com/i/communities/${entity.xCommunityId}`
+      : null;
+  const cacheKey = entity.xHandle
+    ? entity.xHandle.toLowerCase()
+    : entity.xCommunityId
+      ? `community_${entity.xCommunityId}`
+      : '';
+
+  console.log(`[UniversalScan] X presence found (${entity.xHandle ? `@${entity.xHandle}` : `community ${entity.xCommunityId}`}), running X analysis...`);
 
   // Store OSINT entity for the scan processor to use for gap-filling
-  osintEntityCache.set(entity.xHandle.toLowerCase(), entity);
+  osintEntityCache.set(cacheKey, entity);
 
   // Save OSINT project immediately so user can see data while AI analyzes
   // This will be enriched later when the X analysis completes
@@ -267,6 +282,7 @@ export async function submitUniversalScan(options: UniversalScanOptions): Promis
       tokenAddress,
       ticker: entity.symbol || undefined,
       xHandle: entity.xHandle,
+      xUrl: entity.xUrl,
       websiteUrl: entity.website || undefined,
       githubUrl: entity.github || undefined,
       telegramUrl: entity.telegram || undefined,
@@ -277,12 +293,13 @@ export async function submitUniversalScan(options: UniversalScanOptions): Promis
         confidence: 'low' as const,
         lastUpdated: new Date(),
       },
-      marketData: entity.marketIntel ? {
-        price: entity.marketIntel.priceUsd || 0,
-        priceChange24h: entity.marketIntel.priceChange24h || 0,
-        marketCap: entity.marketIntel.marketCap,
-        volume24h: entity.marketIntel.volume24h,
-        liquidity: entity.marketIntel.liquidity,
+      marketData: entity.tokenData ? {
+        // Use DexScreener as primary source (entity.tokenData), fallback to marketIntel
+        price: entity.tokenData.priceUsd || entity.marketIntel?.priceUsd || 0,
+        priceChange24h: entity.tokenData.priceChange24h || entity.marketIntel?.priceChange24h || 0,
+        marketCap: entity.tokenData.marketCap || entity.marketIntel?.marketCap,
+        volume24h: entity.tokenData.volume24h || entity.marketIntel?.volume24h,
+        liquidity: entity.tokenData.liquidity || entity.marketIntel?.liquidity,
       } : undefined,
       securityIntel: entity.securityIntel?.isAccessible ? {
         mintAuthorityEnabled: entity.securityIntel.mintAuthority === 'active',
@@ -300,14 +317,19 @@ export async function submitUniversalScan(options: UniversalScanOptions): Promis
       lastScanAt: new Date(),
     };
 
-    // Save async - don't block the response
-    upsertProjectByTokenAddress(tokenAddress, osintProjectData)
-      .then(p => p && console.log(`[UniversalScan] Saved preliminary OSINT project: ${p.name}`))
-      .catch(err => console.error('[UniversalScan] Failed to save preliminary project:', err));
+    // Await the save to prevent 404 race condition on redirect
+    try {
+      const savedProject = await upsertProjectByTokenAddress(tokenAddress, osintProjectData);
+      if (savedProject) {
+        console.log(`[UniversalScan] Saved preliminary OSINT project: ${savedProject.name}`);
+      }
+    } catch (err) {
+      console.error('[UniversalScan] Failed to save preliminary project:', err);
+    }
   }
 
   const xScanResult = await submitScan({
-    handle: entity.xHandle,
+    handle: xQuery!,
     depth,
     force,
   });
@@ -315,7 +337,7 @@ export async function submitUniversalScan(options: UniversalScanOptions): Promis
   // If cached, get the cached report and merge with OSINT
   if (xScanResult.status === 'cached') {
     try {
-      const cachedReport = await getCachedReport(entity.xHandle);
+      const cachedReport = await getCachedReport(cacheKey);
       return {
         jobId: xScanResult.jobId,
         inputType,
@@ -621,10 +643,16 @@ export async function getUniversalScanResult(jobId: string): Promise<UniversalSc
  * Detect query type and extract/normalize the handle
  * Only accepts X URLs or handles - no plain text
  */
-type QueryType = 'x_url' | 'handle' | 'invalid';
+type QueryType = 'x_url' | 'x_community' | 'handle' | 'invalid';
 
 function detectQueryType(query: string): { type: QueryType; value: string; error?: string } {
   const trimmed = query.trim();
+
+  // X community URL: https://x.com/i/communities/123456789
+  const communityMatch = trimmed.match(/^https?:\/\/(www\.)?(x|twitter)\.com\/i\/communities\/(\d+)/i);
+  if (communityMatch) {
+    return { type: 'x_community', value: communityMatch[3] };
+  }
 
   // X/Twitter URL: https://x.com/username or https://twitter.com/username
   const urlMatch = trimmed.match(/^https?:\/\/(www\.)?(x|twitter)\.com\/([a-zA-Z0-9_]+)/i);
@@ -671,11 +699,18 @@ export async function submitScan(options: SubmitScanOptions): Promise<SubmitScan
       jobId: '',
       status: 'failed',
       cached: false,
-      error: queryInfo.error || 'Please enter an X handle (@username) or X URL (x.com/username).',
+      error: queryInfo.error || 'Please enter an X handle (@username), X URL (x.com/username), or X community URL.',
     };
   }
 
-  const normalizedHandle = queryInfo.value.toLowerCase().replace('@', '');
+  // For communities, use community ID as the key but store full URL for Grok
+  const isCommunity = queryInfo.type === 'x_community';
+  const normalizedHandle = isCommunity
+    ? `community_${queryInfo.value}` // Use community_ID format for caching
+    : queryInfo.value.toLowerCase().replace('@', '');
+  const grokQuery = isCommunity
+    ? `https://x.com/i/communities/${queryInfo.value}` // Pass full URL to Grok
+    : queryInfo.value.toLowerCase().replace('@', '');
 
   // Check rate limiting
   const lastScan = scanCooldowns.get(normalizedHandle);
@@ -761,7 +796,7 @@ export async function submitScan(options: SubmitScanOptions): Promise<SubmitScan
   const jobId = `job_${normalizedHandle}_${Date.now()}`;
   const job: ScanJob = {
     id: jobId,
-    handle: normalizedHandle,
+    handle: grokQuery, // Use grokQuery so Grok receives the community URL when applicable
     depth,
     status: 'queued',
     progress: 0,
@@ -769,13 +804,13 @@ export async function submitScan(options: SubmitScanOptions): Promise<SubmitScan
   };
 
   scanJobs.set(jobId, job);
-  scanCooldowns.set(normalizedHandle, new Date());
+  scanCooldowns.set(normalizedHandle, new Date()); // Use normalizedHandle for rate limiting
 
   // Persist job to database for recovery after page refresh
   if (isSupabaseAvailable()) {
     createScanJob({
       id: jobId,
-      handle: normalizedHandle,
+      handle: grokQuery, // Store grokQuery in DB so Grok receives correct query
       depth,
       status: 'queued',
       progress: 0,
@@ -788,7 +823,7 @@ export async function submitScan(options: SubmitScanOptions): Promise<SubmitScan
 
   return {
     jobId,
-    handle: normalizedHandle,
+    handle: normalizedHandle, // Return normalizedHandle for caching key
     status: 'queued',
     cached: false,
     useRealApi: USE_REAL_API,
@@ -1348,7 +1383,14 @@ async function upsertProjectFromAnalysis(
   report: XIntelReport,
   entityType?: 'project' | 'person' | 'company' | 'unknown'
 ): Promise<void> {
-  const normalizedHandle = handle.toLowerCase().replace('@', '');
+  // Detect if this is a community URL
+  const communityMatch = handle.match(/x\.com\/i\/communities\/(\d+)/i);
+  const isCommunity = !!communityMatch;
+
+  // Build the cache key to match how it was stored
+  const normalizedHandle = isCommunity
+    ? `community_${communityMatch![1]}`
+    : handle.toLowerCase().replace('@', '');
 
   // ========================================================================
   // RETRIEVE OSINT ENTITY (collected by entity-resolver - FREE data!)
@@ -1609,7 +1651,10 @@ async function upsertProjectFromAnalysis(
     avatarUrl: osintEntity?.imageUrl || analysis.profile?.avatarUrl || await fetchXAvatarUrl(normalizedHandle),
     tags: extractTags(analysis, githubIntelData, osintEntity),
     aiSummary: analysis.verdict?.summary || analysis.overallAssessment || undefined,
-    xHandle: normalizedHandle,
+    // For communities, xHandle should be null; use osintEntity.xHandle for actual handles
+    xHandle: isCommunity ? undefined : (osintEntity?.xHandle || normalizedHandle),
+    // Preserve xUrl from OSINT (may be community URL or profile URL)
+    xUrl: osintEntity?.xUrl || undefined,
     githubUrl: osintEntity?.github || analysis.github || undefined,
     websiteUrl: osintEntity?.website || analysis.website || undefined,
     tokenAddress,
@@ -1652,8 +1697,15 @@ async function upsertProjectFromAnalysis(
     lastScanAt: new Date(),
   };
 
-  await upsertProjectByHandle(normalizedHandle, projectData);
-  console.log(`[XIntel] Upserted project entity for @${normalizedHandle} (type: ${normalizedEntityType || 'unknown'}) with OSINT enrichment`);
+  // Prefer upsert by token address if we have one (ensures we update the existing project from OSINT)
+  const tokenAddressFromOsint = osintEntity?.tokenAddresses?.[0]?.address;
+  if (tokenAddressFromOsint) {
+    await upsertProjectByTokenAddress(tokenAddressFromOsint, projectData);
+    console.log(`[XIntel] Upserted project by token ${tokenAddressFromOsint.slice(0, 8)}... (type: ${normalizedEntityType || 'unknown'}) with OSINT enrichment`);
+  } else {
+    await upsertProjectByHandle(normalizedHandle, projectData);
+    console.log(`[XIntel] Upserted project entity for @${normalizedHandle} (type: ${normalizedEntityType || 'unknown'}) with OSINT enrichment`);
+  }
 }
 
 /**

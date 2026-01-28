@@ -26,6 +26,7 @@ export function rowToProject(row: ProjectRow): Project {
     tags: row.tags || [],
     aiSummary: row.ai_summary || undefined,
     xHandle: row.x_handle || undefined,
+    xUrl: row.x_url || undefined,
     githubUrl: row.github_url || undefined,
     websiteUrl: row.website_url || undefined,
     tokenAddress: row.token_address || undefined,
@@ -75,6 +76,7 @@ export function projectToInsert(project: Partial<Project> & { name: string }): P
     tags: project.tags || [],
     ai_summary: project.aiSummary || null,
     x_handle: project.xHandle || null,
+    x_url: project.xUrl || null,
     github_url: project.githubUrl || null,
     website_url: project.websiteUrl || null,
     token_address: project.tokenAddress || null,
@@ -119,6 +121,7 @@ export function projectToUpdate(updates: Partial<Project>): ProjectUpdate {
   if (updates.tags !== undefined) result.tags = updates.tags;
   if (updates.aiSummary !== undefined) result.ai_summary = updates.aiSummary || null;
   if (updates.xHandle !== undefined) result.x_handle = updates.xHandle || null;
+  if (updates.xUrl !== undefined) result.x_url = updates.xUrl || null;
   if (updates.githubUrl !== undefined) result.github_url = updates.githubUrl || null;
   if (updates.websiteUrl !== undefined) result.website_url = updates.websiteUrl || null;
   if (updates.tokenAddress !== undefined) result.token_address = updates.tokenAddress || null;

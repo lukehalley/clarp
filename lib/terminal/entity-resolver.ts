@@ -72,7 +72,9 @@ export interface ResolvedEntity {
   imageUrl?: string;
 
   // Discovered links
-  xHandle?: string;
+  xHandle?: string;           // Extracted X handle for AI analysis (only if valid profile)
+  xUrl?: string;              // Raw X/Twitter URL from DexScreener (may be community, profile, etc.)
+  xCommunityId?: string;      // X community ID if URL is a community link (e.g., "2013904367188132011")
   website?: string;
   github?: string;
   telegram?: string;
@@ -254,15 +256,48 @@ function extractGitHub(input: string): { org: string; repo?: string } | null {
   return null;
 }
 
+// Common false positive Twitter handles (Twitter UI paths, CDN paths, etc.)
+const TWITTER_BLACKLIST = new Set([
+  'intent', 'share', 'home', 'search', 'explore', 'notifications',
+  'messages', 'settings', 'login', 'signup', 'i', 'hashtag',
+  'compose', 'oauth', 'account', 'privacy', 'tos', 'help',
+  'status', 'following', 'followers', 'lists', 'moments',
+]);
+
+/**
+ * Check if a Twitter handle is valid (not a false positive)
+ */
+function isValidTwitterHandle(handle: string): boolean {
+  if (!handle) return false;
+  const lower = handle.toLowerCase();
+  // Must be at least 2 chars, not in blacklist, and not all numbers
+  return handle.length >= 2 &&
+         !TWITTER_BLACKLIST.has(lower) &&
+         !/^\d+$/.test(handle);
+}
+
 /**
  * Extract X handle from Twitter URL
  */
 function extractXHandleFromUrl(url: string): string | null {
   const match = url.match(/(?:twitter\.com|x\.com)\/(@?[\w]+)/i);
   if (match) {
-    return match[1].replace('@', '').toLowerCase();
+    const handle = match[1].replace('@', '').toLowerCase();
+    // Validate the handle
+    if (isValidTwitterHandle(handle)) {
+      return handle;
+    }
   }
   return null;
+}
+
+/**
+ * Extract X community ID from Twitter community URL
+ * Example: https://x.com/i/communities/2013904367188132011 -> "2013904367188132011"
+ */
+function extractXCommunityId(url: string): string | null {
+  const match = url.match(/(?:twitter\.com|x\.com)\/i\/communities\/(\d+)/i);
+  return match ? match[1] : null;
 }
 
 /**
@@ -339,7 +374,12 @@ async function resolveFromTokenAddress(address: string): Promise<ResolutionResul
   const token = dexResult.token;
 
   // Extract initial links from DexScreener
+  // Store raw X URL from DexScreener (may be community, profile, or other)
+  let xUrl = token.twitterUrl;
+  // Only extract handle if it's a valid profile URL (for AI analysis)
   let xHandle = token.twitterUrl ? extractXHandleFromUrl(token.twitterUrl) ?? undefined : undefined;
+  // Extract community ID if it's a community URL
+  let xCommunityId = token.twitterUrl ? extractXCommunityId(token.twitterUrl) ?? undefined : undefined;
   let website = token.websiteUrl;
   let telegram = token.telegramUrl;
   let discord: string | undefined;
@@ -576,6 +616,8 @@ async function resolveFromTokenAddress(address: string): Promise<ResolutionResul
       symbol: token.symbol,
       imageUrl: token.imageUrl || undefined,
       xHandle,
+      xUrl,
+      xCommunityId,
       website,
       github,
       telegram,

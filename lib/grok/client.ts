@@ -183,10 +183,44 @@ IMPORTANT:
       throw new GrokApiError('Grok API client not configured. Set XAI_API_KEY environment variable.');
     }
 
-    const normalizedHandle = handle.toLowerCase().replace('@', '');
-    const prompt = CLASSIFICATION_PROMPT.replace(/{handle}/g, normalizedHandle);
+    // Detect if this is a community URL
+    const communityMatch = handle.match(/x\.com\/i\/communities\/(\d+)/i);
+    const isCommunity = !!communityMatch;
 
-    console.log(`[Grok] Classifying @${normalizedHandle}...`);
+    // Define handleKey for both cases - used in return statements
+    const handleKey = isCommunity
+      ? `community_${communityMatch![1]}`
+      : handle.toLowerCase().replace('@', '');
+
+    let prompt: string;
+    let logMessage: string;
+
+    if (isCommunity) {
+      // For communities, use a modified prompt
+      prompt = `Quick check on X community ${handle}. One x_search only.
+
+Return JSON:
+{
+  "handle": "${handleKey}",
+  "isCryptoRelated": true/false,
+  "entityType": "project",
+  "confidence": "low" | "medium" | "high",
+  "reason": "1 sentence why"
+}
+
+Rules:
+- isCryptoRelated = true if the community is about crypto, blockchain, web3, DeFi, NFTs, tokens, Solana, Ethereum, or any cryptocurrency
+- entityType should be "project" for communities
+- When in doubt about crypto relevance, lean toward isCryptoRelated=true
+
+Return ONLY valid JSON.`;
+      logMessage = `[Grok] Classifying community ${handleKey}...`;
+    } else {
+      prompt = CLASSIFICATION_PROMPT.replace(/{handle}/g, handleKey);
+      logMessage = `[Grok] Classifying @${handleKey}...`;
+    }
+
+    console.log(logMessage);
 
     try {
       const response = await fetch(`${XAI_BASE_URL}/responses`, {
@@ -232,7 +266,7 @@ IMPORTANT:
       if (!jsonMatch) {
         console.warn('[Grok] Classification failed to parse, defaulting to crypto person');
         return {
-          handle: normalizedHandle,
+          handle: handleKey,
           isCryptoRelated: true,
           entityType: 'person',
           confidence: 'low',
@@ -246,7 +280,7 @@ IMPORTANT:
         console.log(`[Grok] Classification: crypto=${parsed.isCryptoRelated}, type=${parsed.entityType}, tokens=${data.usage?.total_tokens}`);
 
         return {
-          handle: normalizedHandle,
+          handle: handleKey,
           isCryptoRelated: Boolean(parsed.isCryptoRelated),
           entityType: this.normalizeEntityType(parsed.entityType),
           confidence: this.normalizeConfidence(parsed.confidence),
@@ -256,7 +290,7 @@ IMPORTANT:
       } catch {
         console.warn('[Grok] Classification JSON parse failed, defaulting to crypto person');
         return {
-          handle: normalizedHandle,
+          handle: handleKey,
           isCryptoRelated: true,
           entityType: 'person',
           confidence: 'low',
@@ -293,12 +327,12 @@ IMPORTANT:
     }
 
     const { isProject = false, useSearchTools = true, osintGaps } = options;
-    const normalizedHandle = handle.toLowerCase().replace('@', '');
+    const handleKey = handle.toLowerCase().replace('@', '');
 
     // Choose base prompt based on whether we're using search tools
     let prompt = useSearchTools
-      ? ANALYSIS_PROMPT.replace(/{handle}/g, normalizedHandle)
-      : DEEP_ANALYSIS_PROMPT.replace(/{handle}/g, normalizedHandle);
+      ? ANALYSIS_PROMPT.replace(/{handle}/g, handleKey)
+      : DEEP_ANALYSIS_PROMPT.replace(/{handle}/g, handleKey);
 
     // Append OSINT gap-filler instructions if there are gaps to fill
     if (osintGaps && Object.values(osintGaps).some(v => v)) {
@@ -319,7 +353,7 @@ IMPORTANT:
     }
 
     const toolsDesc = tools ? tools.map(t => t.type).join(', ') : 'none (training data only)';
-    console.log(`[Grok] Analyzing @${normalizedHandle} with tools: ${toolsDesc}`);
+    console.log(`[Grok] Analyzing @${handleKey} with tools: ${toolsDesc}`);
 
     try {
       // Build request body - only include tools if we're using them
