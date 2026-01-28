@@ -258,15 +258,15 @@ function ScanPageInner() {
           prev.map((s) => ({ ...s, status: 'complete', detail: s.detail || 'cached' }))
         );
         setPhase('complete');
-        // Redirect to project page using canonicalId or X handle
-        const projectId = data.osintData?.xHandle || data.canonicalId || query.replace('@', '').toLowerCase();
+        // Redirect to project page using canonicalId (token address for tokens, handle otherwise)
+        const projectId = data.canonicalId || query.replace('@', '').toLowerCase();
         setTimeout(() => router.push(`/terminal/project/${projectId}`), 1200);
         return;
       }
 
       setJobId(data.jobId);
       if (data.canonicalId) {
-        setResolvedHandle(data.osintData?.xHandle || data.canonicalId);
+        setResolvedHandle(data.canonicalId); // Use canonicalId (token address for tokens)
       }
 
       // If OSINT-only (no X handle to analyze), complete early
@@ -300,9 +300,9 @@ function ScanPageInner() {
 
         if (data.status === 'complete') {
           setPhase('complete');
-          // Redirect to project page using handle from response or resolved handle
-          const handle = data.handle || resolvedHandle || query.replace('@', '').toLowerCase();
-          setTimeout(() => router.push(`/terminal/project/${handle}`), 1200);
+          // Redirect to project page using canonicalId (resolvedHandle) - token address for tokens
+          const projectId = resolvedHandle || query.replace('@', '').toLowerCase();
+          setTimeout(() => router.push(`/terminal/project/${projectId}`), 1200);
         } else if (data.status === 'failed') {
           setPhase('failed');
           setError(data.error || 'Analysis failed');
