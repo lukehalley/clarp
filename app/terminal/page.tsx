@@ -15,6 +15,7 @@ import {
   Building2,
 } from 'lucide-react';
 import IntelCard from '@/components/terminal/IntelCard';
+import WalletGate from '@/components/auth/WalletGate';
 import type { Project, EntityType } from '@/types/project';
 
 // ============================================================================
@@ -367,10 +368,11 @@ export default function TerminalPage() {
   };
 
   return (
-    <div className="px-4 sm:px-6 py-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Entity Type Tabs */}
-        <EntityTypeTabs
+    <WalletGate showPreview={true}>
+      <div className="px-4 sm:px-6 py-6">
+        <div className="max-w-7xl mx-auto">
+          {/* Entity Type Tabs */}
+          <EntityTypeTabs
           entityFilter={entityFilter}
           setEntityFilter={setEntityFilter}
           counts={entityCounts}
@@ -469,7 +471,8 @@ export default function TerminalPage() {
             </p>
           </div>
         )}
+        </div>
       </div>
-    </div>
+    </WalletGate>
   );
 }

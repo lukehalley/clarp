@@ -53,8 +53,8 @@ export interface LaunchpadTokenInfo {
 // Pump.fun tokens end with "pump"
 const PUMP_FUN_SUFFIX = 'pump';
 
-// Bags.fm tokens end with this specific address
-const BAGS_FM_SUFFIX = '5Xb1VT9bWLW8VERuhCgEcstHmSGb1bhpHZdcxiHXBAGS';
+// Bags.fm tokens end with "BAGS" (case-sensitive, uppercase)
+const BAGS_FM_SUFFIX = 'BAGS';
 
 /**
  * Detect which launchpad a token was created on based on address pattern
@@ -66,12 +66,12 @@ export function detectLaunchpad(tokenAddress: string): LaunchpadType {
 
   const address = tokenAddress.trim();
 
-  // Pump.fun: ends with "pump"
+  // Pump.fun: ends with "pump" (case-insensitive)
   if (address.toLowerCase().endsWith(PUMP_FUN_SUFFIX)) {
     return 'pump_fun';
   }
 
-  // Bags.fm: ends with specific suffix
+  // Bags.fm: ends with "BAGS" (case-sensitive - Solana addresses are base58)
   if (address.endsWith(BAGS_FM_SUFFIX)) {
     return 'bags_fm';
   }
@@ -219,13 +219,12 @@ async function scrapePumpFunPage(tokenAddress: string, result: LaunchpadTokenInf
 }
 
 // ============================================================================
-// BAGS.FM API
+// BAGS.FM - Page Scraping (No public token info API)
 // ============================================================================
 
-const BAGS_FM_API = 'https://api.bags.fm';
-
 /**
- * Fetch token info from Bags.fm
+ * Fetch token info from Bags.fm by scraping the page
+ * Note: Bags.fm doesn't have a public API for token lookups
  */
 export async function fetchBagsFmToken(tokenAddress: string): Promise<LaunchpadTokenInfo> {
   const result: LaunchpadTokenInfo = {
@@ -236,51 +235,14 @@ export async function fetchBagsFmToken(tokenAddress: string): Promise<LaunchpadT
     fetchedAt: new Date(),
   };
 
-  try {
-    console.log(`[LaunchpadIntel] Fetching Bags.fm token: ${tokenAddress}`);
+  console.log(`[LaunchpadIntel] Fetching Bags.fm token: ${tokenAddress}`);
 
-    // Try Bags.fm API (if they have one - otherwise scrape)
-    const response = await fetch(`${BAGS_FM_API}/v1/token/${tokenAddress}`, {
-      headers: {
-        'Accept': 'application/json',
-        'User-Agent': 'CLARP/1.0',
-      },
-    });
-
-    if (!response.ok) {
-      console.log(`[LaunchpadIntel] Bags.fm API returned ${response.status}`);
-      // Fall back to scraping
-      return await scrapeBagsFmPage(tokenAddress, result);
-    }
-
-    const data = await response.json();
-    result.isAccessible = true;
-
-    // Map API response (structure TBD - need to verify actual API)
-    result.name = data.name;
-    result.symbol = data.symbol;
-    result.description = data.description;
-    result.imageUrl = data.image;
-    result.creator = data.creator;
-    result.twitter = extractTwitterHandle(data.twitter);
-    result.telegram = data.telegram;
-    result.website = data.website;
-    result.marketCap = data.marketCap;
-    result.createdAt = data.createdAt ? new Date(data.createdAt) : undefined;
-
-    console.log(`[LaunchpadIntel] Bags.fm token: ${result.name} (${result.symbol})`);
-
-    return result;
-
-  } catch (error) {
-    console.error(`[LaunchpadIntel] Error fetching Bags.fm token:`, error);
-    // Fall back to scraping
-    return await scrapeBagsFmPage(tokenAddress, result);
-  }
+  // Bags.fm doesn't have a public token info API, so we scrape the page directly
+  return await scrapeBagsFmPage(tokenAddress, result);
 }
 
 /**
- * Fallback: Scrape Bags.fm page for token info
+ * Scrape Bags.fm page for token info
  */
 async function scrapeBagsFmPage(tokenAddress: string, result: LaunchpadTokenInfo): Promise<LaunchpadTokenInfo> {
   try {
@@ -293,35 +255,45 @@ async function scrapeBagsFmPage(tokenAddress: string, result: LaunchpadTokenInfo
     });
 
     if (!response.ok) {
+      console.log(`[LaunchpadIntel] Bags.fm page returned ${response.status}`);
       return result;
     }
 
     const html = await response.text();
     result.isAccessible = true;
 
-    // Extract from meta tags
-    const titleMatch = html.match(/<meta\s+property="og:title"\s+content="([^"]+)"/i);
-    if (titleMatch) {
-      const titleParts = titleMatch[1].match(/(.+?)\s*\(\$?(\w+)\)/);
-      if (titleParts) {
-        result.name = titleParts[1].trim();
-        result.symbol = titleParts[2].trim();
+    // Extract meta tag content (handles any attribute order)
+    const ogTitle = extractMetaContent(html, 'og:title');
+    const ogDesc = extractMetaContent(html, 'og:description');
+    const ogImage = extractMetaContent(html, 'og:image');
+
+    // Parse Bags.fm title format: "$$SYMBOL on Bags" or "$SYMBOL on Bags"
+    if (ogTitle) {
+      const bagsMatch = ogTitle.match(/^\$+(\w+)\s+on\s+Bags$/i);
+      if (bagsMatch) {
+        result.name = bagsMatch[1]; // e.g., "CLARP"
+        result.symbol = bagsMatch[1];
       } else {
-        result.name = titleMatch[1];
+        // Fallback: try other formats like "TokenName ($SYMBOL)"
+        const altMatch = ogTitle.match(/(.+?)\s*\(\$?(\w+)\)/);
+        if (altMatch) {
+          result.name = altMatch[1].trim();
+          result.symbol = altMatch[2].trim();
+        } else {
+          result.name = ogTitle;
+        }
       }
     }
 
-    const descMatch = html.match(/<meta\s+property="og:description"\s+content="([^"]+)"/i);
-    if (descMatch) {
-      result.description = descMatch[1];
+    if (ogDesc) {
+      result.description = ogDesc;
     }
 
-    const imageMatch = html.match(/<meta\s+property="og:image"\s+content="([^"]+)"/i);
-    if (imageMatch) {
-      result.imageUrl = imageMatch[1];
+    if (ogImage) {
+      result.imageUrl = ogImage;
     }
 
-    // Try to extract socials
+    // Try to extract socials from page content
     const twitterMatch = html.match(/(?:twitter\.com|x\.com)\/(@?[\w]+)/i);
     if (twitterMatch) {
       result.twitter = twitterMatch[1].replace('@', '');
@@ -332,12 +304,34 @@ async function scrapeBagsFmPage(tokenAddress: string, result: LaunchpadTokenInfo
       result.telegram = `https://t.me/${telegramMatch[1]}`;
     }
 
+    console.log(`[LaunchpadIntel] Bags.fm scraped: ${result.name} (${result.symbol})`);
+
     return result;
 
   } catch (error) {
     console.error(`[LaunchpadIntel] Error scraping Bags.fm page:`, error);
     return result;
   }
+}
+
+/**
+ * Extract meta tag content regardless of attribute order
+ */
+function extractMetaContent(html: string, property: string): string | undefined {
+  // Match <meta property="X" content="Y"> or <meta content="Y" property="X">
+  const patterns = [
+    new RegExp(`<meta\\s+property=["']${property}["']\\s+content=["']([^"']+)["']`, 'i'),
+    new RegExp(`<meta\\s+content=["']([^"']+)["']\\s+property=["']${property}["']`, 'i'),
+  ];
+
+  for (const pattern of patterns) {
+    const match = html.match(pattern);
+    if (match) {
+      return match[1];
+    }
+  }
+
+  return undefined;
 }
 
 // ============================================================================

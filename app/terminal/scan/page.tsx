@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { ArrowLeft, Check, Loader2, X } from 'lucide-react';
+import WalletGate from '@/components/auth/WalletGate';
 
 // ============================================================================
 // TYPES
@@ -557,8 +558,10 @@ function ScanPageInner() {
 
 export default function ScanPage() {
   return (
-    <Suspense fallback={<ScanLoading />}>
-      <ScanPageInner />
-    </Suspense>
+    <WalletGate showPreview={true}>
+      <Suspense fallback={<ScanLoading />}>
+        <ScanPageInner />
+      </Suspense>
+    </WalletGate>
   );
 }

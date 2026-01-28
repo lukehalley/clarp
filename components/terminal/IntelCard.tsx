@@ -102,8 +102,21 @@ export default function IntelCard({ project, scoreDelta24h }: IntelCardProps) {
   // Extract tags from project
   const tags = project.tags?.slice(0, 3) || [];
 
+  // Get the correct route based on entity type
+  const getEntityRoute = () => {
+    const identifier = project.xHandle || project.id;
+    switch (project.entityType) {
+      case 'person':
+        return `/terminal/person/${identifier}`;
+      case 'organization':
+        return `/terminal/org/${identifier}`;
+      default:
+        return `/terminal/project/${identifier}`;
+    }
+  };
+
   const handleClick = () => {
-    router.push(`/terminal/project/${project.xHandle || project.id}`);
+    router.push(getEntityRoute());
   };
 
   return (

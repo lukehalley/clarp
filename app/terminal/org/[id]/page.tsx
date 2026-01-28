@@ -8,34 +8,31 @@ import type { Project } from '@/types/project';
 import EntityDetailPage from '@/components/terminal/EntityDetailPage';
 import WalletGate from '@/components/auth/WalletGate';
 
-export default function ProjectPage() {
+export default function OrgPage() {
   const params = useParams();
   const router = useRouter();
-  const projectId = params.id as string;
+  const entityId = params.id as string;
 
   const [project, setProject] = useState<Project | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (!projectId) return;
+    if (!entityId) return;
 
-    const fetchProject = async () => {
+    const fetchEntity = async () => {
       try {
         setIsLoading(true);
-        let res = await fetch(`/api/projects/${projectId}`);
+        let res = await fetch(`/api/projects/${entityId}`);
 
         if (!res.ok && res.status === 404) {
-          res = await fetch(`/api/projects?q=${encodeURIComponent(projectId)}`);
+          res = await fetch(`/api/projects?q=${encodeURIComponent(entityId)}`);
           const data = await res.json();
           if (data.projects && data.projects.length > 0) {
             const entity = data.projects[0];
-            // Redirect if not a project (or default)
-            if (entity.entityType === 'person') {
-              router.replace(`/terminal/person/${entity.xHandle || entity.id}`);
-              return;
-            }
-            if (entity.entityType === 'organization') {
-              router.replace(`/terminal/org/${entity.xHandle || entity.id}`);
+            // Redirect if not an organization
+            if (entity.entityType && entity.entityType !== 'organization') {
+              const route = entity.entityType === 'person' ? 'person' : 'project';
+              router.replace(`/terminal/${route}/${entity.xHandle || entity.id}`);
               return;
             }
             setProject(entity);
@@ -45,38 +42,35 @@ export default function ProjectPage() {
           return;
         }
 
-        if (!res.ok) throw new Error('Failed to fetch project');
+        if (!res.ok) throw new Error('Failed to fetch');
         const data = await res.json();
         const entity = data.project || data;
 
-        // Redirect if not a project (or default)
-        if (entity.entityType === 'person') {
-          router.replace(`/terminal/person/${entity.xHandle || entity.id}`);
-          return;
-        }
-        if (entity.entityType === 'organization') {
-          router.replace(`/terminal/org/${entity.xHandle || entity.id}`);
+        // Redirect if not an organization
+        if (entity.entityType && entity.entityType !== 'organization') {
+          const route = entity.entityType === 'person' ? 'person' : 'project';
+          router.replace(`/terminal/${route}/${entity.xHandle || entity.id}`);
           return;
         }
 
         setProject(entity);
       } catch (err) {
-        console.error('[ProjectPage] Failed to fetch:', err);
+        console.error('[OrgPage] Failed to fetch:', err);
         setProject(null);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchProject();
-  }, [projectId, router]);
+    fetchEntity();
+  }, [entityId, router]);
 
   return (
     <WalletGate showPreview={true}>
       <EntityDetailPage
         project={project}
         isLoading={isLoading}
-        expectedEntityType="project"
+        expectedEntityType="organization"
       />
     </WalletGate>
   );
