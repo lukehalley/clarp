@@ -58,6 +58,28 @@ const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 const scanCooldowns: Map<string, Date> = new Map();
 const COOLDOWN_MS = 60 * 1000; // 1 minute between scans of same handle
 
+/**
+ * Check if a handle is rate limited (for preflight checks)
+ */
+export function checkHandleCooldown(handle: string): { limited: boolean; waitSeconds: number } {
+  const normalizedHandle = handle.toLowerCase().replace('@', '');
+  const lastScan = scanCooldowns.get(normalizedHandle);
+
+  if (!lastScan) {
+    return { limited: false, waitSeconds: 0 };
+  }
+
+  const elapsed = Date.now() - lastScan.getTime();
+  if (elapsed < COOLDOWN_MS) {
+    return {
+      limited: true,
+      waitSeconds: Math.ceil((COOLDOWN_MS - elapsed) / 1000),
+    };
+  }
+
+  return { limited: false, waitSeconds: 0 };
+}
+
 // OSINT entity cache (for passing OSINT gaps to Grok)
 // Stores resolved entities by handle so processScanJob can extract gaps
 const osintEntityCache: Map<string, ResolvedEntity> = new Map();
@@ -207,9 +229,15 @@ export async function submitUniversalScan(options: UniversalScanOptions): Promis
         lastScanAt: new Date(),
       };
 
-      upsertProjectByTokenAddress(tokenAddress, projectData)
-        .then(p => p && console.log(`[UniversalScan] Saved OSINT-only project: ${p.name}`))
-        .catch(err => console.error('[UniversalScan] Failed to save OSINT-only project:', err));
+      // Await the save to prevent race condition with redirect
+      try {
+        const savedProject = await upsertProjectByTokenAddress(tokenAddress, projectData);
+        if (savedProject) {
+          console.log(`[UniversalScan] Saved OSINT-only project: ${savedProject.name}`);
+        }
+      } catch (err) {
+        console.error('[UniversalScan] Failed to save OSINT-only project:', err);
+      }
     }
 
     return {
@@ -227,6 +255,56 @@ export async function submitUniversalScan(options: UniversalScanOptions): Promis
 
   // Store OSINT entity for the scan processor to use for gap-filling
   osintEntityCache.set(entity.xHandle.toLowerCase(), entity);
+
+  // Save OSINT project immediately so user can see data while AI analyzes
+  // This will be enriched later when the X analysis completes
+  if (isSupabaseAvailable() && entity.tokenAddresses?.[0]?.address) {
+    const tokenAddress = entity.tokenAddresses[0].address;
+    const osintProjectData = {
+      name: entity.name || entity.symbol || `Token ${tokenAddress.slice(0, 8)}...`,
+      description: entity.description || undefined,
+      avatarUrl: entity.imageUrl || undefined,
+      tokenAddress,
+      ticker: entity.symbol || undefined,
+      xHandle: entity.xHandle,
+      websiteUrl: entity.website || undefined,
+      githubUrl: entity.github || undefined,
+      telegramUrl: entity.telegram || undefined,
+      discordUrl: entity.discord || undefined,
+      trustScore: {
+        score: 50, // Preliminary score, will be updated after AI analysis
+        tier: 'neutral' as const,
+        confidence: 'low' as const,
+        lastUpdated: new Date(),
+      },
+      marketData: entity.marketIntel ? {
+        price: entity.marketIntel.priceUsd || 0,
+        priceChange24h: entity.marketIntel.priceChange24h || 0,
+        marketCap: entity.marketIntel.marketCap,
+        volume24h: entity.marketIntel.volume24h,
+        liquidity: entity.marketIntel.liquidity,
+      } : undefined,
+      securityIntel: entity.securityIntel?.isAccessible ? {
+        mintAuthorityEnabled: entity.securityIntel.mintAuthority === 'active',
+        freezeAuthorityEnabled: entity.securityIntel.freezeAuthority === 'active',
+        lpLocked: entity.securityIntel.lpLocked === true,
+        holdersCount: entity.securityIntel.totalHolders,
+        risks: entity.securityIntel.risks?.map(r => r.description || r.name) || [],
+      } : undefined,
+      keyFindings: [
+        ...(entity.securityIntel?.isRugged ? ['⚠️ FLAGGED AS RUG PULL'] : []),
+        ...(entity.securityIntel?.mintAuthority === 'active' ? ['Mint authority active'] : []),
+        ...(entity.securityIntel?.freezeAuthority === 'active' ? ['Freeze authority active'] : []),
+        '⏳ AI analysis in progress...',
+      ],
+      lastScanAt: new Date(),
+    };
+
+    // Save async - don't block the response
+    upsertProjectByTokenAddress(tokenAddress, osintProjectData)
+      .then(p => p && console.log(`[UniversalScan] Saved preliminary OSINT project: ${p.name}`))
+      .catch(err => console.error('[UniversalScan] Failed to save preliminary project:', err));
+  }
 
   const xScanResult = await submitScan({
     handle: entity.xHandle,
@@ -1059,17 +1137,21 @@ async function processRealScan(job: ScanJob): Promise<void> {
     const cachedAt = new Date();
     reportCache.set(job.handle, { report, cachedAt });
 
-    // Async cache to Supabase (don't block on this)
+    // Save to Supabase - await project upsert to prevent race condition with redirect
     if (isSupabaseAvailable()) {
+      // Cache report async (ok if this completes after redirect)
       cacheReportInSupabase(
         job.handle,
         report as unknown as Record<string, unknown>,
         CACHE_TTL_MS
       ).catch(err => console.error('[XIntel] Failed to cache to Supabase:', err));
 
-      // Also create/update the project entity (pass entityType from classification)
-      upsertProjectFromAnalysis(job.handle, analysis, report, classifiedEntityType)
-        .catch(err => console.error('[XIntel] Failed to upsert project:', err));
+      // Await project upsert so it exists before client redirects
+      try {
+        await upsertProjectFromAnalysis(job.handle, analysis, report, classifiedEntityType);
+      } catch (err) {
+        console.error('[XIntel] Failed to upsert project:', err);
+      }
     }
   } catch (error) {
     clearInterval(progressInterval);

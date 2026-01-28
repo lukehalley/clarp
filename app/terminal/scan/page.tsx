@@ -245,39 +245,47 @@ function ScanPageInner() {
       // Update resolve step with detected type
       updateStep('resolve', { status: 'complete', detail: `detected: ${data.inputType || 'unknown'}` });
 
-      // If we got immediate OSINT data, show progress
+      // If we got immediate OSINT data, show progress and redirect early
       if (data.osintData) {
         updateStep('osint', { status: 'complete', detail: data.osintData.securityIntel ? 'RugCheck + market data' : 'market data collected' });
         if (data.osintData.xHandle) {
           updateStep('social', { status: 'complete', detail: `found @${data.osintData.xHandle}` });
         }
+
+        // If we have OSINT data, redirect immediately - don't wait for AI analysis
+        // The project page will show OSINT data and poll for AI analysis completion
+        const projectId = data.canonicalId || query.replace('@', '').toLowerCase();
+
+        setSteps((prev) =>
+          prev.map((s) => ({ ...s, status: 'complete', detail: s.detail || 'complete' }))
+        );
+        setPhase('complete');
+
+        // Only pass jobId for real AI analysis jobs (job_* prefix)
+        // Don't show indicator for osint_* or cached_* - they have no background processing
+        const hasRealAiJob = data.jobId && data.jobId.startsWith('job_');
+        const redirectUrl = hasRealAiJob
+          ? `/terminal/project/${projectId}?scanJob=${data.jobId}`
+          : `/terminal/project/${projectId}`;
+
+        setTimeout(() => router.push(redirectUrl), 1200);
+        return;
       }
 
+      // No OSINT data - need to poll for completion
       if (data.cached || data.status === 'complete') {
-        // Fast path - already have data
         setSteps((prev) =>
           prev.map((s) => ({ ...s, status: 'complete', detail: s.detail || 'cached' }))
         );
         setPhase('complete');
-        // Redirect to project page using canonicalId or X handle
-        const projectId = data.osintData?.xHandle || data.canonicalId || query.replace('@', '').toLowerCase();
+        const projectId = data.canonicalId || query.replace('@', '').toLowerCase();
         setTimeout(() => router.push(`/terminal/project/${projectId}`), 1200);
         return;
       }
 
       setJobId(data.jobId);
       if (data.canonicalId) {
-        setResolvedHandle(data.osintData?.xHandle || data.canonicalId);
-      }
-
-      // If OSINT-only (no X handle to analyze), complete early
-      if (data.status === 'complete' && !data.osintData?.xHandle) {
-        setSteps((prev) =>
-          prev.map((s) => ({ ...s, status: 'complete', detail: s.detail || 'complete' }))
-        );
-        setPhase('complete');
-        const projectId = data.canonicalId || query;
-        setTimeout(() => router.push(`/terminal/project/${projectId}`), 1200);
+        setResolvedHandle(data.canonicalId);
       }
     } catch (err) {
       console.error('[ScanPage] Error:', err);
@@ -301,9 +309,9 @@ function ScanPageInner() {
 
         if (data.status === 'complete') {
           setPhase('complete');
-          // Redirect to project page using handle from response or resolved handle
-          const handle = data.handle || resolvedHandle || query.replace('@', '').toLowerCase();
-          setTimeout(() => router.push(`/terminal/project/${handle}`), 1200);
+          // Redirect to project page using canonicalId (resolvedHandle) - token address for tokens
+          const projectId = resolvedHandle || query.replace('@', '').toLowerCase();
+          setTimeout(() => router.push(`/terminal/project/${projectId}`), 1200);
         } else if (data.status === 'failed') {
           setPhase('failed');
           setError(data.error || 'Analysis failed');
@@ -317,25 +325,51 @@ function ScanPageInner() {
     return () => clearInterval(interval);
   }, [jobId, phase, router, resolvedHandle, query]);
 
-  // Check for existing active scan on mount (for resume after page refresh)
+  // Check for existing scan, cached project, or rate limits before starting
   const checkExistingScan = async () => {
     if (!query) return false;
 
     try {
-      const normalizedHandle = query.replace('@', '').toLowerCase();
-      const res = await fetch(`/api/xintel/scan?handle=${encodeURIComponent(normalizedHandle)}`);
+      const normalizedQuery = query.replace('@', '').toLowerCase();
 
-      if (res.ok) {
-        const data = await res.json();
+      // First check if there's an active scan in progress
+      const scanRes = await fetch(`/api/xintel/scan?handle=${encodeURIComponent(normalizedQuery)}`);
+      if (scanRes.ok) {
+        const data = await scanRes.json();
         if (data.hasActiveScan && data.status !== 'complete' && data.status !== 'failed') {
           console.log('[ScanPage] Found active scan, resuming:', data.jobId);
           setPhase('scanning');
           setSteps(initSteps());
           setJobId(data.jobId);
           setResolvedHandle(data.handle);
-          // Update steps based on current progress
           mapStatusToStep(data.status, data.progress, data.statusMessage);
           return true;
+        }
+      }
+
+      // Preflight check: existing project + rate limit
+      const preflightRes = await fetch(`/api/xintel/preflight?q=${encodeURIComponent(query)}`);
+      if (preflightRes.ok) {
+        const preflight = await preflightRes.json();
+
+        // If project exists, redirect directly
+        if (preflight.existingProject && preflight.canonicalId) {
+          console.log('[ScanPage] Found existing project via preflight, redirecting');
+          router.push(`/terminal/project/${preflight.canonicalId}`);
+          return true;
+        }
+
+        // If rate limited, show error immediately (no animation)
+        if (preflight.rateLimited) {
+          console.log('[ScanPage] Rate limited:', preflight.waitSeconds, 'seconds');
+          setError(`Rate limited. Try again in ${preflight.waitSeconds} seconds.`);
+          setPhase('failed');
+          return true; // Return true to prevent startScan from being called
+        }
+
+        // Store resolved handle for later use
+        if (preflight.canonicalId) {
+          setResolvedHandle(preflight.canonicalId);
         }
       }
     } catch (err) {
@@ -347,7 +381,12 @@ function ScanPageInner() {
   // Auto-start on mount (or resume existing scan)
   useEffect(() => {
     if (query && phase === 'idle') {
-      // First check if there's an existing scan to resume
+      // Show scanning UI immediately for better perceived performance
+      setPhase('scanning');
+      setSteps(initSteps());
+      updateStep('resolve', { status: 'active', detail: 'initializing...' });
+
+      // Then check for existing scan/project in background
       checkExistingScan().then(hasExisting => {
         if (!hasExisting) {
           startScan();

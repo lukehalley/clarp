@@ -309,7 +309,7 @@ async function resolveFromTokenAddress(address: string): Promise<ResolutionResul
         return {
           success: true,
           entity: {
-            canonicalId: launchpadData.twitter || address,
+            canonicalId: address, // Always use token address as canonical ID
             inputType: 'token_address',
             originalInput: address,
             name: launchpadData.name,
@@ -569,7 +569,7 @@ async function resolveFromTokenAddress(address: string): Promise<ResolutionResul
   return {
     success: true,
     entity: {
-      canonicalId: xHandle || token.symbol || address,
+      canonicalId: address, // Always use token address as canonical ID for token inputs
       inputType: 'token_address',
       originalInput: address,
       name: token.name,
