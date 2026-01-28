@@ -16,7 +16,8 @@ import {
 } from 'lucide-react';
 import IntelCard from '@/components/terminal/IntelCard';
 import WalletGate from '@/components/auth/WalletGate';
-import type { Project, EntityType } from '@/types/project';
+import TokenomicsDashboard from '@/components/tokenomics/Dashboard';
+import type { Project } from '@/types/project';
 
 // ============================================================================
 // TYPES
@@ -456,6 +457,11 @@ export default function TerminalPage() {
             )}
           </>
         )}
+
+        {/* Tokenomics Dashboard */}
+        <div className="mt-8 pt-6 border-t-2 border-ivory-light/10">
+          <TokenomicsDashboard />
+        </div>
 
         {/* Bottom hint */}
         {filteredProjects.length > 0 && (

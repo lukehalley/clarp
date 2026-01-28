@@ -11,9 +11,10 @@ import { useWallet } from '@solana/wallet-adapter-react';
 import { useWalletModal } from '@solana/wallet-adapter-react-ui';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { Lock, Wallet, Zap, ArrowRight, ExternalLink, AlertTriangle } from 'lucide-react';
+import { Lock, Wallet, Zap, ArrowRight, ExternalLink, AlertTriangle, ChevronDown, ChevronUp } from 'lucide-react';
 import { useTokenBalance } from '@/hooks/useTokenBalance';
 import { TIER_THRESHOLDS, BAGS_FM_URL } from '@/lib/config/tokenomics';
+import BagsSwap from '@/components/swap/BagsSwap';
 
 interface WalletGateProps {
   children: React.ReactNode;
@@ -29,12 +30,12 @@ export default function WalletGate({
   requiredBalance = TIER_THRESHOLDS.holder,
   showPreview = true,
 }: WalletGateProps) {
-  const { connected, publicKey } = useWallet();
+  const { connected } = useWallet();
   const { setVisible } = useWalletModal();
   const { balance, isLoading: balanceLoading } = useTokenBalance();
-  const router = useRouter();
   const [freeScanUsed, setFreeScanUsed] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [showSwap, setShowSwap] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -130,17 +131,56 @@ export default function WalletGate({
                     </div>
                   </div>
 
-                  <a
-                    href={BAGS_FM_URL}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  {/* Inline Swap Widget */}
+                  <button
+                    onClick={() => setShowSwap(!showSwap)}
                     className="w-full bg-danger-orange hover:bg-danger-orange/90 text-black font-mono font-bold
                                py-3 transition-colors flex items-center justify-center gap-2"
                   >
-                    <Wallet className="w-5 h-5" />
-                    BUY CLARP ON BAGS.FM
-                    <ExternalLink className="w-4 h-4" />
-                  </a>
+                    <Zap className="w-5 h-5" />
+                    {showSwap ? 'HIDE SWAP' : 'BUY CLARP NOW'}
+                    {showSwap ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                  </button>
+
+                  {showSwap && (
+                    <div className="mt-2">
+                      <BagsSwap
+                        compact
+                        onSuccess={() => {
+                          // Balance will refresh automatically
+                          setShowSwap(false);
+                        }}
+                      />
+                    </div>
+                  )}
+
+                  {!showSwap && (
+                    <>
+                      <div className="relative">
+                        <div className="absolute inset-0 flex items-center">
+                          <div className="w-full border-t border-ivory-light/10" />
+                        </div>
+                        <div className="relative flex justify-center">
+                          <span className="bg-slate-medium px-4 font-mono text-xs text-ivory-light/40">
+                            OR
+                          </span>
+                        </div>
+                      </div>
+
+                      <a
+                        href={BAGS_FM_URL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full bg-slate-dark hover:bg-ivory-light/5 border-2 border-ivory-light/20
+                                   hover:border-ivory-light/40 text-ivory-light font-mono
+                                   py-3 transition-colors flex items-center justify-center gap-2"
+                      >
+                        <Wallet className="w-5 h-5" />
+                        BUY ON BAGS.FM
+                        <ExternalLink className="w-4 h-4" />
+                      </a>
+                    </>
+                  )}
 
                   <p className="text-center font-mono text-xs text-ivory-light/40">
                     CLARP trades on Bags.fm with 1% creator fees

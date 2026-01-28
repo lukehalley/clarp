@@ -174,22 +174,35 @@ export async function GET(request: NextRequest) {
       if (!supabase) {
         console.warn('[Distribute] Supabase not configured, skipping database logging');
       } else {
-        await supabase.from('revenue_distributions').insert({
-        total_sol: balanceSOL,
-        profit_sol: amounts.profit / LAMPORTS_PER_SOL,
-        operations_sol: amounts.operations / LAMPORTS_PER_SOL,
-        burn_sol: amounts.burn / LAMPORTS_PER_SOL,
-        distribution_tx: distSig,
-        burn_tx: burnResult.signature || null,
-        clarp_burned: burnResult.clarpBurned || null,
-      });
+        // Insert distribution record with new schema
+        const { data: distribution, error: distError } = await supabase
+          .from('revenue_distributions')
+          .insert({
+            total_claimed: balanceSOL,
+            currency: 'SOL',
+            profit_amount: amounts.profit / LAMPORTS_PER_SOL,
+            ops_amount: amounts.operations / LAMPORTS_PER_SOL,
+            burn_amount: amounts.burn / LAMPORTS_PER_SOL,
+            claim_tx_signature: distSig,
+            profit_tx_signature: distSig,
+            ops_tx_signature: distSig,
+            burn_tx_signature: burnResult.signature || null,
+            status: burnResult.clarpBurned > 0 ? 'completed' : 'processing',
+            processed_at: new Date().toISOString(),
+          })
+          .select()
+          .single();
 
-        // Also log burn separately for analytics
-        if (burnResult.clarpBurned > 0) {
-          await supabase.from('burn_history').insert({
-            amount: burnResult.clarpBurned,
-            sol_value: amounts.burn / LAMPORTS_PER_SOL,
+        // Log burn transaction separately for analytics
+        if (burnResult.clarpBurned > 0 && !distError) {
+          await supabase.from('burn_transactions').insert({
             signature: burnResult.signature,
+            clarp_amount: burnResult.clarpBurned,
+            sol_spent: amounts.burn / LAMPORTS_PER_SOL,
+            price_per_clarp: (amounts.burn / LAMPORTS_PER_SOL) / burnResult.clarpBurned,
+            distribution_id: distribution?.id,
+            confirmed: true,
+            block_time: Math.floor(Date.now() / 1000),
           });
         }
       }

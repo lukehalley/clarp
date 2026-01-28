@@ -3,7 +3,11 @@
  *
  * Detects tokens from popular Solana launchpads and fetches their metadata.
  * These platforms have specific address patterns that identify their tokens.
+ *
+ * For Bags.fm tokens, we use the official Bags API when available.
  */
+
+import { getTokenCreator, getLifetimeFees, getTokenInfo } from '@/lib/bags/client';
 
 // ============================================================================
 // TYPES
@@ -219,12 +223,12 @@ async function scrapePumpFunPage(tokenAddress: string, result: LaunchpadTokenInf
 }
 
 // ============================================================================
-// BAGS.FM - Page Scraping (No public token info API)
+// BAGS.FM - Official API + Page Scraping Fallback
 // ============================================================================
 
 /**
- * Fetch token info from Bags.fm by scraping the page
- * Note: Bags.fm doesn't have a public API for token lookups
+ * Fetch token info from Bags.fm
+ * Uses official Bags API when available, falls back to page scraping
  */
 export async function fetchBagsFmToken(tokenAddress: string): Promise<LaunchpadTokenInfo> {
   const result: LaunchpadTokenInfo = {
@@ -237,7 +241,47 @@ export async function fetchBagsFmToken(tokenAddress: string): Promise<LaunchpadT
 
   console.log(`[LaunchpadIntel] Fetching Bags.fm token: ${tokenAddress}`);
 
-  // Bags.fm doesn't have a public token info API, so we scrape the page directly
+  try {
+    // Try official Bags API first
+    const [tokenInfo, creator, fees] = await Promise.all([
+      getTokenInfo(tokenAddress),
+      getTokenCreator(tokenAddress),
+      getLifetimeFees(tokenAddress),
+    ]);
+
+    if (tokenInfo) {
+      result.isAccessible = true;
+      result.name = tokenInfo.name;
+      result.symbol = tokenInfo.symbol;
+      result.imageUrl = tokenInfo.imageUrl;
+      result.createdAt = tokenInfo.launchDate ? new Date(tokenInfo.launchDate) : undefined;
+
+      if (creator) {
+        result.creator = creator.address;
+      }
+
+      // Store lifetime fees as a custom metric
+      if (fees) {
+        (result as LaunchpadTokenInfo & { lifetimeFees?: number }).lifetimeFees = fees.totalFees;
+      }
+
+      console.log(`[LaunchpadIntel] Bags API returned: ${result.name} (${result.symbol})`);
+
+      // Supplement with scraped data for socials (not in API)
+      const scraped = await scrapeBagsFmPage(tokenAddress, result);
+      return {
+        ...result,
+        twitter: scraped.twitter || result.twitter,
+        telegram: scraped.telegram || result.telegram,
+        website: scraped.website || result.website,
+        description: scraped.description || result.description,
+      };
+    }
+  } catch (error) {
+    console.warn(`[LaunchpadIntel] Bags API failed, falling back to scraping:`, error);
+  }
+
+  // Fall back to page scraping
   return await scrapeBagsFmPage(tokenAddress, result);
 }
 
