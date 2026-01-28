@@ -316,7 +316,7 @@ function ScanPageInner() {
     return () => clearInterval(interval);
   }, [jobId, phase, router, resolvedHandle, query]);
 
-  // Check for existing active scan or cached project on mount
+  // Check for existing scan, cached project, or rate limits before starting
   const checkExistingScan = async () => {
     if (!query) return false;
 
@@ -338,14 +338,29 @@ function ScanPageInner() {
         }
       }
 
-      // Check if project already exists in database (cached from previous scan)
-      const projectRes = await fetch(`/api/projects/${encodeURIComponent(normalizedQuery)}`);
-      if (projectRes.ok) {
-        const projectData = await projectRes.json();
-        if (projectData.project) {
-          console.log('[ScanPage] Found existing project, redirecting');
-          router.push(`/terminal/project/${normalizedQuery}`);
+      // Preflight check: existing project + rate limit
+      const preflightRes = await fetch(`/api/xintel/preflight?q=${encodeURIComponent(query)}`);
+      if (preflightRes.ok) {
+        const preflight = await preflightRes.json();
+
+        // If project exists, redirect directly
+        if (preflight.existingProject && preflight.canonicalId) {
+          console.log('[ScanPage] Found existing project via preflight, redirecting');
+          router.push(`/terminal/project/${preflight.canonicalId}`);
           return true;
+        }
+
+        // If rate limited, show error immediately (no animation)
+        if (preflight.rateLimited) {
+          console.log('[ScanPage] Rate limited:', preflight.waitSeconds, 'seconds');
+          setError(`Rate limited. Try again in ${preflight.waitSeconds} seconds.`);
+          setPhase('failed');
+          return true; // Return true to prevent startScan from being called
+        }
+
+        // Store resolved handle for later use
+        if (preflight.canonicalId) {
+          setResolvedHandle(preflight.canonicalId);
         }
       }
     } catch (err) {

@@ -58,6 +58,28 @@ const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 const scanCooldowns: Map<string, Date> = new Map();
 const COOLDOWN_MS = 60 * 1000; // 1 minute between scans of same handle
 
+/**
+ * Check if a handle is rate limited (for preflight checks)
+ */
+export function checkHandleCooldown(handle: string): { limited: boolean; waitSeconds: number } {
+  const normalizedHandle = handle.toLowerCase().replace('@', '');
+  const lastScan = scanCooldowns.get(normalizedHandle);
+
+  if (!lastScan) {
+    return { limited: false, waitSeconds: 0 };
+  }
+
+  const elapsed = Date.now() - lastScan.getTime();
+  if (elapsed < COOLDOWN_MS) {
+    return {
+      limited: true,
+      waitSeconds: Math.ceil((COOLDOWN_MS - elapsed) / 1000),
+    };
+  }
+
+  return { limited: false, waitSeconds: 0 };
+}
+
 // OSINT entity cache (for passing OSINT gaps to Grok)
 // Stores resolved entities by handle so processScanJob can extract gaps
 const osintEntityCache: Map<string, ResolvedEntity> = new Map();
