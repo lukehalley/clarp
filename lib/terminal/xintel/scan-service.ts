@@ -258,6 +258,7 @@ export async function submitUniversalScan(options: UniversalScanOptions): Promis
 
   // Save OSINT project immediately so user can see data while AI analyzes
   // This will be enriched later when the X analysis completes
+  // IMPORTANT: Await the save to prevent 404 race condition on redirect
   if (isSupabaseAvailable() && entity.tokenAddresses?.[0]?.address) {
     const tokenAddress = entity.tokenAddresses[0].address;
     const osintProjectData = {
@@ -300,10 +301,15 @@ export async function submitUniversalScan(options: UniversalScanOptions): Promis
       lastScanAt: new Date(),
     };
 
-    // Save async - don't block the response
-    upsertProjectByTokenAddress(tokenAddress, osintProjectData)
-      .then(p => p && console.log(`[UniversalScan] Saved preliminary OSINT project: ${p.name}`))
-      .catch(err => console.error('[UniversalScan] Failed to save preliminary project:', err));
+    // Await the save to prevent 404 race condition with redirect
+    try {
+      const savedProject = await upsertProjectByTokenAddress(tokenAddress, osintProjectData);
+      if (savedProject) {
+        console.log(`[UniversalScan] Saved preliminary OSINT project: ${savedProject.name}`);
+      }
+    } catch (err) {
+      console.error('[UniversalScan] Failed to save preliminary project:', err);
+    }
   }
 
   const xScanResult = await submitScan({
