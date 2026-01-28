@@ -73,6 +73,7 @@ export interface ResolvedEntity {
 
   // Discovered links
   xHandle?: string;
+  xCommunityUrl?: string; // X community URL (x.com/i/communities/...)
   website?: string;
   github?: string;
   telegram?: string;
@@ -284,6 +285,19 @@ function isValidXHandle(handle: string): boolean {
 }
 
 /**
+ * Extract X community URL from internal X paths
+ * Returns the full URL if it's a community link
+ */
+function extractXCommunityUrl(url: string): string | null {
+  const match = url.match(/(?:twitter\.com|x\.com)\/i\/communities\/(\d+)/i);
+  if (match) {
+    // Normalize to x.com format
+    return `https://x.com/i/communities/${match[1]}`;
+  }
+  return null;
+}
+
+/**
  * Extract X handle from Twitter URL
  * Handles edge cases like x.com/i/communities/... which are NOT user profiles
  */
@@ -381,6 +395,11 @@ async function resolveFromTokenAddress(address: string): Promise<ResolutionResul
 
   // Extract initial links from DexScreener
   let xHandle = token.twitterUrl ? extractXHandleFromUrl(token.twitterUrl) ?? undefined : undefined;
+  // Also check for X community URL (x.com/i/communities/...)
+  let xCommunityUrl = token.twitterUrl ? extractXCommunityUrl(token.twitterUrl) ?? undefined : undefined;
+  if (xCommunityUrl) {
+    console.log(`[EntityResolver] Found X community: ${xCommunityUrl}`);
+  }
   let website = token.websiteUrl;
   let telegram = token.telegramUrl;
   let discord: string | undefined;
@@ -617,6 +636,7 @@ async function resolveFromTokenAddress(address: string): Promise<ResolutionResul
       symbol: token.symbol,
       imageUrl: token.imageUrl || undefined,
       xHandle,
+      xCommunityUrl,
       website,
       github,
       telegram,

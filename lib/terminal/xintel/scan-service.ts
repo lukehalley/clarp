@@ -22,7 +22,7 @@ import {
   getActiveScanJobByHandle,
 } from '@/lib/supabase/client';
 import { upsertProjectByHandle, upsertProjectByTokenAddress } from '@/lib/terminal/project-service';
-import type { GrokAnalysisResult } from '@/lib/grok/types';
+import type { GrokAnalysisResult, GrokCommunityAnalysisResult } from '@/lib/grok/types';
 import { fetchGitHubRepoIntel, checkWebsiteLive, type GitHubRepoIntel } from '@/lib/terminal/osint';
 import {
   resolveEntity,
@@ -183,27 +183,84 @@ export async function submitUniversalScan(options: UniversalScanOptions): Promis
     console.log(`  - Price: $${entity.marketIntel.priceUsd}`);
   }
 
-  // If no X handle or skipXAnalysis, return OSINT-only result
+  // If no X handle or skipXAnalysis, check for X community URL or return OSINT-only result
   if (!entity.xHandle || skipXAnalysis) {
-    console.log(`[UniversalScan] No X handle or skip requested - returning OSINT-only result`);
+    console.log(`[UniversalScan] No X handle${entity.xCommunityUrl ? ', but found X community URL' : ''} - ${entity.xCommunityUrl ? 'running community analysis' : 'returning OSINT-only result'}`);
+
+    // Try X community analysis if we have a community URL
+    let communityAnalysis: GrokCommunityAnalysisResult | null = null;
+    if (entity.xCommunityUrl && !skipXAnalysis && isGrokAvailable()) {
+      try {
+        console.log(`[UniversalScan] Analyzing X community: ${entity.xCommunityUrl}`);
+        const grokClient = getGrokClient();
+        communityAnalysis = await grokClient.analyzeCommunity(entity.xCommunityUrl);
+        console.log(`[UniversalScan] Community analysis complete: ${communityAnalysis.communityName}, health: ${communityAnalysis.verdict.communityHealth}`);
+
+        // Extract X handle from community if found
+        if (communityAnalysis.projectInfo?.xHandle && !entity.xHandle) {
+          console.log(`[UniversalScan] Community analysis found X handle: @${communityAnalysis.projectInfo.xHandle}`);
+          // We could trigger a full X handle scan here if desired, but for now just log it
+        }
+      } catch (err) {
+        console.error(`[UniversalScan] Community analysis failed:`, err);
+      }
+    }
+
+    // Build key findings from OSINT + community analysis
+    const keyFindings: string[] = [
+      ...(entity.securityIntel?.isRugged ? ['⚠️ FLAGGED AS RUG PULL'] : []),
+      ...(entity.securityIntel?.mintAuthority === 'active' ? ['Mint authority active'] : []),
+      ...(entity.securityIntel?.freezeAuthority === 'active' ? ['Freeze authority active'] : []),
+    ];
+
+    // Add community analysis findings
+    if (communityAnalysis) {
+      keyFindings.push(`X Community: ${communityAnalysis.communityName || 'Analyzed'}`);
+      if (communityAnalysis.memberCount) {
+        keyFindings.push(`Community members: ${communityAnalysis.memberCount.toLocaleString()}`);
+      }
+      if (communityAnalysis.communitySignals?.sentiment) {
+        keyFindings.push(`Community sentiment: ${communityAnalysis.communitySignals.sentiment}`);
+      }
+      // Add key findings from community analysis
+      if (communityAnalysis.keyFindings?.length > 0) {
+        keyFindings.push(...communityAnalysis.keyFindings.slice(0, 3));
+      }
+      // Add red flags from community
+      if (communityAnalysis.communitySignals?.redFlags?.length) {
+        keyFindings.push(...communityAnalysis.communitySignals.redFlags.slice(0, 2).map((f: string) => `⚠️ ${f}`));
+      }
+    } else if (entity.xCommunityUrl) {
+      keyFindings.push(`X Community: ${entity.xCommunityUrl}`);
+    }
+
+    if (!communityAnalysis) {
+      keyFindings.push('OSINT-only scan (no X handle found)');
+    }
+
+    // Calculate trust score based on community analysis if available
+    const baseScore = communityAnalysis ? communityAnalysis.verdict.legitimacyScore * 10 : 50;
+    const trustTier = baseScore >= 70 ? 'trusted' as const :
+                      baseScore >= 40 ? 'neutral' as const : 'caution' as const;
 
     // Save the project to DB so redirect works (even without X handle)
     if (isSupabaseAvailable() && entity.tokenAddresses?.[0]?.address) {
       const tokenAddress = entity.tokenAddresses[0].address;
       const projectData = {
-        name: entity.name || entity.symbol || `Token ${tokenAddress.slice(0, 8)}...`,
-        description: entity.description || undefined,
+        name: entity.name || entity.symbol || communityAnalysis?.projectInfo?.name || `Token ${tokenAddress.slice(0, 8)}...`,
+        description: entity.description || communityAnalysis?.description || undefined,
         avatarUrl: entity.imageUrl || undefined,
         tokenAddress,
-        ticker: entity.symbol || undefined,
-        websiteUrl: entity.website || undefined,
+        ticker: entity.symbol || communityAnalysis?.projectInfo?.ticker?.replace('$', '') || undefined,
+        websiteUrl: entity.website || communityAnalysis?.projectInfo?.website || undefined,
         githubUrl: entity.github || undefined,
         telegramUrl: entity.telegram || undefined,
         discordUrl: entity.discord || undefined,
+        xCommunityUrl: entity.xCommunityUrl || undefined,
         trustScore: {
-          score: 50,
-          tier: 'neutral' as const,
-          confidence: 'low' as const,
+          score: baseScore,
+          tier: trustTier,
+          confidence: communityAnalysis ? 'medium' as const : 'low' as const,
           lastUpdated: new Date(),
         },
         marketData: entity.marketIntel ? {
@@ -220,12 +277,18 @@ export async function submitUniversalScan(options: UniversalScanOptions): Promis
           holdersCount: entity.securityIntel.totalHolders,
           risks: entity.securityIntel.risks?.map(r => r.description || r.name) || [],
         } : undefined,
-        keyFindings: [
-          ...(entity.securityIntel?.isRugged ? ['⚠️ FLAGGED AS RUG PULL'] : []),
-          ...(entity.securityIntel?.mintAuthority === 'active' ? ['Mint authority active'] : []),
-          ...(entity.securityIntel?.freezeAuthority === 'active' ? ['Freeze authority active'] : []),
-          'OSINT-only scan (no X handle found)',
-        ],
+        keyFindings,
+        // Store community analysis data
+        communityIntel: communityAnalysis ? {
+          communityUrl: communityAnalysis.communityUrl,
+          communityName: communityAnalysis.communityName,
+          memberCount: communityAnalysis.memberCount,
+          isActive: communityAnalysis.isActive,
+          sentiment: communityAnalysis.communitySignals?.sentiment,
+          healthScore: communityAnalysis.verdict.communityHealth,
+          legitimacyScore: communityAnalysis.verdict.legitimacyScore,
+          analyzedAt: new Date(),
+        } : undefined,
         lastScanAt: new Date(),
       };
 
@@ -233,12 +296,12 @@ export async function submitUniversalScan(options: UniversalScanOptions): Promis
       try {
         const savedProject = await upsertProjectByTokenAddress(tokenAddress, projectData);
         if (savedProject) {
-          console.log(`[UniversalScan] Saved OSINT-only project: ${savedProject.name} (id: ${savedProject.id})`);
+          console.log(`[UniversalScan] Saved ${communityAnalysis ? 'community-enhanced' : 'OSINT-only'} project: ${savedProject.name} (id: ${savedProject.id})`);
         } else {
-          console.warn(`[UniversalScan] Failed to save OSINT-only project for token ${tokenAddress.slice(0, 8)}... - upsert returned null`);
+          console.warn(`[UniversalScan] Failed to save project for token ${tokenAddress.slice(0, 8)}... - upsert returned null`);
         }
       } catch (err) {
-        console.error('[UniversalScan] Failed to save OSINT-only project:', err);
+        console.error('[UniversalScan] Failed to save project:', err);
       }
     }
 

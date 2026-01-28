@@ -613,6 +613,64 @@ export interface GrokClassificationResult {
 }
 
 // ============================================================================
+// COMMUNITY ANALYSIS RESULT
+// ============================================================================
+
+/**
+ * Result from X community analysis
+ * Used when analyzing tokens that have X communities but no direct X handle
+ */
+export interface GrokCommunityAnalysisResult {
+  communityUrl: string;
+  communityName: string;
+  memberCount?: number;
+  description?: string;
+  isActive: boolean;
+  recentActivityLevel?: 'high' | 'medium' | 'low' | 'dead' | 'active' | 'moderate' | 'absent';
+
+  projectInfo?: {
+    name?: string;
+    ticker?: string;
+    website?: string;
+    xHandle?: string;
+    description?: string;
+  };
+
+  communitySignals?: {
+    hasActiveDiscussion: boolean;
+    sentiment: 'positive' | 'neutral' | 'negative' | 'mixed';
+    topTopics: string[];
+    redFlags: string[];
+    positiveSignals: string[];
+  };
+
+  adminInfo?: {
+    admins: Array<{ handle: string; role: string }>;
+    isResponsive: boolean;
+    adminActivity: 'high' | 'medium' | 'low' | 'dead' | 'active' | 'moderate' | 'absent';
+  };
+
+  keyFindings: string[];
+  evidence: Array<{
+    date?: string;
+    content: string;
+    source: string;
+  }>;
+
+  verdict: {
+    communityHealth: number;
+    legitimacyScore: number;
+    riskLevel: 'low' | 'medium' | 'high';
+    confidence: 'low' | 'medium' | 'high';
+    summary: string;
+  };
+
+  rawAnalysis: string;
+  citations: Array<{ url: string; title?: string }>;
+  tokensUsed?: number;
+}
+
+// ============================================================================
 // CLIENT OPTIONS
 // ============================================================================
 

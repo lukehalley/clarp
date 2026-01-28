@@ -812,6 +812,97 @@ For each found item, also add evidence in the "evidence" array showing where you
   return instructions.join('\n');
 }
 
+// ============================================================================
+// X COMMUNITY ANALYSIS PROMPT
+// ============================================================================
+
+/**
+ * Prompt for analyzing X communities when no X handle is available.
+ * This allows Grok to gather intel from community pages even without a direct profile.
+ */
+export const X_COMMUNITY_ANALYSIS_PROMPT = `Analyze the X community at {communityUrl} for crypto trust assessment.
+
+SEARCH: Visit/search this community to extract available data about the token/project it represents.
+
+Return JSON:
+{
+  "communityUrl": "{communityUrl}",
+  "communityName": "Name of the community",
+  "memberCount": null,
+  "description": "Community description/purpose",
+  "isActive": false,
+  "recentActivityLevel": "high|medium|low|dead",
+
+  "projectInfo": {
+    "name": "Project/token name if identifiable",
+    "ticker": "$TICKER",
+    "website": null,
+    "xHandle": null,
+    "description": "What the project does"
+  },
+
+  "communitySignals": {
+    "hasActiveDiscussion": false,
+    "sentiment": "positive|neutral|negative|mixed",
+    "topTopics": ["topic1", "topic2"],
+    "redFlags": [],
+    "positiveSignals": []
+  },
+
+  "adminInfo": {
+    "admins": [{"handle": "", "role": "admin|moderator"}],
+    "isResponsive": false,
+    "adminActivity": "active|moderate|absent"
+  },
+
+  "keyFindings": [
+    "Most important finding 1",
+    "Most important finding 2"
+  ],
+
+  "evidence": [
+    {
+      "date": "YYYY-MM-DD",
+      "content": "Relevant post or observation",
+      "source": "community"
+    }
+  ],
+
+  "verdict": {
+    "communityHealth": 5,
+    "legitimacyScore": 5,
+    "riskLevel": "low|medium|high",
+    "confidence": "low|medium|high",
+    "summary": "1-2 sentence assessment of this community"
+  }
+}
+
+## EXTRACTION PRIORITIES
+1. communityName - What is this community called?
+2. projectInfo - What project/token does this community represent?
+3. memberCount - How many members?
+4. recentActivityLevel - Is there recent activity?
+5. adminInfo - Who runs this community? Are they active?
+6. keyFindings - What stands out about this community?
+
+## RED FLAGS TO LOOK FOR
+- Dead community (no recent posts)
+- Spam/bot activity
+- Unrealistic promises
+- Aggressive shilling
+- No moderation
+- Scam warnings from members
+
+## POSITIVE SIGNALS TO LOOK FOR
+- Active discussions
+- Helpful community
+- Responsive admins
+- Technical discussions
+- Roadmap updates
+- Real user engagement
+
+Return ONLY valid JSON.`;
+
 export function buildShillDetectionPrompt(
   tweets: GrokTweetInput[]
 ): string {

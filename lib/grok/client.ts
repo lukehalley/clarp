@@ -4,6 +4,7 @@
 import {
   GrokAnalysisResult,
   GrokClassificationResult,
+  GrokCommunityAnalysisResult,
   GrokResponsesApiResponse,
   GrokTextOutput,
   GrokTopInteraction,
@@ -12,6 +13,7 @@ import {
   ANALYSIS_PROMPT,
   CLASSIFICATION_PROMPT,
   DEEP_ANALYSIS_PROMPT,
+  X_COMMUNITY_ANALYSIS_PROMPT,
   buildOsintGapFinderPrompt,
   type OsintGaps,
 } from './prompts';
@@ -458,6 +460,197 @@ IMPORTANT:
         error
       );
     }
+  }
+
+  /**
+   * Analyze an X community when no X handle is available.
+   * This is useful for tokens that have a community but no official X account.
+   *
+   * @param communityUrl - The X community URL (e.g., https://x.com/i/communities/123)
+   * @returns Community analysis result
+   */
+  async analyzeCommunity(communityUrl: string): Promise<GrokCommunityAnalysisResult> {
+    if (!XAI_API_KEY) {
+      throw new GrokApiError('Grok API client not configured. Set XAI_API_KEY environment variable.');
+    }
+
+    const prompt = X_COMMUNITY_ANALYSIS_PROMPT.replace(/{communityUrl}/g, communityUrl);
+
+    console.log(`[Grok] Analyzing X community: ${communityUrl}`);
+
+    try {
+      const response = await fetch(`${XAI_BASE_URL}/responses`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${XAI_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: this.model,
+          input: [{ role: 'user', content: prompt }],
+          tools: [{ type: 'x_search' }, { type: 'web_search' }],
+          temperature: 0.3,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new GrokApiError(
+          errorData.error || `API request failed with status ${response.status}`,
+          response.status,
+          errorData
+        );
+      }
+
+      const data: GrokResponsesApiResponse = await response.json();
+
+      if (data.error) {
+        throw new GrokApiError(data.error, undefined, data);
+      }
+
+      const textOutput = data.output?.find(
+        (o): o is GrokTextOutput => o.type === 'message' && o.role === 'assistant'
+      );
+
+      if (!textOutput?.content?.[0]?.text) {
+        throw new GrokApiError('No text response from Grok API');
+      }
+
+      const text = textOutput.content[0].text;
+      const citations = textOutput.content[0].annotations?.filter(a => a.type === 'url_citation') || [];
+
+      return this.parseCommunityAnalysisResponse(text, citations, data.usage);
+    } catch (error) {
+      if (error instanceof GrokApiError || error instanceof GrokParseError) {
+        throw error;
+      }
+      throw new GrokApiError(
+        error instanceof Error ? error.message : 'Unknown error during community analysis',
+        undefined,
+        error
+      );
+    }
+  }
+
+  /**
+   * Parse community analysis response from Grok
+   */
+  private parseCommunityAnalysisResponse(
+    text: string,
+    citations: Array<{ url: string; title?: string }>,
+    usage?: GrokResponsesApiResponse['usage']
+  ): GrokCommunityAnalysisResult {
+    // Try to parse JSON from the response
+    const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/) ||
+                      text.match(/(\{[\s\S]*\})/);
+
+    if (!jsonMatch) {
+      console.warn('[Grok] Community analysis failed to parse JSON, returning minimal result');
+      return {
+        communityUrl: '',
+        communityName: 'Unknown',
+        isActive: false,
+        keyFindings: ['Could not analyze community'],
+        evidence: [],
+        verdict: {
+          communityHealth: 5,
+          legitimacyScore: 5,
+          riskLevel: 'medium',
+          confidence: 'low',
+          summary: 'Unable to parse community analysis response',
+        },
+        rawAnalysis: text,
+        citations: citations.map(c => ({ url: c.url, title: c.title })),
+        tokensUsed: usage?.total_tokens,
+      };
+    }
+
+    try {
+      const parsed = JSON.parse(jsonMatch[1]);
+      console.log(`[Grok] Community analysis complete: ${parsed.communityName || 'Unknown'}, health: ${parsed.verdict?.communityHealth || 5}`);
+
+      return {
+        communityUrl: String(parsed.communityUrl || ''),
+        communityName: String(parsed.communityName || 'Unknown'),
+        memberCount: typeof parsed.memberCount === 'number' ? parsed.memberCount : undefined,
+        description: parsed.description as string | undefined,
+        isActive: Boolean(parsed.isActive),
+        recentActivityLevel: this.normalizeActivityLevel(parsed.recentActivityLevel),
+        projectInfo: parsed.projectInfo ? {
+          name: parsed.projectInfo.name as string | undefined,
+          ticker: parsed.projectInfo.ticker as string | undefined,
+          website: parsed.projectInfo.website as string | undefined,
+          xHandle: parsed.projectInfo.xHandle as string | undefined,
+          description: parsed.projectInfo.description as string | undefined,
+        } : undefined,
+        communitySignals: parsed.communitySignals ? {
+          hasActiveDiscussion: Boolean(parsed.communitySignals.hasActiveDiscussion),
+          sentiment: this.normalizeSentiment(parsed.communitySignals.sentiment),
+          topTopics: Array.isArray(parsed.communitySignals.topTopics) ? parsed.communitySignals.topTopics : [],
+          redFlags: Array.isArray(parsed.communitySignals.redFlags) ? parsed.communitySignals.redFlags : [],
+          positiveSignals: Array.isArray(parsed.communitySignals.positiveSignals) ? parsed.communitySignals.positiveSignals : [],
+        } : undefined,
+        adminInfo: parsed.adminInfo ? {
+          admins: Array.isArray(parsed.adminInfo.admins) ? parsed.adminInfo.admins : [],
+          isResponsive: Boolean(parsed.adminInfo.isResponsive),
+          adminActivity: this.normalizeActivityLevel(parsed.adminInfo.adminActivity),
+        } : undefined,
+        keyFindings: Array.isArray(parsed.keyFindings) ? parsed.keyFindings : [],
+        evidence: Array.isArray(parsed.evidence) ? parsed.evidence : [],
+        verdict: parsed.verdict ? {
+          communityHealth: typeof parsed.verdict.communityHealth === 'number' ? parsed.verdict.communityHealth : 5,
+          legitimacyScore: typeof parsed.verdict.legitimacyScore === 'number' ? parsed.verdict.legitimacyScore : 5,
+          riskLevel: this.normalizeRiskLevel(parsed.verdict.riskLevel),
+          confidence: this.normalizeConfidence(parsed.verdict.confidence),
+          summary: String(parsed.verdict.summary || ''),
+        } : {
+          communityHealth: 5,
+          legitimacyScore: 5,
+          riskLevel: 'medium',
+          confidence: 'low',
+          summary: '',
+        },
+        rawAnalysis: text,
+        citations: citations.map(c => ({ url: c.url, title: c.title })),
+        tokensUsed: usage?.total_tokens,
+      };
+    } catch {
+      console.warn('[Grok] Community analysis JSON parse failed');
+      return {
+        communityUrl: '',
+        communityName: 'Unknown',
+        isActive: false,
+        keyFindings: ['Could not parse community analysis'],
+        evidence: [],
+        verdict: {
+          communityHealth: 5,
+          legitimacyScore: 5,
+          riskLevel: 'medium',
+          confidence: 'low',
+          summary: 'Failed to parse analysis',
+        },
+        rawAnalysis: text,
+        citations: citations.map(c => ({ url: c.url, title: c.title })),
+        tokensUsed: usage?.total_tokens,
+      };
+    }
+  }
+
+  private normalizeActivityLevel(level: string | undefined): 'high' | 'medium' | 'low' | 'dead' | 'active' | 'moderate' | 'absent' {
+    const normalized = String(level || '').toLowerCase();
+    if (normalized === 'high' || normalized === 'active') return normalized as 'high' | 'active';
+    if (normalized === 'medium' || normalized === 'moderate') return normalized as 'medium' | 'moderate';
+    if (normalized === 'low' || normalized === 'absent') return normalized as 'low' | 'absent';
+    if (normalized === 'dead') return 'dead';
+    return 'medium';
+  }
+
+  private normalizeSentiment(sentiment: string | undefined): 'positive' | 'neutral' | 'negative' | 'mixed' {
+    const normalized = String(sentiment || '').toLowerCase();
+    if (normalized === 'positive') return 'positive';
+    if (normalized === 'negative') return 'negative';
+    if (normalized === 'mixed') return 'mixed';
+    return 'neutral';
   }
 
   // ============================================================================
