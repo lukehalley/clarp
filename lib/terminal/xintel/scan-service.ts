@@ -233,7 +233,9 @@ export async function submitUniversalScan(options: UniversalScanOptions): Promis
       try {
         const savedProject = await upsertProjectByTokenAddress(tokenAddress, projectData);
         if (savedProject) {
-          console.log(`[UniversalScan] Saved OSINT-only project: ${savedProject.name}`);
+          console.log(`[UniversalScan] Saved OSINT-only project: ${savedProject.name} (id: ${savedProject.id})`);
+        } else {
+          console.warn(`[UniversalScan] Failed to save OSINT-only project for token ${tokenAddress.slice(0, 8)}... - upsert returned null`);
         }
       } catch (err) {
         console.error('[UniversalScan] Failed to save OSINT-only project:', err);
@@ -305,7 +307,10 @@ export async function submitUniversalScan(options: UniversalScanOptions): Promis
     try {
       const savedProject = await upsertProjectByTokenAddress(tokenAddress, osintProjectData);
       if (savedProject) {
-        console.log(`[UniversalScan] Saved preliminary OSINT project: ${savedProject.name}`);
+        console.log(`[UniversalScan] Saved preliminary OSINT project: ${savedProject.name} (id: ${savedProject.id})`);
+      } else {
+        // This shouldn't happen anymore with the x_handle check fix, but log for debugging
+        console.warn(`[UniversalScan] Failed to save project for token ${tokenAddress.slice(0, 8)}... - upsert returned null`);
       }
     } catch (err) {
       console.error('[UniversalScan] Failed to save preliminary project:', err);

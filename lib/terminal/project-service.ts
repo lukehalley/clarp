@@ -482,6 +482,13 @@ export async function upsertProjectByHandle(
 
 /**
  * Upsert project by token address (for OSINT-only projects without X handle)
+ *
+ * IMPORTANT: This function handles the case where:
+ * 1. A project with this token address already exists -> update it
+ * 2. A project with this x_handle already exists -> update it with new token address
+ * 3. No matching project exists -> create new project
+ *
+ * This prevents 404 errors when the same X handle is associated with different tokens.
  */
 export async function upsertProjectByTokenAddress(
   tokenAddress: string,
@@ -492,9 +499,9 @@ export async function upsertProjectByTokenAddress(
 
   try {
     // First check if a project with this token address already exists
-    const existing = await getProjectByTokenAddress(tokenAddress);
+    const existingByToken = await getProjectByTokenAddress(tokenAddress);
 
-    if (existing) {
+    if (existingByToken) {
       // Update the existing project
       const updateData = projectToUpdate({
         ...project,
@@ -504,7 +511,7 @@ export async function upsertProjectByTokenAddress(
       const { data, error } = await client
         .from('projects')
         .update(updateData)
-        .eq('id', existing.id)
+        .eq('id', existingByToken.id)
         .select()
         .single();
 
@@ -515,6 +522,36 @@ export async function upsertProjectByTokenAddress(
 
       console.log(`[ProjectService] Updated project by token: ${tokenAddress.slice(0, 8)}...`);
       return rowToProject(data as ProjectRow);
+    }
+
+    // Check if a project with this x_handle already exists
+    // This prevents unique constraint violations on x_handle
+    if (project.xHandle) {
+      const existingByHandle = await getProjectByHandle(project.xHandle);
+
+      if (existingByHandle) {
+        // Update existing project with the new token address
+        const updateData = projectToUpdate({
+          ...project,
+          tokenAddress, // Add the new token address to existing project
+          lastScanAt: new Date(),
+        });
+
+        const { data, error } = await client
+          .from('projects')
+          .update(updateData)
+          .eq('id', existingByHandle.id)
+          .select()
+          .single();
+
+        if (error) {
+          console.error('[ProjectService] Error updating project by handle:', error.message);
+          return null;
+        }
+
+        console.log(`[ProjectService] Updated project @${project.xHandle} with token: ${tokenAddress.slice(0, 8)}...`);
+        return rowToProject(data as ProjectRow);
+      }
     }
 
     // Create new project
