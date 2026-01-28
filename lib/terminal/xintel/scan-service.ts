@@ -1599,8 +1599,35 @@ async function upsertProjectFromAnalysis(
     keyFindings.push(`New domain: registered ${osintEntity.domainIntel.ageInDays} days ago`);
   if (githubIntelData && githubIntelData.stars > 100)
     keyFindings.push(`Strong GitHub presence: ${githubIntelData.stars} stars`);
-  if (osintEntity?.launchpadData)
-    keyFindings.push(`Launched on ${osintEntity.launchpad}: ${osintEntity.launchpadData.isGraduated ? 'Graduated from bonding curve' : 'Still on bonding curve'}`);
+
+  // Launchpad graduation status - prefer DexScreener data (more reliable) over launchpad API
+  if (osintEntity?.launchpad === 'pump_fun' || osintEntity?.launchpad === 'bags_fm') {
+    // DexScreener tells us if the token is trading on PumpSwap (graduated) or bonding curve
+    const isGraduatedFromDex = osintEntity?.tokenData?.isPumpFunGraduated;
+    const isGraduatedFromLaunchpad = osintEntity?.launchpadData?.isGraduated;
+    const dexType = osintEntity?.tokenData?.dexType;
+    const rawDexId = osintEntity?.tokenData?.rawDexId;
+
+    // Use DexScreener as primary source (checks if trading on PumpSwap vs bonding curve)
+    // Fall back to launchpad API if DexScreener data unavailable
+    const isGraduated = isGraduatedFromDex ?? isGraduatedFromLaunchpad;
+
+    if (isGraduated === true) {
+      // Show where the token graduated to (PumpSwap for new tokens, Raydium for pre-March 2025 tokens)
+      const graduatedTo = dexType === 'pumpswap' ? 'PumpSwap' :
+                          dexType === 'raydium' ? 'Raydium (pre-March 2025)' :
+                          dexType === 'meteora' ? 'Meteora' :
+                          rawDexId || 'DEX';
+      keyFindings.push(`Launched on ${osintEntity.launchpad}: Graduated to ${graduatedTo}`);
+    } else if (isGraduated === false) {
+      keyFindings.push(`Launched on ${osintEntity.launchpad}: Still on bonding curve`);
+    } else {
+      keyFindings.push(`Launched on ${osintEntity.launchpad}`);
+    }
+  } else if (osintEntity?.launchpadData) {
+    // Non-pump.fun launchpads
+    keyFindings.push(`Launched on ${osintEntity.launchpad}`);
+  }
 
   // Map Grok's entityType to our EntityType (normalize 'company' to 'organization')
   const normalizedEntityType = entityType === 'company' ? 'organization' as const :
@@ -1722,7 +1749,10 @@ function extractTags(
     // Launchpad
     if (osintEntity.launchpad === 'pump_fun') tags.push('pump-fun');
     if (osintEntity.launchpad === 'bags_fm') tags.push('bags-fm');
-    if (osintEntity.launchpadData?.isGraduated) tags.push('graduated');
+
+    // Graduation status - prefer DexScreener (checks if on PumpSwap) over launchpad API
+    const isGraduated = osintEntity.tokenData?.isPumpFunGraduated ?? osintEntity.launchpadData?.isGraduated;
+    if (isGraduated) tags.push('graduated');
 
     // Security status from RugCheck
     if (osintEntity.securityIntel?.isAccessible) {
