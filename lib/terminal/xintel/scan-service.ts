@@ -207,9 +207,15 @@ export async function submitUniversalScan(options: UniversalScanOptions): Promis
         lastScanAt: new Date(),
       };
 
-      upsertProjectByTokenAddress(tokenAddress, projectData)
-        .then(p => p && console.log(`[UniversalScan] Saved OSINT-only project: ${p.name}`))
-        .catch(err => console.error('[UniversalScan] Failed to save OSINT-only project:', err));
+      // Await the save to prevent race condition with redirect
+      try {
+        const savedProject = await upsertProjectByTokenAddress(tokenAddress, projectData);
+        if (savedProject) {
+          console.log(`[UniversalScan] Saved OSINT-only project: ${savedProject.name}`);
+        }
+      } catch (err) {
+        console.error('[UniversalScan] Failed to save OSINT-only project:', err);
+      }
     }
 
     return {
@@ -1059,17 +1065,21 @@ async function processRealScan(job: ScanJob): Promise<void> {
     const cachedAt = new Date();
     reportCache.set(job.handle, { report, cachedAt });
 
-    // Async cache to Supabase (don't block on this)
+    // Save to Supabase - await project upsert to prevent race condition with redirect
     if (isSupabaseAvailable()) {
+      // Cache report async (ok if this completes after redirect)
       cacheReportInSupabase(
         job.handle,
         report as unknown as Record<string, unknown>,
         CACHE_TTL_MS
       ).catch(err => console.error('[XIntel] Failed to cache to Supabase:', err));
 
-      // Also create/update the project entity (pass entityType from classification)
-      upsertProjectFromAnalysis(job.handle, analysis, report, classifiedEntityType)
-        .catch(err => console.error('[XIntel] Failed to upsert project:', err));
+      // Await project upsert so it exists before client redirects
+      try {
+        await upsertProjectFromAnalysis(job.handle, analysis, report, classifiedEntityType);
+      } catch (err) {
+        console.error('[XIntel] Failed to upsert project:', err);
+      }
     }
   } catch (error) {
     clearInterval(progressInterval);
