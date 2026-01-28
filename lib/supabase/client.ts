@@ -2,6 +2,7 @@
 // Used for authentication and data storage
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { getServiceClient } from './server';
 
 // Database types for xintel_reports table
 export interface XIntelReportRow {
@@ -127,7 +128,8 @@ export async function cacheReportInSupabase(
   report: Record<string, unknown>,
   ttlMs: number
 ): Promise<boolean> {
-  const client = getSupabaseClient();
+  // Use service client to bypass RLS for server-side writes
+  const client = getServiceClient();
   if (!client) return false;
 
   try {
@@ -161,7 +163,8 @@ export async function cacheReportInSupabase(
  * Delete cached report from Supabase
  */
 export async function deleteCachedReportFromSupabase(handle: string): Promise<boolean> {
-  const client = getSupabaseClient();
+  // Use service client to bypass RLS for server-side writes
+  const client = getServiceClient();
   if (!client) return false;
 
   try {
@@ -209,7 +212,8 @@ export async function getCacheAgeFromSupabase(handle: string): Promise<number | 
  * Clean up expired reports (can be called periodically)
  */
 export async function cleanupExpiredReports(): Promise<number> {
-  const client = getSupabaseClient();
+  // Use service client to bypass RLS for server-side writes
+  const client = getServiceClient();
   if (!client) return 0;
 
   try {
@@ -265,7 +269,8 @@ export async function createScanJob(job: {
   statusMessage?: string;
   startedAt: Date;
 }): Promise<boolean> {
-  const client = getSupabaseClient();
+  // Use service client to bypass RLS for server-side writes
+  const client = getServiceClient();
   if (!client) return false;
 
   try {
@@ -304,7 +309,8 @@ export async function updateScanJob(
     error?: string;
   }
 ): Promise<boolean> {
-  const client = getSupabaseClient();
+  // Use service client to bypass RLS for server-side writes
+  const client = getServiceClient();
   if (!client) return false;
 
   try {
@@ -436,7 +442,8 @@ export async function getRecentScanJobByHandle(
  * Cleanup old completed/failed scan jobs (keep last 24 hours)
  */
 export async function cleanupOldScanJobs(): Promise<number> {
-  const client = getSupabaseClient();
+  // Use service client to bypass RLS for server-side writes
+  const client = getServiceClient();
   if (!client) return 0;
 
   const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
@@ -545,7 +552,8 @@ export async function cacheToken(token: {
   imageUrl?: string;
   dexType?: string;
 }): Promise<boolean> {
-  const client = getSupabaseClient();
+  // Use service client to bypass RLS for server-side writes
+  const client = getServiceClient();
   if (!client) return false;
 
   // Normalize ticker

@@ -1,7 +1,11 @@
 // Project Service - CRUD operations for unified project entities
 // "Trustpilot + Google Maps + Rugchecker for crypto"
 
-import { getSupabaseClient, isSupabaseAvailable } from '@/lib/supabase/client';
+import { getServiceClient } from '@/lib/supabase/server';
+
+// Use service client (bypasses RLS) for all server-side project operations
+const getSupabaseClient = getServiceClient;
+const isSupabaseAvailable = () => !!getServiceClient();
 import type { ProjectRow, ProjectInsert, ProjectUpdate } from '@/types/supabase';
 import type { Project, TrustTier, TeamMember, EntityType } from '@/types/project';
 
