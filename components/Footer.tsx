@@ -37,7 +37,7 @@ export default function Footer() {
     if (copyrightClicks >= 5) return '© 2025 clarp. stop clicking this.';
     if (copyrightClicks >= 3) return '© 2025 clarp. why are you clicking the copyright?';
     if (copyrightClicks >= 1) return '© 2025 clarp. yes, you clicked the copyright.';
-    return '© 2025 clarp. no rights reserved. it\'s a parody.';
+    return '© 2025 clarp. all rights reserved.';
   };
 
   return (
@@ -174,13 +174,7 @@ export default function Footer() {
             >
               {getCopyrightText()}
             </p>
-            <p className="text-[10px] sm:text-xs text-ivory-light/40 font-mono text-center md:text-right">
-              <span className="text-larp-red">×</span> not financial advice. don't buy this. you'll lose it all anyway.
-            </p>
           </div>
-          <p className="text-[9px] text-ivory-light/30 text-center mt-4 max-w-2xl mx-auto">
-            <span className="text-danger-orange">disclaimer:</span> this is a parody website for entertainment purposes only. all views expressed are my own and do not represent any employer or organization.
-          </p>
         </div>
 
         {/* Easter egg - hidden on mobile */}

@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
+import ScanProgressIndicator from '@/components/terminal/ScanProgressIndicator';
 import Image from 'next/image';
 import {
   ArrowLeft,
@@ -1437,10 +1438,12 @@ function NotFoundState() {
 // MAIN PAGE COMPONENT
 // ============================================================================
 
-export default function ProjectPage() {
+function ProjectPageContent() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const projectId = params.id as string;
+  const scanJobId = searchParams.get('scanJob');
 
   const [project, setProject] = useState<Project | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -1770,6 +1773,29 @@ export default function ProjectPage() {
           </div>
         </div>
       </div>
+
+      {/* Scan Progress Indicator - shows when AI analysis is running in background */}
+      <ScanProgressIndicator
+        scanJobId={scanJobId}
+        onComplete={() => {
+          // Refresh project data when scan completes
+          fetchProject();
+          // Remove scanJob from URL
+          router.replace(`/terminal/project/${projectId}`, { scroll: false });
+        }}
+        onDismiss={() => {
+          // Remove scanJob from URL when user dismisses
+          router.replace(`/terminal/project/${projectId}`, { scroll: false });
+        }}
+      />
     </div>
+  );
+}
+
+export default function ProjectPage() {
+  return (
+    <Suspense fallback={<LoadingState />}>
+      <ProjectPageContent />
+    </Suspense>
   );
 }

@@ -63,6 +63,12 @@ module.exports = {
         'slide-up': 'slideUp 0.6s ease-out forwards',
         'stripe-move': 'stripe-move 20s linear infinite',
         'flicker': 'flicker 3s infinite',
+        'scan-line': 'scanLine 2s linear infinite',
+        'expand-line': 'expandLine 0.4s ease-out forwards',
+        'pop-in': 'popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
+        'ping-slow': 'pingSlow 1.5s ease-out infinite',
+        'spin-slow': 'spin 3s linear infinite',
+        'wave': 'wave 0.8s ease-in-out infinite',
       },
       keyframes: {
         blink: {
@@ -108,6 +114,26 @@ module.exports = {
           '43%': { opacity: '1' },
           '45%': { opacity: '0.3' },
           '46%': { opacity: '1' },
+        },
+        scanLine: {
+          '0%': { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(200%)' },
+        },
+        expandLine: {
+          '0%': { transform: 'scaleX(0)', transformOrigin: 'left' },
+          '100%': { transform: 'scaleX(1)', transformOrigin: 'left' },
+        },
+        popIn: {
+          '0%': { transform: 'scale(0)', opacity: '0' },
+          '100%': { transform: 'scale(1)', opacity: '1' },
+        },
+        pingSlow: {
+          '0%': { transform: 'scale(1)', opacity: '0.6' },
+          '100%': { transform: 'scale(1.8)', opacity: '0' },
+        },
+        wave: {
+          '0%, 100%': { height: '4px' },
+          '50%': { height: '12px' },
         },
       },
       backgroundImage: {

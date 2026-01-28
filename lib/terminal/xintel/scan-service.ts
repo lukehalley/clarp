@@ -256,6 +256,56 @@ export async function submitUniversalScan(options: UniversalScanOptions): Promis
   // Store OSINT entity for the scan processor to use for gap-filling
   osintEntityCache.set(entity.xHandle.toLowerCase(), entity);
 
+  // Save OSINT project immediately so user can see data while AI analyzes
+  // This will be enriched later when the X analysis completes
+  if (isSupabaseAvailable() && entity.tokenAddresses?.[0]?.address) {
+    const tokenAddress = entity.tokenAddresses[0].address;
+    const osintProjectData = {
+      name: entity.name || entity.symbol || `Token ${tokenAddress.slice(0, 8)}...`,
+      description: entity.description || undefined,
+      avatarUrl: entity.imageUrl || undefined,
+      tokenAddress,
+      ticker: entity.symbol || undefined,
+      xHandle: entity.xHandle,
+      websiteUrl: entity.website || undefined,
+      githubUrl: entity.github || undefined,
+      telegramUrl: entity.telegram || undefined,
+      discordUrl: entity.discord || undefined,
+      trustScore: {
+        score: 50, // Preliminary score, will be updated after AI analysis
+        tier: 'neutral' as const,
+        confidence: 'low' as const,
+        lastUpdated: new Date(),
+      },
+      marketData: entity.marketIntel ? {
+        price: entity.marketIntel.priceUsd || 0,
+        priceChange24h: entity.marketIntel.priceChange24h || 0,
+        marketCap: entity.marketIntel.marketCap,
+        volume24h: entity.marketIntel.volume24h,
+        liquidity: entity.marketIntel.liquidity,
+      } : undefined,
+      securityIntel: entity.securityIntel?.isAccessible ? {
+        mintAuthorityEnabled: entity.securityIntel.mintAuthority === 'active',
+        freezeAuthorityEnabled: entity.securityIntel.freezeAuthority === 'active',
+        lpLocked: entity.securityIntel.lpLocked === true,
+        holdersCount: entity.securityIntel.totalHolders,
+        risks: entity.securityIntel.risks?.map(r => r.description || r.name) || [],
+      } : undefined,
+      keyFindings: [
+        ...(entity.securityIntel?.isRugged ? ['⚠️ FLAGGED AS RUG PULL'] : []),
+        ...(entity.securityIntel?.mintAuthority === 'active' ? ['Mint authority active'] : []),
+        ...(entity.securityIntel?.freezeAuthority === 'active' ? ['Freeze authority active'] : []),
+        '⏳ AI analysis in progress...',
+      ],
+      lastScanAt: new Date(),
+    };
+
+    // Save async - don't block the response
+    upsertProjectByTokenAddress(tokenAddress, osintProjectData)
+      .then(p => p && console.log(`[UniversalScan] Saved preliminary OSINT project: ${p.name}`))
+      .catch(err => console.error('[UniversalScan] Failed to save preliminary project:', err));
+  }
+
   const xScanResult = await submitScan({
     handle: entity.xHandle,
     depth,

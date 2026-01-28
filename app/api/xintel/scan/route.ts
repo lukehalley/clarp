@@ -102,6 +102,26 @@ export async function GET(request: NextRequest) {
     );
   }
 
+  // OSINT-only jobs are already complete (they don't have background processing)
+  if (jobId.startsWith('osint_')) {
+    return NextResponse.json({
+      jobId,
+      status: 'complete',
+      progress: 100,
+      statusMessage: 'OSINT data ready',
+    });
+  }
+
+  // Cached results are already complete
+  if (jobId.startsWith('cached_')) {
+    return NextResponse.json({
+      jobId,
+      status: 'complete',
+      progress: 100,
+      statusMessage: 'Cached data loaded',
+    });
+  }
+
   const job = await getScanJob(jobId);
 
   if (!job) {

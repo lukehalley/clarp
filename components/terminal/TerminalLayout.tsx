@@ -173,13 +173,7 @@ export default function TerminalLayout({ children }: TerminalLayoutProps) {
                   @CLARPAgent
                 </a>
               </div>
-              <span className="text-ivory-light/30">
-                <span className="text-larp-red">×</span> not financial advice. don&apos;t buy this.
-              </span>
             </div>
-            <p className="text-[9px] text-ivory-light/30 text-center font-mono">
-              <span className="text-danger-orange">disclaimer:</span> this is a parody website for entertainment purposes only. all views expressed are my own and do not represent any employer or organization.
-            </p>
           </div>
         </footer>
 

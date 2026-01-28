@@ -244,21 +244,37 @@ function ScanPageInner() {
       // Update resolve step with detected type
       updateStep('resolve', { status: 'complete', detail: `detected: ${data.inputType || 'unknown'}` });
 
-      // If we got immediate OSINT data, show progress
+      // If we got immediate OSINT data, show progress and redirect early
       if (data.osintData) {
         updateStep('osint', { status: 'complete', detail: data.osintData.securityIntel ? 'RugCheck + market data' : 'market data collected' });
         if (data.osintData.xHandle) {
           updateStep('social', { status: 'complete', detail: `found @${data.osintData.xHandle}` });
         }
+
+        // If we have OSINT data, redirect immediately - don't wait for AI analysis
+        // The project page will show OSINT data and poll for AI analysis completion
+        const projectId = data.canonicalId || query.replace('@', '').toLowerCase();
+
+        setSteps((prev) =>
+          prev.map((s) => ({ ...s, status: 'complete', detail: s.detail || 'complete' }))
+        );
+        setPhase('complete');
+
+        // Always pass jobId if we have one - let project page show the indicator
+        const redirectUrl = data.jobId
+          ? `/terminal/project/${projectId}?scanJob=${data.jobId}`
+          : `/terminal/project/${projectId}`;
+
+        setTimeout(() => router.push(redirectUrl), 1200);
+        return;
       }
 
+      // No OSINT data - need to poll for completion
       if (data.cached || data.status === 'complete') {
-        // Fast path - already have data
         setSteps((prev) =>
           prev.map((s) => ({ ...s, status: 'complete', detail: s.detail || 'cached' }))
         );
         setPhase('complete');
-        // Redirect to project page using canonicalId (token address for tokens, handle otherwise)
         const projectId = data.canonicalId || query.replace('@', '').toLowerCase();
         setTimeout(() => router.push(`/terminal/project/${projectId}`), 1200);
         return;
@@ -266,17 +282,7 @@ function ScanPageInner() {
 
       setJobId(data.jobId);
       if (data.canonicalId) {
-        setResolvedHandle(data.canonicalId); // Use canonicalId (token address for tokens)
-      }
-
-      // If OSINT-only (no X handle to analyze), complete early
-      if (data.status === 'complete' && !data.osintData?.xHandle) {
-        setSteps((prev) =>
-          prev.map((s) => ({ ...s, status: 'complete', detail: s.detail || 'complete' }))
-        );
-        setPhase('complete');
-        const projectId = data.canonicalId || query;
-        setTimeout(() => router.push(`/terminal/project/${projectId}`), 1200);
+        setResolvedHandle(data.canonicalId);
       }
     } catch (err) {
       console.error('[ScanPage] Error:', err);
@@ -372,7 +378,12 @@ function ScanPageInner() {
   // Auto-start on mount (or resume existing scan)
   useEffect(() => {
     if (query && phase === 'idle') {
-      // First check if there's an existing scan to resume
+      // Show scanning UI immediately for better perceived performance
+      setPhase('scanning');
+      setSteps(initSteps());
+      updateStep('resolve', { status: 'active', detail: 'initializing...' });
+
+      // Then check for existing scan/project in background
       checkExistingScan().then(hasExisting => {
         if (!hasExisting) {
           startScan();
