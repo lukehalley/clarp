@@ -18,7 +18,20 @@ export default function ScanProgressIndicator({
 }: ScanProgressIndicatorProps) {
   const [status, setStatus] = useState<'analyzing' | 'complete' | 'dismissed'>('analyzing');
   const [glitchFrame, setGlitchFrame] = useState(0);
-  const [isVisible, setIsVisible] = useState(true); // Start visible immediately
+  const [isVisible, setIsVisible] = useState(true);
+
+  // Handle transition to complete state
+  const transitionToComplete = useCallback(() => {
+    setStatus('complete');
+    // Auto-dismiss after showing completion message
+    setTimeout(() => {
+      setIsVisible(false);
+      setTimeout(() => {
+        setStatus('dismissed');
+        onComplete?.();
+      }, 300);
+    }, 2500);
+  }, [onComplete]);
 
   // Poll for scan completion
   const checkStatus = useCallback(async () => {
@@ -30,33 +43,22 @@ export default function ScanProgressIndicator({
 
       const data = await res.json();
       if (data.status === 'complete' || data.status === 'cached') {
-        setStatus('complete');
-        // Auto-dismiss after showing completion
-        setTimeout(() => {
-          setIsVisible(false);
-          setTimeout(() => {
-            setStatus('dismissed');
-            onComplete?.();
-          }, 300);
-        }, 2500);
+        transitionToComplete();
       }
     } catch (err) {
       console.error('[ScanProgress] Poll error:', err);
     }
-  }, [scanJobId, status, onComplete]);
+  }, [scanJobId, status, transitionToComplete]);
 
-  // Polling effect - delay first check to ensure indicator is visible first
+  // Polling effect
   useEffect(() => {
     if (!scanJobId || status !== 'analyzing') return;
 
-    // Wait for indicator to animate in before first check
-    const initialDelay = setTimeout(checkStatus, 1500);
+    // Start polling immediately, then every POLL_INTERVAL
+    checkStatus();
     const interval = setInterval(checkStatus, POLL_INTERVAL);
 
-    return () => {
-      clearTimeout(initialDelay);
-      clearInterval(interval);
-    };
+    return () => clearInterval(interval);
   }, [scanJobId, status, checkStatus]);
 
   // Glitch effect for cyberpunk feel

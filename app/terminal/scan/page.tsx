@@ -260,8 +260,10 @@ function ScanPageInner() {
         );
         setPhase('complete');
 
-        // Always pass jobId if we have one - let project page show the indicator
-        const redirectUrl = data.jobId
+        // Only pass jobId for real AI analysis jobs (job_* prefix)
+        // Don't show indicator for osint_* or cached_* - they have no background processing
+        const hasRealAiJob = data.jobId && data.jobId.startsWith('job_');
+        const redirectUrl = hasRealAiJob
           ? `/terminal/project/${projectId}?scanJob=${data.jobId}`
           : `/terminal/project/${projectId}`;
 
