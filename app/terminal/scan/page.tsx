@@ -316,24 +316,35 @@ function ScanPageInner() {
     return () => clearInterval(interval);
   }, [jobId, phase, router, resolvedHandle, query]);
 
-  // Check for existing active scan on mount (for resume after page refresh)
+  // Check for existing active scan or cached project on mount
   const checkExistingScan = async () => {
     if (!query) return false;
 
     try {
-      const normalizedHandle = query.replace('@', '').toLowerCase();
-      const res = await fetch(`/api/xintel/scan?handle=${encodeURIComponent(normalizedHandle)}`);
+      const normalizedQuery = query.replace('@', '').toLowerCase();
 
-      if (res.ok) {
-        const data = await res.json();
+      // First check if there's an active scan in progress
+      const scanRes = await fetch(`/api/xintel/scan?handle=${encodeURIComponent(normalizedQuery)}`);
+      if (scanRes.ok) {
+        const data = await scanRes.json();
         if (data.hasActiveScan && data.status !== 'complete' && data.status !== 'failed') {
           console.log('[ScanPage] Found active scan, resuming:', data.jobId);
           setPhase('scanning');
           setSteps(initSteps());
           setJobId(data.jobId);
           setResolvedHandle(data.handle);
-          // Update steps based on current progress
           mapStatusToStep(data.status, data.progress, data.statusMessage);
+          return true;
+        }
+      }
+
+      // Check if project already exists in database (cached from previous scan)
+      const projectRes = await fetch(`/api/projects/${encodeURIComponent(normalizedQuery)}`);
+      if (projectRes.ok) {
+        const projectData = await projectRes.json();
+        if (projectData.project) {
+          console.log('[ScanPage] Found existing project, redirecting');
+          router.push(`/terminal/project/${normalizedQuery}`);
           return true;
         }
       }
