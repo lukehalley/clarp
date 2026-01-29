@@ -32,7 +32,11 @@ const RECENT_SEARCHES_KEY = 'clarp-recent-searches';
 const MAX_RECENT_SEARCHES = 5;
 
 const PLACEHOLDER_OPTIONS = [
-  'Paste Solana token address...',
+  'Paste a Solana token address...',
+  'Enter an X handle like @claborators...',
+  'Paste a GitHub URL...',
+  'Enter a website like clarp.fun...',
+  'Search for any token name...',
 ];
 
 export default function SearchInput({ compact, initialValue = '', onSearch }: SearchInputProps) {
