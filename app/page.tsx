@@ -310,8 +310,8 @@ export default function Home() {
         <div className="max-w-6xl mx-auto relative">
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             {/* left: terminal */}
-            <div className="order-2 lg:order-1 hidden md:block">
-              <Terminal title="clarp">
+            <div className="order-2 lg:order-1 hidden md:block h-[380px] sm:h-[420px] min-w-0 overflow-hidden">
+              <Terminal title="clarp" className="h-full">
                 <div ref={terminalRef} className="h-[280px] sm:h-[320px] overflow-y-auto overflow-x-hidden scrollbar-hide">
                   {/* Mobile: simple text logo */}
                   <pre
@@ -351,7 +351,7 @@ export default function Home() {
                           {msg.role === 'user' ? (
                             <>
                               <span className="text-larp-green shrink-0">&gt;</span>
-                              <span className="text-ivory-light font-mono">
+                              <span className="text-ivory-light font-mono break-words min-w-0">
                                 {displayText}
                                 {isTyping && <span className="inline-block w-2 h-4 bg-larp-green animate-blink align-middle ml-0.5" />}
                               </span>
@@ -359,7 +359,7 @@ export default function Home() {
                           ) : (
                             <>
                               <span className="text-danger-orange shrink-0">ai:</span>
-                              <span className="text-ivory-light/80">
+                              <span className="text-ivory-light/80 break-words min-w-0">
                                 {displayText}
                                 {isTyping && <span className="inline-block w-2 h-4 bg-danger-orange animate-blink align-middle ml-0.5" />}
                               </span>
