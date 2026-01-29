@@ -88,8 +88,11 @@ module.exports = {
           '100%': { width: '99%' },
         },
         float: {
-          '0%, 100%': { transform: 'translateY(0px)' },
-          '50%': { transform: 'translateY(-10px)' },
+          '0%': { transform: 'translate(0px, 0px)' },
+          '25%': { transform: 'translate(8px, -12px)' },
+          '50%': { transform: 'translate(-4px, -20px)' },
+          '75%': { transform: 'translate(-10px, -8px)' },
+          '100%': { transform: 'translate(0px, 0px)' },
         },
         typing: {
           'from': { width: '0' },
