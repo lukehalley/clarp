@@ -7,7 +7,7 @@ interface WarningTickerProps {
 
 export default function WarningTicker({ messages, direction }: WarningTickerProps) {
   const animationClass = direction === 'left' ? 'ticker-scroll-left' : 'ticker-scroll-right';
-  const duration = direction === 'left' ? '6s' : '8s';
+  const duration = direction === 'left' ? '12s' : '15s';
 
   return (
     <div className="bg-slate-dark border-y-2 border-danger-orange overflow-hidden select-none">

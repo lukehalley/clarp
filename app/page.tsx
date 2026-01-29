@@ -277,6 +277,36 @@ export default function Home() {
         {/* background grid */}
         <div className="absolute inset-0 bg-grid bg-grid opacity-30" />
 
+        {/* Floating desktop mascots */}
+        <div className="absolute inset-0 pointer-events-none hidden md:block overflow-hidden">
+          {[
+            // Edges
+            { size: 80, top: '4%', left: '2%', duration: '8s', delay: '0s' },
+            { size: 100, top: '3%', right: '6%', duration: '7s', delay: '2s' },
+            { size: 120, top: '40%', left: '0%', duration: '10s', delay: '4s' },
+            { size: 64, bottom: '8%', right: '3%', duration: '5s', delay: '1s' },
+            { size: 90, bottom: '15%', left: '8%', duration: '9s', delay: '3s' },
+            { size: 72, top: '25%', right: '1%', duration: '11s', delay: '5s' },
+            { size: 56, top: '60%', right: '10%', duration: '6s', delay: '0.5s' },
+            { size: 110, top: '15%', left: '15%', duration: '12s', delay: '2.5s' },
+            { size: 68, bottom: '5%', left: '30%', duration: '7.5s', delay: '4.5s' },
+            { size: 85, top: '70%', right: '20%', duration: '8.5s', delay: '1.5s' },
+            // Middle top
+            { size: 72, top: '2%', left: '40%', duration: '9s', delay: '1.5s' },
+            { size: 96, top: '6%', left: '55%', duration: '7.5s', delay: '3.5s' },
+            // Middle - offset from center to avoid text
+            { size: 64, top: '35%', left: '25%', duration: '10.5s', delay: '0.5s' },
+            { size: 88, top: '50%', left: '72%', duration: '8s', delay: '4s' },
+            // Middle bottom
+            { size: 80, bottom: '3%', left: '48%', duration: '6.5s', delay: '3s' },
+            { size: 60, bottom: '12%', left: '55%', duration: '9.5s', delay: '5.5s' },
+          ].map(({ size, duration, delay, ...pos }, i) => (
+            <svg key={i} className="absolute animate-float" style={{ ...pos, animationDuration: duration, animationDelay: delay }} width={size} height={size} viewBox="0 0 400 400" fill="none" aria-hidden="true">
+              <rect x="60" y="68" width="280" height="168" fill="#0a0a09"/><rect x="32" y="104" width="28" height="42" fill="#0a0a09"/><rect x="340" y="104" width="28" height="42" fill="#0a0a09"/><rect x="116" y="124" width="42" height="70" fill="#FAF9F5"/><rect x="242" y="124" width="42" height="70" fill="#FAF9F5"/><rect x="74" y="236" width="56" height="96" fill="#0a0a09"/><rect x="158" y="236" width="42" height="96" fill="#0a0a09"/><rect x="200" y="236" width="42" height="96" fill="#0a0a09"/><rect x="270" y="236" width="56" height="96" fill="#0a0a09"/>
+            </svg>
+          ))}
+        </div>
+
         <div className="max-w-6xl mx-auto relative">
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             {/* left: terminal */}
