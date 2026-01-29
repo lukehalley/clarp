@@ -86,17 +86,23 @@ export default function ConnectWallet({ className = '', compact = false }: Conne
     setVisible(true);
   };
 
-  // Handle disconnect
+  // Handle disconnect — disconnect wallet first, then sign out of Supabase
   const handleDisconnect = async () => {
     setDropdownOpen(false);
     // Remember that user manually disconnected to prevent auto-reconnect spam
     localStorage.setItem('wallet-user-disconnected', 'true');
     setUserDisconnected(true);
     try {
-      await signOut();
+      // Disconnect wallet adapter first (tells Phantom to sever the connection)
       await disconnect();
     } catch (err) {
-      console.error('[ConnectWallet] Disconnect error:', err);
+      console.error('[ConnectWallet] Wallet disconnect error:', err);
+    }
+    try {
+      // Then sign out from Supabase auth
+      await signOut();
+    } catch (err) {
+      console.error('[ConnectWallet] Sign out error:', err);
     }
   };
 
