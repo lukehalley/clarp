@@ -1,6 +1,22 @@
 'use client';
 
 import { useState } from 'react';
+import { Send } from 'lucide-react';
+import PixelGithub from '@/components/PixelGithub';
+
+function XIcon({ size = 16, className = '' }: { size?: number; className?: string }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      className={className}
+    >
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+    </svg>
+  );
+}
 
 const LINK_MESSAGES = [
   'this feature is coming. check the roadmap.',
@@ -38,22 +54,22 @@ export default function Footer() {
             </p>
             <div className="flex gap-3 sm:gap-4">
               <a
-                href="https://x.com/i/communities/2013904367188132011"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 bg-slate-medium flex items-center justify-center text-ivory-light/60 hover:text-danger-orange hover:bg-slate-light/20 transition-colors border border-slate-light/20"
-                title="x community"
-              >
-                <span className="text-lg">𝕏</span>
-              </a>
-              <a
                 href="https://t.me/CLARPTG"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-10 h-10 bg-slate-medium flex items-center justify-center text-ivory-light/60 hover:text-danger-orange hover:bg-slate-light/20 transition-colors border border-slate-light/20"
                 title="telegram"
               >
-                <span className="text-lg">✈</span>
+                <Send size={16} />
+              </a>
+              <a
+                href="https://x.com/i/communities/2013904367188132011"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-10 h-10 bg-slate-medium flex items-center justify-center text-ivory-light/60 hover:text-danger-orange hover:bg-slate-light/20 transition-colors border border-slate-light/20"
+                title="x community"
+              >
+                <XIcon size={15} />
               </a>
               <a
                 href="https://github.com/lukehalley/Clarp"
@@ -62,16 +78,16 @@ export default function Footer() {
                 className="w-10 h-10 bg-slate-medium flex items-center justify-center text-ivory-light/60 hover:text-danger-orange hover:bg-slate-light/20 transition-colors border border-slate-light/20"
                 title="github"
               >
-                <span className="text-lg">◈</span>
+                <PixelGithub size={16} className="text-current" />
               </a>
               <a
-                href="https://dexscreener.com/solana/6c71mun334bafcuvn3cwajfqnk6skztzk9vfzrthstwj"
+                href="https://dexscreener.com/solana/GtwMkjRY8Vi5oGaLaEsd1xnsr3AkZ6ZYBqsG5ipTBAGS"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-10 h-10 bg-slate-medium flex items-center justify-center text-ivory-light/60 hover:text-danger-orange hover:bg-slate-light/20 transition-colors border border-slate-light/20"
                 title="dexscreener"
               >
-                <img src="/dexscreener-icon.svg" alt="dexscreener" className="w-5 h-5" />
+                <img src="/dexscreener-icon.svg" alt="dexscreener" className="w-4 h-4 invert opacity-60" />
               </a>
             </div>
           </div>
@@ -107,7 +123,7 @@ export default function Footer() {
               {[
                 { label: 'terminal', note: 'live', href: '/terminal' },
                 { label: 'github', note: 'open source', href: 'https://github.com/lukehalley/Clarp' },
-                { label: 'dexscreener', note: '$CLARP', href: 'https://dexscreener.com/solana/6c71mun334bafcuvn3cwajfqnk6skztzk9vfzrthstwj' },
+                { label: 'dexscreener', note: '$CLARP', href: 'https://dexscreener.com/solana/GtwMkjRY8Vi5oGaLaEsd1xnsr3AkZ6ZYBqsG5ipTBAGS' },
                 { label: 'bags.fm', note: 'trade', href: 'https://bags.fm/token/GtwMkjRY8Vi5oGaLaEsd1xnsr3AkZ6ZYBqsG5ipTBAGS' },
               ].map(item => (
                 <li key={item.label} className="min-h-[24px] flex items-center">

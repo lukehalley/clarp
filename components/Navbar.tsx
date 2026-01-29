@@ -85,6 +85,16 @@ export default function Navbar() {
               >
                 <PixelGithub size={16} className="group-hover:animate-[glitch_0.1s_ease-in-out_2]" />
               </a>
+              <a
+                href="https://dexscreener.com/solana/GtwMkjRY8Vi5oGaLaEsd1xnsr3AkZ6ZYBqsG5ipTBAGS"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-9 h-9 flex items-center justify-center border-2 border-slate-dark bg-white hover:bg-slate-dark text-slate-dark transition-all group"
+                style={{ boxShadow: '2px 2px 0 #0a0a09' }}
+                title="dexscreener"
+              >
+                <img src="/dexscreener-icon.svg" alt="dexscreener" className="w-4 h-4 group-hover:invert" />
+              </a>
             </div>
             <button
               onClick={(e) => handleNavClick(e, '/terminal')}
@@ -156,6 +166,17 @@ export default function Navbar() {
                 >
                   <PixelGithub size={16} />
                   source
+                </a>
+                <a
+                  href="https://dexscreener.com/solana/GtwMkjRY8Vi5oGaLaEsd1xnsr3AkZ6ZYBqsG5ipTBAGS"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 flex items-center justify-center gap-2 py-3 border-2 border-slate-dark bg-white text-slate-dark font-mono text-sm"
+                  style={{ boxShadow: '2px 2px 0 #0a0a09' }}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <img src="/dexscreener-icon.svg" alt="" className="w-4 h-4" />
+                  chart
                 </a>
               </div>
               <a

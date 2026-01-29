@@ -280,7 +280,7 @@ export default function Home() {
         {/* background grid */}
         <div className="absolute inset-0 bg-grid bg-grid opacity-30" />
 
-        <div className="max-w-6xl mx-auto relative">
+        <div className="max-w-6xl w-full mx-auto relative">
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-end">
             {/* left: terminal */}
             <div className="order-2 lg:order-1 hidden md:block h-[380px] sm:h-[420px] min-w-0 overflow-hidden">
@@ -380,11 +380,11 @@ export default function Home() {
                 scan projects. scan people. trust with receipts.
               </p>
 
-              <p className="text-sm sm:text-base text-slate-light mb-3 sm:mb-8 max-w-md mx-auto lg:mx-0 min-h-[3rem] sm:min-h-[4.5rem]">
+              <p className="text-sm sm:text-base text-slate-light mb-3 sm:mb-8 max-w-md mx-auto lg:mx-0 h-[3rem] sm:h-[4.5rem] overflow-hidden">
                 {HERO_SENTENCES[heroSentenceIndex]}
               </p>
 
-              <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 justify-center lg:justify-start mb-0 sm:mb-8 w-full max-w-full">
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 justify-center lg:justify-start mb-0 sm:mb-8 w-full max-w-full whitespace-nowrap">
                 <a
                   href="/terminal"
                   onClick={(e) => { e.preventDefault(); navigateWithFade('/terminal'); }}
@@ -397,20 +397,18 @@ export default function Home() {
                   </span>
                 </a>
                 <a
-                  href="/roadmap"
-                  onClick={(e) => { e.preventDefault(); navigateWithFade('/roadmap'); }}
-                  className="btn-primary relative overflow-hidden group cursor-pointer"
+                  href="/terminal"
+                  onClick={(e) => { e.preventDefault(); navigateWithFade('/terminal'); }}
+                  className="btn-primary relative overflow-hidden group cursor-pointer hidden sm:block"
                 >
-                  view roadmap
+                  launch terminal
                 </a>
                 <a
-                  href="https://dexscreener.com/solana/6c71mun334bafcuvn3cwajfqnk6skztzk9vfzrthstwj"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn-secondary hover:opacity-100 transition-opacity inline-flex items-center justify-center gap-2"
+                  href="/roadmap"
+                  onClick={(e) => { e.preventDefault(); navigateWithFade('/roadmap'); }}
+                  className="btn-secondary relative overflow-hidden group cursor-pointer"
                 >
-                  <img src="/dexscreener-icon.svg" alt="" className="w-5 h-5" />
-                  dexscreener
+                  view roadmap
                 </a>
               </div>
 

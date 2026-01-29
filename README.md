@@ -13,7 +13,7 @@
 
 <br>
 
-[Website](https://clarp.lukehalley.com) · [Terminal](https://clarp.lukehalley.com/terminal) · [Dexscreener](https://dexscreener.com/solana/6c71mun334bafcuvn3cwajfqnk6skztzk9vfzrthstwj)
+[Website](https://clarp.lukehalley.com) · [Terminal](https://clarp.lukehalley.com/terminal) · [Dexscreener](https://dexscreener.com/solana/GtwMkjRY8Vi5oGaLaEsd1xnsr3AkZ6ZYBqsG5ipTBAGS)
 
 ---
 

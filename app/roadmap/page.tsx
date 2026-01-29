@@ -1014,7 +1014,7 @@ export default function RoadmapPage() {
               LAUNCH TERMINAL
             </a>
             <a
-              href="https://dexscreener.com/solana/6c71mun334bafcuvn3cwajfqnk6skztzk9vfzrthstwj"
+              href="https://dexscreener.com/solana/GtwMkjRY8Vi5oGaLaEsd1xnsr3AkZ6ZYBqsG5ipTBAGS"
               target="_blank"
               rel="noopener noreferrer"
               className="btn-secondary inline-flex items-center justify-center gap-2 text-base px-8 py-4"
