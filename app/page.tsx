@@ -272,14 +272,15 @@ export default function Home() {
   return (
     <main className="min-h-screen overflow-x-hidden">
       {/* hero section */}
-      <section className="relative py-12 sm:py-16 lg:py-24 px-4 sm:px-6 overflow-hidden">
+      <div className="h-[calc(100svh-5rem)] sm:h-[calc(100svh-5.6rem)] flex flex-col overflow-hidden">
+      <section className="relative flex-1 min-h-0 flex items-center py-4 sm:py-16 lg:py-24 px-4 sm:px-6 overflow-hidden">
         {/* background grid */}
         <div className="absolute inset-0 bg-grid bg-grid opacity-30" />
 
         <div className="max-w-6xl mx-auto relative">
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             {/* left: terminal */}
-            <div className="order-2 lg:order-1">
+            <div className="order-2 lg:order-1 hidden md:block">
               <Terminal title="clarp">
                 <div ref={terminalRef} className="h-[280px] sm:h-[320px] overflow-y-auto overflow-x-hidden scrollbar-hide">
                   {/* Mobile: simple text logo */}
@@ -351,22 +352,47 @@ export default function Home() {
 
             {/* right: hero copy */}
             <div className="order-1 lg:order-2 text-center lg:text-left overflow-hidden">
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-slate-dark leading-tight mb-4 sm:mb-6 font-display">
+              {/* Mobile mascot */}
+              <div className="md:hidden flex justify-center mb-4 animate-float">
+                <svg width="120" height="120" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <rect x="60" y="68" width="280" height="168" fill="#0a0a09"/>
+                  <rect x="32" y="104" width="28" height="42" fill="#0a0a09"/>
+                  <rect x="340" y="104" width="28" height="42" fill="#0a0a09"/>
+                  <rect x="116" y="124" width="42" height="70" fill="#FAF9F5"/>
+                  <rect x="242" y="124" width="42" height="70" fill="#FAF9F5"/>
+                  <rect x="74" y="236" width="56" height="96" fill="#0a0a09"/>
+                  <rect x="158" y="236" width="42" height="96" fill="#0a0a09"/>
+                  <rect x="200" y="236" width="42" height="96" fill="#0a0a09"/>
+                  <rect x="270" y="236" width="56" height="96" fill="#0a0a09"/>
+                </svg>
+              </div>
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-slate-dark leading-tight mb-2 sm:mb-6 font-display">
                 $clarp
               </h1>
 
-              <p className="text-lg sm:text-xl md:text-2xl text-slate-light mb-2 sm:mb-4">
+              <p className="text-lg sm:text-xl md:text-2xl text-slate-light mb-1 sm:mb-4">
                 first autonomous trust pilot
               </p>
-              <p className="text-base sm:text-lg text-danger-orange font-mono mb-4 sm:mb-6 font-bold">
+              <p className="text-base sm:text-lg text-danger-orange font-mono mb-2 sm:mb-6 font-bold">
                 polymarket odds + on-chain receipts
               </p>
 
-              <p className="text-sm sm:text-base text-slate-light mb-6 sm:mb-8 max-w-md mx-auto lg:mx-0 min-h-[6rem] sm:min-h-[4.5rem]">
+              <p className="text-sm sm:text-base text-slate-light mb-3 sm:mb-8 max-w-md mx-auto lg:mx-0 min-h-[3rem] sm:min-h-[4.5rem]">
                 {HERO_SENTENCES[heroSentenceIndex]}
               </p>
 
-              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start mb-6 sm:mb-8 w-full max-w-full">
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 justify-center lg:justify-start mb-0 sm:mb-8 w-full max-w-full">
+                <a
+                  href="/terminal"
+                  onClick={(e) => { e.preventDefault(); navigateWithFade('/terminal'); }}
+                  className="relative overflow-hidden group cursor-pointer sm:hidden px-4 py-2.5 bg-black text-ivory-light font-mono font-bold text-sm border-2 border-danger-orange transition-all duration-150 text-center active:translate-x-[2px] active:translate-y-[2px] active:shadow-[1px_1px_0_#FF6B35]"
+                  style={{ boxShadow: '3px 3px 0 #FF6B35' }}
+                >
+                  <span className="flex items-center justify-center gap-2">
+                    <span className="w-1.5 h-1.5 bg-danger-orange animate-pulse" />
+                    launch terminal
+                  </span>
+                </a>
                 <a
                   href="/roadmap"
                   onClick={(e) => { e.preventDefault(); navigateWithFade('/roadmap'); }}
@@ -378,16 +404,16 @@ export default function Home() {
                   href="https://dexscreener.com/solana/6c71mun334bafcuvn3cwajfqnk6skztzk9vfzrthstwj"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="btn-secondary hover:opacity-100 transition-opacity inline-flex items-center gap-2"
+                  className="btn-secondary hover:opacity-100 transition-opacity inline-flex items-center justify-center gap-2"
                 >
                   <img src="/dexscreener-icon.svg" alt="" className="w-5 h-5" />
                   dexscreener
                 </a>
               </div>
 
-              {/* CA Box */}
+              {/* CA Box - hidden on mobile to fit hero in viewport */}
               <div
-                className="bg-slate-dark border-2 border-danger-orange px-4 sm:px-6 py-3 sm:py-4 font-mono flex items-center gap-3 sm:gap-4 group cursor-pointer hover:border-larp-green transition-colors w-full max-w-2xl overflow-hidden"
+                className="hidden sm:flex bg-slate-dark border-2 border-danger-orange px-4 sm:px-6 py-3 sm:py-4 font-mono items-center gap-3 sm:gap-4 group cursor-pointer hover:border-larp-green transition-colors w-full max-w-2xl overflow-hidden"
                 style={{ boxShadow: '4px 4px 0 #FF6B35' }}
                 onClick={() => {
                   navigator.clipboard.writeText(CA_ADDRESS);
@@ -407,7 +433,10 @@ export default function Home() {
       </section>
 
       {/* ticker: hero → mascot */}
-      <WarningTicker messages={WARNING_TICKERS[0].messages} direction={WARNING_TICKERS[0].direction as 'left' | 'right'} />
+      <div className="shrink-0">
+        <WarningTicker messages={WARNING_TICKERS[0].messages} direction={WARNING_TICKERS[0].direction as 'left' | 'right'} />
+      </div>
+      </div>
 
       {/* mascot section */}
       <section className="py-16 sm:py-24 px-4 sm:px-6 bg-slate-dark text-ivory-light overflow-hidden">

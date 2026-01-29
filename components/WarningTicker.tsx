@@ -7,7 +7,7 @@ interface WarningTickerProps {
 
 export default function WarningTicker({ messages, direction }: WarningTickerProps) {
   const animationClass = direction === 'left' ? 'ticker-scroll-left' : 'ticker-scroll-right';
-  const duration = direction === 'left' ? '25s' : '30s';
+  const duration = direction === 'left' ? '6s' : '8s';
 
   return (
     <div className="bg-slate-dark border-y-2 border-danger-orange overflow-hidden select-none">
@@ -16,7 +16,7 @@ export default function WarningTicker({ messages, direction }: WarningTickerProp
           className={`${animationClass} flex whitespace-nowrap`}
           style={{ animationDuration: duration }}
         >
-          {[...Array(2)].map((_, i) => (
+          {[...Array(4)].map((_, i) => (
             <div key={i} className="flex items-center gap-6 px-4 text-xs font-mono">
               {messages.map((msg, j) => (
                 <span key={j} className="flex items-center gap-6">

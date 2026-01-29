@@ -158,16 +158,14 @@ export default function Navbar() {
                   source
                 </a>
               </div>
-              <button
-                onClick={(e) => handleNavClick(e, '/terminal')}
-                className="group relative block w-full text-center mt-2 px-5 py-3 bg-black text-ivory-light font-mono font-bold text-sm border-2 border-danger-orange transition-all duration-150 overflow-hidden cursor-pointer active:translate-x-[2px] active:translate-y-[2px] active:shadow-[1px_1px_0_#FF6B35]"
-                style={{ boxShadow: '3px 3px 0 #FF6B35' }}
+              <a
+                href="/roadmap"
+                onClick={(e) => handleNavClick(e, '/roadmap')}
+                className="block w-full text-center mt-2 px-5 py-3 bg-white text-slate-dark font-mono font-bold text-sm border-2 border-slate-dark transition-all duration-150 cursor-pointer active:translate-x-[2px] active:translate-y-[2px] active:shadow-[1px_1px_0_#0a0a09]"
+                style={{ boxShadow: '3px 3px 0 #0a0a09' }}
               >
-                <span className="relative z-10 flex items-center justify-center gap-2">
-                  <span className="w-1.5 h-1.5 bg-danger-orange animate-pulse" />
-                  launch terminal
-                </span>
-              </button>
+                view roadmap
+              </a>
             </div>
           </div>
         )}
